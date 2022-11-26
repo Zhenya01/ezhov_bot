@@ -4,12 +4,10 @@ import traceback
 
 import regs
 from telegram.ext import Updater, CallbackContext, CommandHandler, \
-    MessageHandler, Filters
+    MessageHandler, Filters, PicklePersistence
 from telegram import Update
 import logging
 
-updater = Updater(token=regs.bot_token, use_context=True)
-dispatcher = updater.dispatcher
 logging.basicConfig(
     level=logging.DEBUG,
     format='[%(asctime)s: %(levelname)s, %(threadName)s, %(filename)s, %(funcName)s, %(message)s',
@@ -39,6 +37,11 @@ def echo(update: Update, context: CallbackContext):
     context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text)
 
 
+bot_persistence = PicklePersistence(filename=f'{os.path.abspath(os.path.dirname(__file__))}/bot_persistence')
+updater = Updater(token=regs.bot_token,
+                  persistence=bot_persistence)
+updater.dispatcher.bot.send_message(93906905, 'Бот перезагружен')
+dispatcher = updater.dispatcher
 dispatcher.add_handler(CommandHandler('start', start))
 dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), echo))
 updater.start_polling()
