@@ -42,3 +42,5 @@ def echo(update: Update, context: CallbackContext):
 dispatcher.add_handler(CommandHandler('start', start))
 dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), echo))
 updater.start_polling()
+
+updater.idle()
