@@ -14,7 +14,7 @@ logging.basicConfig(
     level=logging.DEBUG,
     format='[%(asctime)s: %(levelname)s, %(threadName)s, %(filename)s, %(funcName)s, %(message)s',
     handlers=[
-        logging.FileHandler(f'{os.path.abspath(os.path.dirname(__file__))}/locker_post_bot.log'),
+        logging.FileHandler(f'{os.path.abspath(os.path.dirname(__file__))}/ezhov_bot.log'),
         logging.StreamHandler(sys.stdout)
     ]
 )
