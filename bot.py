@@ -28,6 +28,7 @@ def logging_uncaught_exceptions(ex_type, ex_value, trace_back):
 
 sys.excepthook = logging_uncaught_exceptions
 
+logger = logging.getLogger(__name__)
 
 def start(update: Update, context: CallbackContext):
     context.bot.send_message(chat_id=update.effective_chat.id, text="Привет. Я Жижов. Добро пожаловать.")
