@@ -30,12 +30,15 @@ sys.excepthook = logging_uncaught_exceptions
 
 logger = logging.getLogger(__name__)
 
+
 def start(update: Update, context: CallbackContext):
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Привет. Я Жижов. Добро пожаловать.")
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Привет. Я Жижов. Добро пожаловать!")
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text="Кстааати, купи слона!")
 
 
 def echo(update: Update, context: CallbackContext):
-    context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text)
+    context.bot.send_message(chat_id=update.effective_chat.id, text=f'Все говорят: "{update.message.text}", а ты возьми да и купи слона!')
 
 
 bot_persistence = PicklePersistence(filename=f'{os.path.abspath(os.path.dirname(__file__))}/bot_persistence')
