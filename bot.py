@@ -29,6 +29,7 @@ bot_persistence = PicklePersistence(filename=f'{os.path.abspath(os.path.dirname(
 updater = Updater(token=regs.bot_token,
                   persistence=bot_persistence)
 updater.dispatcher.bot.send_message(93906905, 'Бот перезагружен')
+print('Бот перезагружен')
 dispatcher = updater.dispatcher
 dispatcher.add_handler(CommandHandler('start', start))
 # dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), echo))
