@@ -2,3 +2,5 @@
 /locker_post_bot.log
 /ezhov_bot.log
 /bot_persistence
+/verify_twitch_signature.py
+/test.py
