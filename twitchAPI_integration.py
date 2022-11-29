@@ -49,4 +49,4 @@ def setup_subscribe_webhook():
 
 twitch = Twitch(regs.twitch_client_id, regs.twitch_client_secret)
 webhook = setup_subscribe_webhook()
-webhook.listen_stream_online(regs.zhenya_broadcaster_id)
+webhook.listen_stream_online(regs.zhenya_broadcaster_id, )

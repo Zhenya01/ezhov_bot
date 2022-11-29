@@ -6,6 +6,7 @@ import regs
 from telegram.ext import Updater, CallbackContext, CommandHandler, \
     MessageHandler, Filters, PicklePersistence
 from telegram import Update
+import twitchAPI_integration
 import logging
 
 
