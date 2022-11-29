@@ -1,13 +1,23 @@
+import asyncio
 import os
 import sys
 import traceback
 
 import regs
 from telegram.ext import Updater, CallbackContext, CommandHandler, \
-    MessageHandler, Filters, PicklePersistence
+    MessageHandler, Filters, PicklePersistence, Dispatcher
 from telegram import Update
 import twitchAPI_integration
 import logging
+
+from functools import wraps
+
+
+def make_async(sync_func):
+    @wraps(sync_func)
+    async def async_func(*args, **kwargs):
+        return sync_func(*args, **kwargs)
+    return async_func
 
 
 def start(update: Update, context: CallbackContext):
@@ -20,11 +30,12 @@ def echo(update: Update, context: CallbackContext):
     context.bot.send_message(chat_id=update.effective_chat.id, text=f'Все говорят: "{update.message.text}", а ты возьми, да и купи слона!')
 
 
-async def post_stream_notification(data):
+def post_stream_notification(data):
     updater.dispatcher.bot.send_message(93906905, f'Стрим начался\ndata - {data}')
     print(data)
 
 
+make_async(post_stream_notification)
 bot_persistence = PicklePersistence(filename=f'{os.path.abspath(os.path.dirname(__file__))}/bot_persistence')
 updater = Updater(token=regs.bot_token,
                   persistence=bot_persistence)
