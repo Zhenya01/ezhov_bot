@@ -20,7 +20,7 @@ def echo(update: Update, context: CallbackContext):
     context.bot.send_message(chat_id=update.effective_chat.id, text=f'Все говорят: "{update.message.text}", а ты возьми, да и купи слона!')
 
 
-def post_stream_notification(data):
+async def post_stream_notification(data):
     updater.dispatcher.bot.send_message(93906905, f'Стрим начался\ndata - {data}')
     print(data)
 
