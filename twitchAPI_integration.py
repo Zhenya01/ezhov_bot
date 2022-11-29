@@ -5,7 +5,6 @@ import traceback
 
 import requests
 
-import bot
 import regs
 import twitchAPI
 from twitchAPI import EventSub, TwitchAPIException, UnauthorizedException, \
