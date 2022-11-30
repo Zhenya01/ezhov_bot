@@ -36,11 +36,11 @@ async def post_stream_live_notification(data):
     notification_text = f'{emoji} Заходи пожалуйста я играть буду в компунтер'
     notification_text += '\ntwitch.tv/zdarovezhov'
     updater.dispatcher.bot.send_message(-1001879046742, notification_text)
-    rename_channel(live=True)
+    await rename_channel(live=True)
 
 
 async def post_stream_offline_notification(data):
-    rename_channel(live=False)
+    await rename_channel(live=False)
 
 
 async def rename_channel(live: bool):
@@ -81,7 +81,7 @@ updater.dispatcher.bot.send_message(93906905, 'Бот перезагружен')
 print('Бот перезагружен')
 dispatcher = updater.dispatcher
 dispatcher.add_handler(CommandHandler('start', start))
-dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), echo))
+# dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), echo))
 updater.start_polling()
 twitchAPI_integration.webhook.listen_stream_online(regs.zhenya_broadcaster_id,
                              callback=post_stream_live_notification)
