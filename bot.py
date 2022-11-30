@@ -23,7 +23,7 @@ def echo(update: Update, context: CallbackContext):
 
 
 async def post_stream_notification(data):
-    updater.dispatcher.bot.send_message(93906905, f'Стрим начался\ndata - {data}')
+    await updater.dispatcher.bot.send_message(93906905, f'Стрим начался\ndata - {data}')
     print(data)
 
 
