@@ -46,7 +46,7 @@ async def post_stream_offline_notification(data):
 async def rename_channel(live: bool):
     title = '🔴 ZdarovNeEzhov' if live else 'ZdarovNeEzhov'
     async with TelegramClient('ezhovApp', regs.telegram_app_api_id, regs.telegram_app_api_hash) as client:
-        result = client(functions.channels.EditTitleRequest(
+        await client(functions.channels.EditTitleRequest(
             channel='ezhov_test',
             title=title)
             )
