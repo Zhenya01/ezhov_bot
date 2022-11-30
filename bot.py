@@ -9,15 +9,7 @@ from telegram.ext import Updater, CallbackContext, CommandHandler, \
 from telegram import Update
 import twitchAPI_integration
 import logging
-
-from functools import wraps
-
-
-def make_async(sync_func):
-    @wraps(sync_func)
-    async def async_func(*args, **kwargs):
-        return sync_func(*args, **kwargs)
-    return async_func
+import asyncio
 
 
 def start(update: Update, context: CallbackContext):
@@ -30,12 +22,11 @@ def echo(update: Update, context: CallbackContext):
     context.bot.send_message(chat_id=update.effective_chat.id, text=f'Все говорят: "{update.message.text}", а ты возьми, да и купи слона!')
 
 
-def post_stream_notification(data):
+async def post_stream_notification(data):
     updater.dispatcher.bot.send_message(93906905, f'Стрим начался\ndata - {data}')
     print(data)
 
 
-make_async(post_stream_notification)
 bot_persistence = PicklePersistence(filename=f'{os.path.abspath(os.path.dirname(__file__))}/bot_persistence')
 updater = Updater(token=regs.bot_token,
                   persistence=bot_persistence)
@@ -45,7 +36,7 @@ dispatcher = updater.dispatcher
 dispatcher.add_handler(CommandHandler('start', start))
 # dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), echo))
 updater.start_polling()
-twitchAPI_integration.webhook.listen_stream_online(regs.zhenya_broadcaster_id,
+await twitchAPI_integration.webhook.listen_stream_online(regs.zhenya_broadcaster_id,
                              callback=post_stream_notification)
 # twitchAPI_integration.webhook.listen_channel_subscribe(regs.ezhov_broadcaster_id, post_stream_notification)
 updater.idle()
