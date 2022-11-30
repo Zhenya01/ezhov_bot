@@ -45,7 +45,7 @@ class EzhovUpdater(Updater):
                                      job_queue=JobQueue(),
                                      persistence=bot_persistence)
 
-        super().__init__()
+        super().__init__(token)
 
 
 updater = EzhovUpdater(regs.bot_token)
