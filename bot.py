@@ -35,7 +35,7 @@ dispatcher = updater.dispatcher
 dispatcher.add_handler(CommandHandler('start', start))
 # dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), echo))
 updater.start_polling()
-await twitchAPI_integration.webhook.listen_stream_online(regs.zhenya_broadcaster_id,
+twitchAPI_integration.webhook.listen_stream_online(regs.zhenya_broadcaster_id,
                              callback=post_stream_notification)
 # twitchAPI_integration.webhook.listen_channel_subscribe(regs.ezhov_broadcaster_id, post_stream_notification)
 updater.idle()
