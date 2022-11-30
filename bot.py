@@ -85,6 +85,7 @@ updater.dispatcher.bot.send_message(93906905, 'Бот перезагружен')
 print('Бот перезагружен')
 dispatcher = updater.dispatcher
 dispatcher.add_handler(CommandHandler('start', start))
+rename_channel()
 # dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), echo))
 # updater.start_polling()
 # twitchAPI_integration.webhook.listen_stream_online(regs.zhenya_broadcaster_id,
