@@ -40,7 +40,8 @@ async def post_stream_notification(data):
     twitchAPI_integration.twitch.get_channel_information(regs.zhenya_broadcaster_id)
     notification_text = f'🔴🔴🔴 Cтремлер запустил поток: "{title}"'
     if game:
-        notification_text += f'Сегодня играем в "{game}"'
+        notification_text += f'\nСегодня играем в "{game}"'
+    notification_text += 'Лови ссылкочку и забегай скорее: https://www.twitch.tv/zhenya_2001'
     updater.dispatcher.bot.send_message(93906905, notification_text)
 
 
