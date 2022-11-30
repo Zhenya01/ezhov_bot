@@ -45,7 +45,7 @@ async def post_stream_notification(data):
     if game:
         notification_text += f'\nСегодня играем в "{game}"'
     notification_text += '\nЛови ссылкочку и забегай скорее: https://www.twitch.tv/zhenya_2001'
-    updater.dispatcher.bot.send_message(93906905, notification_text)
+    updater.dispatcher.bot.send_message(-1001879046742, notification_text)
     with TelegramClient('ezhovApp', regs.telegram_app_api_id, regs.telegram_app_api_hash) as client:
         result = client(functions.channels.EditTitleRequest(
             channel='ezhov_test',
