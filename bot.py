@@ -35,10 +35,10 @@ class EzhovDispatcher(Dispatcher):
 
 
 class EzhovUpdater(Updater):
-    def __init__(self):
+    def __init__(self, token):
         con_pool_size = 4 + 4
         request_kwargs = {"con_pool_size": con_pool_size}
-        bot = Bot(regs.bot_token)
+        bot = Bot(token)
         bot_persistence = PicklePersistence(filename=f'{os.path.abspath(os.path.dirname(__file__))}/bot_persistence')
 
         dispatcher = EzhovDispatcher(bot, update_queue=Queue(),
@@ -48,7 +48,7 @@ class EzhovUpdater(Updater):
         super().__init__()
 
 
-updater = EzhovUpdater()
+updater = EzhovUpdater(regs.bot_token)
 updater.dispatcher.bot.send_message(93906905, 'Бот перезагружен')
 print('Бот перезагружен')
 dispatcher = updater.dispatcher
