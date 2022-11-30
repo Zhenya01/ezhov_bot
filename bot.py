@@ -5,11 +5,12 @@ import traceback
 
 import regs
 from telegram.ext import Updater, CallbackContext, CommandHandler, \
-    MessageHandler, Filters, PicklePersistence, Dispatcher
-from telegram import Update
+    MessageHandler, Filters, PicklePersistence, Dispatcher, ExtBot, JobQueue
+from telegram import Update, Bot
 import twitchAPI_integration
 import logging
 import asyncio
+from queue import Queue
 
 
 def start(update: Update, context: CallbackContext):
@@ -23,12 +24,31 @@ def echo(update: Update, context: CallbackContext):
 
 
 async def post_stream_notification(data):
-    await updater.dispatcher.bot.send_message(93906905, f'Стрим начался\ndata - {data}')
+    updater.dispatcher.bot.send_message(93906905, f'Стрим начался\ndata - {data}')
 
 
-bot_persistence = PicklePersistence(filename=f'{os.path.abspath(os.path.dirname(__file__))}/bot_persistence')
-updater = Updater(token=regs.bot_token,
-                  persistence=bot_persistence)
+class EzhovDispatcher(Dispatcher):
+    def start(self, ready=None):
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        super().start(ready)
+
+
+class EzhovUpdater(Updater):
+    def __init__(self):
+        con_pool_size = 4 + 4
+        request_kwargs = {"con_pool_size": con_pool_size}
+        bot = Bot(regs.bot_token)
+        bot_persistence = PicklePersistence(filename=f'{os.path.abspath(os.path.dirname(__file__))}/bot_persistence')
+
+        dispatcher = EzhovDispatcher(bot, update_queue=Queue(),
+                                     job_queue=JobQueue(),
+                                     persistence=bot_persistence)
+
+        super().__init__()
+
+
+updater = EzhovUpdater()
 updater.dispatcher.bot.send_message(93906905, 'Бот перезагружен')
 print('Бот перезагружен')
 dispatcher = updater.dispatcher
