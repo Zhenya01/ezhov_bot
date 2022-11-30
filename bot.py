@@ -46,11 +46,14 @@ async def post_stream_notification(data):
         notification_text += f'\nСегодня играем в "{game}"'
     notification_text += '\nЛови ссылкочку и забегай скорее: https://www.twitch.tv/zhenya_2001'
     updater.dispatcher.bot.send_message(-1001879046742, notification_text)
-    async with TelegramClient('ezhovApp', regs.telegram_app_api_id, regs.telegram_app_api_hash) as client:
+
+
+def rename_channel():
+    with TelegramClient('ezhovApp', regs.telegram_app_api_id, regs.telegram_app_api_hash) as client:
         print('renaming channel_name')
         result = client(functions.channels.EditTitleRequest(
             channel='ezhov_test',
-            title='🔴 ZdarovNeEzhov')
+            title='ZdarovNeEzhov')
             )
         print(result.stringify()
         )
@@ -70,7 +73,7 @@ class EzhovUpdater(Updater):
         bot = Bot(token)
         bot_persistence = PicklePersistence(filename=f'{os.path.abspath(os.path.dirname(__file__))}/bot_persistence')
 
-        dispatcher = EzhovDispatcher(bot, update_queue=Queue(),
+        self.dispatcher = EzhovDispatcher(bot, update_queue=Queue(),
                                      job_queue=JobQueue(),
                                      persistence=bot_persistence)
 
@@ -83,8 +86,8 @@ print('Бот перезагружен')
 dispatcher = updater.dispatcher
 dispatcher.add_handler(CommandHandler('start', start))
 # dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), echo))
-updater.start_polling()
-twitchAPI_integration.webhook.listen_stream_online(regs.zhenya_broadcaster_id,
-                             callback=post_stream_notification)
+# updater.start_polling()
+# twitchAPI_integration.webhook.listen_stream_online(regs.zhenya_broadcaster_id,
+#                              callback=post_stream_notification)
 # twitchAPI_integration.webhook.listen_channel_subscribe(regs.ezhov_broadcaster_id, post_stream_notification)
-updater.idle()
+# updater.idle()
