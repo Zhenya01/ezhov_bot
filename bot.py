@@ -3,6 +3,9 @@ import os
 import sys
 import traceback
 
+from twitchAPI import TwitchAPIException, UnauthorizedException, \
+    TwitchAuthorizationException, TwitchBackendException
+
 import regs
 from telegram.ext import Updater, CallbackContext, CommandHandler, \
     MessageHandler, Filters, PicklePersistence, Dispatcher, ExtBot, JobQueue
@@ -11,6 +14,7 @@ import twitchAPI_integration
 import logging
 import asyncio
 from queue import Queue
+from regs import logger
 
 
 def start(update: Update, context: CallbackContext):
@@ -24,7 +28,20 @@ def echo(update: Update, context: CallbackContext):
 
 
 async def post_stream_notification(data):
-    updater.dispatcher.bot.send_message(93906905, f'Стрим начался\ndata - {data}')
+    try:
+        res = twitchAPI_integration.twitch.get_channel_information(regs.zhenya_broadcaster_id)
+    except (TwitchAPIException, UnauthorizedException,
+            TwitchAuthorizationException, TwitchBackendException) as err:
+        logger.error(f"APP] {regs.zhenya_broadcaster_id} get stream_info failed with error {type(err).__name__}: '{err}'")
+        return None, None
+    game = res["data"][0]["game_name"]
+    title = res["data"][0]["title"]
+    logger.info((f"APP] Broadcaster Zhenya_2001: game: {game}, title: '{title}'"))
+    twitchAPI_integration.twitch.get_channel_information(regs.zhenya_broadcaster_id)
+    notification_text = f'🔴🔴🔴 Cтремлер запустил поток: "{title}"'
+    if game:
+        notification_text += f'Сегодня играем в "{game}"'
+    updater.dispatcher.bot.send_message(93906905, notification_text)
 
 
 class EzhovDispatcher(Dispatcher):
