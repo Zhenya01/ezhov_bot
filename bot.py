@@ -2,6 +2,7 @@ import asyncio
 import os
 import sys
 import traceback
+import random
 
 from telethon.sync import TelegramClient
 from telethon import functions, types
@@ -30,30 +31,25 @@ def echo(update: Update, context: CallbackContext):
     context.bot.send_message(chat_id=update.effective_chat.id, text=f'Все говорят: "{update.message.text}", а ты возьми, да и купи слона!')
 
 
-async def post_stream_notification(data):
-    try:
-        res = twitchAPI_integration.twitch.get_channel_information(regs.zhenya_broadcaster_id)
-    except (TwitchAPIException, UnauthorizedException,
-            TwitchAuthorizationException, TwitchBackendException) as err:
-        logger.error(f"APP] {regs.zhenya_broadcaster_id} get stream_info failed with error {type(err).__name__}: '{err}'")
-        return None, None
-    game = res["data"][0]["game_name"]
-    title = res["data"][0]["title"]
-    logger.info((f"APP] Broadcaster Zhenya_2001: game: {game}, title: '{title}'"))
-    twitchAPI_integration.twitch.get_channel_information(regs.zhenya_broadcaster_id)
-    notification_text = f'🔴🔴🔴 Cтремлер запустил поток: "{title}"'
-    if game:
-        notification_text += f'\nСегодня играем в "{game}"'
-    notification_text += '\nЛови ссылкочку и забегай скорее: https://www.twitch.tv/zhenya_2001'
+async def post_stream_live_notification(data):
+    emoji = random.choice(regs.emoji_list)
+    notification_text = f'{emoji} Заходи пожалуйста я играть буду в компунтер'
+    notification_text += '\ntwitch.tv/zdarovezhov'
     updater.dispatcher.bot.send_message(-1001879046742, notification_text)
+    rename_channel(live=True)
 
 
-def rename_channel():
+async def post_stream_offline_notification(data):
+    rename_channel(live=False)
+
+
+def rename_channel(live: bool):
+    title = '🔴 ZdarovNeEzhov' if live else 'ZdarovNeEzhov'
     with TelegramClient('ezhovApp', regs.telegram_app_api_id, regs.telegram_app_api_hash) as client:
         print('renaming channel_name')
         result = client(functions.channels.EditTitleRequest(
             channel='ezhov_test',
-            title='ZdarovNeEzhov')
+            title=title)
             )
         print(result.stringify()
         )
@@ -85,10 +81,11 @@ updater.dispatcher.bot.send_message(93906905, 'Бот перезагружен')
 print('Бот перезагружен')
 dispatcher = updater.dispatcher
 dispatcher.add_handler(CommandHandler('start', start))
-rename_channel()
-# dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), echo))
-# updater.start_polling()
-# twitchAPI_integration.webhook.listen_stream_online(regs.zhenya_broadcaster_id,
-#                              callback=post_stream_notification)
+dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), echo))
+updater.start_polling()
+twitchAPI_integration.webhook.listen_stream_online(regs.zhenya_broadcaster_id,
+                             callback=post_stream_live_notification)
+twitchAPI_integration.webhook.listen_stream_offline(regs.zhenya_broadcaster_id,
+                             callback=post_stream_offline_notification)
 # twitchAPI_integration.webhook.listen_channel_subscribe(regs.ezhov_broadcaster_id, post_stream_notification)
-# updater.idle()
+updater.idle()
