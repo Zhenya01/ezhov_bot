@@ -27,6 +27,12 @@ def start(update: Update, context: CallbackContext):
                              text="Кстааати, купи слона!")
 
 
+def post_hello_message(update: Update, context: CallbackContext):
+    if update.message.text == 93906905:
+        text = 'Би - бо - бу - бип\n11010000 10101111 100000 11010000 10110001 11010000 10111110 11010001 10000010 100000 11010000 10010110 11010000 10111000 11010000 10110110 11010000 10111110 11010000 10110010'
+        context.bot.send_message(-1001684055869, text)
+
+
 def echo(update: Update, context: CallbackContext):
     context.bot.send_message(chat_id=update.effective_chat.id, text=f'Все говорят: "{update.message.text}", а ты возьми, да и купи слона!')
 
@@ -35,7 +41,7 @@ async def post_stream_live_notification(data):
     emoji = random.choice(regs.emoji_list)
     notification_text = f'{emoji} Заходи пожалуйста я играть буду в компунтер'
     notification_text += '\ntwitch.tv/zdarovezhov'
-    updater.dispatcher.bot.send_message(-1001879046742, notification_text)
+    updater.dispatcher.bot.send_message(-1001684055869, notification_text)
     await rename_channel(live=True)
 
 
@@ -47,7 +53,7 @@ async def rename_channel(live: bool):
     title = '🔴 ZdarovNeEzhov' if live else 'ZdarovNeEzhov'
     async with TelegramClient('ezhovApp', regs.telegram_app_api_id, regs.telegram_app_api_hash) as client:
         await client(functions.channels.EditTitleRequest(
-            channel='ezhov_test',
+            channel='zdarovezhov',
             title=title)
             )
 
@@ -80,9 +86,9 @@ dispatcher = updater.dispatcher
 dispatcher.add_handler(CommandHandler('start', start))
 # dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), echo))
 updater.start_polling()
-twitchAPI_integration.webhook.listen_stream_online(regs.zhenya_broadcaster_id,
+twitchAPI_integration.webhook.listen_stream_online(regs.ezhov_broadcaster_id,
                              callback=post_stream_live_notification)
-twitchAPI_integration.webhook.listen_stream_offline(regs.zhenya_broadcaster_id,
+twitchAPI_integration.webhook.listen_stream_offline(regs.ezhov_broadcaster_id,
                              callback=post_stream_offline_notification)
 # twitchAPI_integration.webhook.listen_channel_subscribe(regs.ezhov_broadcaster_id, post_stream_notification)
 updater.idle()
