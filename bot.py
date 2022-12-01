@@ -28,7 +28,8 @@ def start(update: Update, context: CallbackContext):
 
 
 def post_hello_message(update: Update, context: CallbackContext):
-    if update.message.text == 93906905:
+    if update.effective_user.id == 93906905:
+        context.bot.send_message(93906905, 'Отправил')
         text = 'Би - бо - бу - бип\n11010000 10101111 100000 11010000 10110001 11010000 10111110 11010001 10000010 100000 11010000 10010110 11010000 10111000 11010000 10110110 11010000 10111110 11010000 10110010'
         context.bot.send_message(-1001684055869, text)
 
