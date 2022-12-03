@@ -101,6 +101,13 @@ async def rename_channel(live: bool):
 def silent(update: Update, context: CallbackContext):
     if update.effective_user.id in regs.admins_list:
         context.bot_data['silent'] = True
+        update.message.reply_text('Следующий стрим пройдёт без уведомления')
+
+
+def loud(update: Update, context: CallbackContext):
+    if update.effective_user.id in regs.admins_list:
+        context.bot_data['silent'] = False
+        update.message.reply_text('Следующий стрим пройдёт c уведомлением')
 
 
 class EzhovDispatcher(Dispatcher):
@@ -132,6 +139,8 @@ dispatcher.add_handler(CommandHandler('start', start))
 dispatcher.add_handler(CommandHandler('add', add_phrase))
 dispatcher.add_handler(CommandHandler('show', show))
 dispatcher.add_handler(CommandHandler('remove', remove_phrase))
+dispatcher.add_handler(CommandHandler('silent', silent))
+dispatcher.add_handler(CommandHandler('loud', loud))
 # dispatcher.add_handler(CommandHandler('post', post_hello_message))
 dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), echo))
 updater.start_polling()
