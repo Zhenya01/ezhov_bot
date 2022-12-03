@@ -5,7 +5,7 @@ import traceback
 import random
 
 from telethon.sync import TelegramClient
-from telethon import functions, types
+from telethon import functions
 
 from twitchAPI import TwitchAPIException, UnauthorizedException, \
     TwitchAuthorizationException, TwitchBackendException
@@ -13,7 +13,7 @@ from twitchAPI import TwitchAPIException, UnauthorizedException, \
 import regs
 from telegram.ext import Updater, CallbackContext, CommandHandler, \
     MessageHandler, Filters, PicklePersistence, Dispatcher, ExtBot, JobQueue
-from telegram import Update, Bot
+from telegram import Update, Bot, Chat
 import twitchAPI_integration
 import logging
 import asyncio
@@ -69,15 +69,19 @@ def post_hello_message(update: Update, context: CallbackContext):
 
 
 def echo(update: Update, context: CallbackContext):
-    context.bot.send_message(chat_id=update.effective_chat.id, text=f'Все говорят: "{update.message.text}", а ты возьми, да и купи слона!')
+    if update.effective_chat.type == Filters.chat_type.private:
+        context.bot.send_message(chat_id=update.effective_chat.id, text=f'Все говорят: "{update.message.text}", а ты возьми, да и купи слона!')
 
 
 async def post_stream_live_notification(data):
-    emoji = random.choice(regs.emoji_list)
-    phrase = random.choice(regs.phrase_list)
-    notification_text = f'{emoji} {phrase}'
-    notification_text += '\ntwitch.tv/zdarovezhov'
-    updater.dispatcher.bot.send_message(-1001684055869, notification_text)
+    if 'silent' not in updater.dispatcher.bot_data.keys() or updater.dispatcher.bot_data['silent'] is False:
+        emoji = random.choice(regs.emoji_list)
+        phrase = random.choice(updater.dispatcher.bot_data['phrases_list'])
+        notification_text = f'{emoji} {phrase}'
+        notification_text += '\ntwitch.tv/zdarovezhov'
+        updater.dispatcher.bot.send_message(-1001684055869, notification_text)
+    else:
+        updater.dispatcher.bot_data['silent'] = True
     await rename_channel(live=True)
 
 
@@ -92,6 +96,11 @@ async def rename_channel(live: bool):
             channel='zdarovezhov',
             title=title)
             )
+
+
+def silent(update: Update, context: CallbackContext):
+    if update.effective_user.id in regs.admins_list:
+        context.bot_data['silent'] = True
 
 
 class EzhovDispatcher(Dispatcher):
@@ -124,11 +133,11 @@ dispatcher.add_handler(CommandHandler('add', add_phrase))
 dispatcher.add_handler(CommandHandler('show', show))
 dispatcher.add_handler(CommandHandler('remove', remove_phrase))
 # dispatcher.add_handler(CommandHandler('post', post_hello_message))
-# dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), echo))
+dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), echo))
 updater.start_polling()
-twitchAPI_integration.webhook.listen_stream_online(regs.ezhov_broadcaster_id,
-                             callback=post_stream_live_notification)
-twitchAPI_integration.webhook.listen_stream_offline(regs.ezhov_broadcaster_id,
-                             callback=post_stream_offline_notification)
+# twitchAPI_integration.webhook.listen_stream_online(regs.ezhov_broadcaster_id,
+#                              callback=post_stream_live_notification)
+# twitchAPI_integration.webhook.listen_stream_offline(regs.ezhov_broadcaster_id,
+#                              callback=post_stream_offline_notification)
 # twitchAPI_integration.webhook.listen_channel_subscribe(regs.ezhov_broadcaster_id, post_stream_notification)
 updater.idle()
