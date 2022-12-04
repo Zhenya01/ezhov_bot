@@ -38,11 +38,14 @@ def get_user_login_by_id(user_id):
 
 
 def setup_subscribe_webhook():
-    webhook = EventSub(regs.twith_callback_url, regs.twitch_client_id, 5555, twitch)
-    webhook.wait_for_subscription_confirm_timeout = 15
-    webhook.unsubscribe_all()
-    webhook.start()
-    return webhook
+    subscribe_webhook = EventSub(regs.twith_callback_url,
+                                 regs.twitch_client_id,
+                                 5555,
+                                 twitch)
+    subscribe_webhook.wait_for_subscription_confirm_timeout = 15
+    subscribe_webhook.unsubscribe_all()
+    subscribe_webhook.start()
+    return subscribe_webhook
 
 
 print('registering twitch instance')
