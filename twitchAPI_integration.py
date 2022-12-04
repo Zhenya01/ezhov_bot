@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 import sys
@@ -48,8 +49,12 @@ def setup_subscribe_webhook():
     return subscribe_webhook
 
 
+async def setup_twitch():
+    twitch = await Twitch(regs.twitch_client_id, regs.twitch_client_secret)
+    return Twitch
 print('registering twitch instance')
-twitch = Twitch(regs.twitch_client_id, regs.twitch_client_secret)
+
+twitch = asyncio.run(setup_twitch())
 logger.debug(f'TWITCH APP TOKEN: {twitch.get_app_token()}')
 logger.debug(f'SUBSCRIPTION_RESULT: {twitch.check_user_subscription(regs.ezhov_broadcaster_id, regs.zhenya_broadcaster_id)}')
 print('setting up webhook')
