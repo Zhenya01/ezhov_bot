@@ -50,8 +50,8 @@ def setup_subscribe_webhook():
 
 
 async def setup_twitch():
-    twitch = Twitch(regs.twitch_client_id, regs.twitch_client_secret)
-    return twitch
+    twitch_object = await Twitch(regs.twitch_client_id, regs.twitch_client_secret)
+    return twitch_object
 print('registering twitch instance')
 
 twitch = asyncio.run(setup_twitch())
