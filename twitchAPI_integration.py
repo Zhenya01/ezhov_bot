@@ -55,7 +55,6 @@ async def setup_twitch():
 print('registering twitch instance')
 
 twitch = asyncio.run(setup_twitch())
-logger.debug(f'TWITCH APP TOKEN: {twitch.get_app_token()}')
 logger.debug(f'SUBSCRIPTION_RESULT: {twitch.check_user_subscription(regs.ezhov_broadcaster_id, regs.zhenya_broadcaster_id)}')
 print('setting up webhook')
 webhook = setup_subscribe_webhook()
