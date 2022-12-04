@@ -50,7 +50,8 @@ def setup_subscribe_webhook():
 
 print('registering twitch instance')
 twitch = Twitch(regs.twitch_client_id, regs.twitch_client_secret)
-twitch
+logger.debug(f'TWITCH APP TOKEN: {twitch.get_app_token()}')
+logger.debug(f'SUBSCRIPTION_RESULT: {twitch.check_user_subscription(regs.ezhov_broadcaster_id, regs.zhenya_broadcaster_id)}')
 print('setting up webhook')
 webhook = setup_subscribe_webhook()
 print(f'webhook url - {webhook.callback_url}')
