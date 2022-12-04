@@ -128,19 +128,6 @@ class EzhovUpdater(Updater):
 
         super().__init__(dispatcher=dispatcher, workers=None)
 
-
-def subscribe_stream_online():
-    twitchAPI_integration.webhook.listen_stream_online(
-        regs.ezhov_broadcaster_id,
-        callback=post_stream_live_notification)
-
-
-def subscribe_stream_offline():
-    twitchAPI_integration.webhook.listen_stream_offline(
-        regs.ezhov_broadcaster_id,
-        callback=post_stream_offline_notification)
-
-
 updater = EzhovUpdater(regs.bot_token)
 updater.dispatcher.bot.send_message(93906905, 'Бот перезагружен')
 print('Бот перезагружен')
@@ -154,7 +141,13 @@ dispatcher.add_handler(CommandHandler('loud', loud))
 # dispatcher.add_handler(CommandHandler('post', post_hello_message))
 dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), echo))
 updater.start_polling()
-subscribe_stream_online()
+twitchAPI_integration.webhook.listen_stream_online(
+        regs.ezhov_broadcaster_id,
+        callback=post_stream_live_notification)
+
+twitchAPI_integration.webhook.listen_stream_offline(
+        regs.ezhov_broadcaster_id,
+        callback=post_stream_offline_notification)
 subscribe_stream_offline()
 logger.debug('STARTING TO SUBSCRIBE TO STREAM ONLINE')
 # subscribe_stream_online()
