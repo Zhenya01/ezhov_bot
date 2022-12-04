@@ -117,8 +117,8 @@ class EzhovDispatcher(Dispatcher):
 
 class EzhovUpdater(Updater):
     def __init__(self, token):
-        con_pool_size = 4 + 4
-        request_kwargs = {"con_pool_size": con_pool_size}
+        # con_pool_size = 4 + 4
+        # request_kwargs = {"con_pool_size": con_pool_size}
         bot = Bot(token)
         persistence = PicklePersistence(
             filename=f'{os.path.abspath(os.path.dirname(__file__))}/bot_persistence')
