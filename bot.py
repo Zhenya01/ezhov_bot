@@ -70,6 +70,8 @@ def post_hello_message(update: Update, context: CallbackContext):
 
 def echo(update: Update, context: CallbackContext):
     print(update.effective_chat.type)
+    print(Filters.chat_type.private)
+    print(Filters.chat_type.private == update.effective_chat.type)
     if update.effective_chat.type == Filters.chat_type.private:
         context.bot.send_message(chat_id=update.effective_chat.id, text=f'Все говорят: "{update.message.text}", а ты возьми, да и купи слона!')
 
