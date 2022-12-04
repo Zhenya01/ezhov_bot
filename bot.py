@@ -13,7 +13,7 @@ from twitchAPI import TwitchAPIException, UnauthorizedException, \
 import regs
 from telegram.ext import Updater, CallbackContext, CommandHandler, \
     MessageHandler, Filters, PicklePersistence, Dispatcher, ExtBot, JobQueue
-from telegram import Update, Bot, Chat
+from telegram import Update, Bot
 import twitchAPI_integration
 import logging
 import asyncio
@@ -69,10 +69,7 @@ def post_hello_message(update: Update, context: CallbackContext):
 
 
 def echo(update: Update, context: CallbackContext):
-    print(update.effective_chat.type)
-    print(Filters.chat_type.private)
-    print(Filters.chat_type.private == update.effective_chat.type)
-    if update.effective_chat.type == Filters.chat_type.private:
+    if update.effective_chat.type == 'private':
         context.bot.send_message(chat_id=update.effective_chat.id, text=f'Все говорят: "{update.message.text}", а ты возьми, да и купи слона!')
 
 
