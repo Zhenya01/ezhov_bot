@@ -148,7 +148,6 @@ twitchAPI_integration.webhook.listen_stream_online(
 twitchAPI_integration.webhook.listen_stream_offline(
         regs.ezhov_broadcaster_id,
         callback=post_stream_offline_notification)
-subscribe_stream_offline()
 logger.debug('STARTING TO SUBSCRIBE TO STREAM ONLINE')
 # subscribe_stream_online()
 logger.debug('STARTING TO SUBSCRIBE TO STREAM OFFLINE')
