@@ -69,6 +69,7 @@ def post_hello_message(update: Update, context: CallbackContext):
 
 
 def echo(update: Update, context: CallbackContext):
+    print(update.effective_chat.type)
     if update.effective_chat.type == Filters.chat_type.private:
         context.bot.send_message(chat_id=update.effective_chat.id, text=f'Все говорят: "{update.message.text}", а ты возьми, да и купи слона!')
 
@@ -102,6 +103,7 @@ def silent(update: Update, context: CallbackContext):
     if update.effective_user.id in regs.admins_list:
         context.bot_data['silent'] = True
         update.message.reply_text('Следующий стрим пройдёт без уведомления')
+        context.bot.restrict_chat_member()
 
 
 def loud(update: Update, context: CallbackContext):
