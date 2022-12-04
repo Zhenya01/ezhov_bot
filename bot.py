@@ -7,9 +7,6 @@ import random
 from telethon.sync import TelegramClient
 from telethon import functions
 
-from twitchAPI import TwitchAPIException, UnauthorizedException, \
-    TwitchAuthorizationException, TwitchBackendException
-
 import regs
 from telegram.ext import Updater, CallbackContext, CommandHandler, \
     MessageHandler, Filters, PicklePersistence, Dispatcher, ExtBot, JobQueue
