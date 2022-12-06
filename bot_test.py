@@ -70,7 +70,7 @@ async def post_stream_live_notification_zhenya(data):
         phrase = random.choice(updater.dispatcher.bot_data['phrases_list'])
         notification_text = f'{emoji} {phrase}'
         notification_text += '\ntwitch.tv/zdarovezhov'
-        updater.dispatcher.bot.send_message(-1001684055869, notification_text)
+        updater.dispatcher.bot.send_message(-1001879046742, notification_text)
     else:
         updater.dispatcher.bot_data['silent'] = True
     await rename_channel_zhenya(live=True)
