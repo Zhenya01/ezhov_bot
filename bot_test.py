@@ -59,19 +59,12 @@ def remove_phrase(update: Update, context: CallbackContext):
         update.message.reply_text('Удалил')
 
 
-def post_hello_message(update: Update, context: CallbackContext):
-    if update.effective_user.id == 93906905:
-        context.bot.send_message(93906905, 'Отправил')
-        text = 'Би - бо - бу - бип\n11010000 10101111 100000 11010000 10110001 11010000 10111110 11010001 10000010 100000 11010000 10010110 11010000 10111000 11010000 10110110 11010000 10111110 11010000 10110010'
-        context.bot.send_message(id=-1001684055869, text=text)
-
-
 def echo(update: Update, context: CallbackContext):
     if update.effective_chat.type == 'private':
         context.bot.send_message(chat_id=update.effective_chat.id, text=f'Все говорят: "{update.message.text}", а ты возьми, да и купи слона!')
 
 
-async def post_stream_live_notification(data):
+async def post_stream_live_notification_zhenya(data):
     if 'silent' not in updater.dispatcher.bot_data.keys() or updater.dispatcher.bot_data['silent'] is False:
         emoji = random.choice(regs.emoji_list)
         phrase = random.choice(updater.dispatcher.bot_data['phrases_list'])
@@ -80,11 +73,11 @@ async def post_stream_live_notification(data):
         updater.dispatcher.bot.send_message(-1001684055869, notification_text)
     else:
         updater.dispatcher.bot_data['silent'] = True
-    await rename_channel(live=True)
+    await rename_channel_zhenya(live=True)
 
 
-async def post_stream_offline_notification(data):
-    await rename_channel(live=False)
+async def post_stream_offline_notification_zhenya(data):
+    await rename_channel_zhenya(live=False)
 
 
 def mute(update: Update, context: CallbackContext):
@@ -95,12 +88,12 @@ def mute(update: Update, context: CallbackContext):
         context.bot.restrict_chat_member()
 
 
-async def rename_channel(live: bool):
-    title = '🔴 zdarovezhov' if live else 'zdarovezhov'
+async def rename_channel_zhenya(live: bool):
+    title = '🔴 zdarovNeEzhov' if live else 'zdarovNeEzhov'
     try:
         async with TelegramClient('ezhovApp', regs.telegram_app_api_id, regs.telegram_app_api_hash) as client:
             await client(functions.channels.EditTitleRequest(
-                channel='zdarovezhov',
+                channel='ezhov_test',
                 title=title)
                 )
     except:
@@ -132,7 +125,7 @@ class EzhovUpdater(Updater):
         # request_kwargs = {"con_pool_size": con_pool_size}
         bot = Bot(token)
         persistence = PicklePersistence(
-            filename=f'{os.path.abspath(os.path.dirname(__file__))}/bot_persistence')
+            filename=f'{os.path.abspath(os.path.dirname(__file__))}/bot_persistence_zhenya')
 
         dispatcher = EzhovDispatcher(bot, update_queue=Queue(),
                                      job_queue=JobQueue(), persistence=persistence)
@@ -140,20 +133,20 @@ class EzhovUpdater(Updater):
         super().__init__(dispatcher=dispatcher, workers=None)
 
 
-async def subscribe_stream_online():
+async def subscribe_stream_online_zhenya():
     await twitchAPI_integration.webhook.listen_stream_online(
-        regs.ezhov_broadcaster_id,
-        callback=post_stream_live_notification)
+        regs.zhenya_broadcaster_id,
+        callback=post_stream_live_notification_zhenya)
 
 
-async def subscribe_stream_offline():
+async def subscribe_stream_offline_zhenya():
     await twitchAPI_integration.webhook.listen_stream_offline(
-        regs.ezhov_broadcaster_id,
-        callback=post_stream_offline_notification)
+        regs.zhenya_broadcaster_id,
+        callback=post_stream_offline_notification_zhenya)
 
 
 async def main():
-    tasks = [subscribe_stream_online(), subscribe_stream_offline()]
+    tasks = [subscribe_stream_online_zhenya(), subscribe_stream_offline_zhenya()]
     return asyncio.gather(*tasks)
 
 updater = EzhovUpdater(regs.bot_token_main)
