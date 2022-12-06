@@ -149,7 +149,7 @@ async def main():
     tasks = [subscribe_stream_online_zhenya(), subscribe_stream_offline_zhenya()]
     return asyncio.gather(*tasks)
 
-updater = EzhovUpdater(regs.bot_token_main)
+updater = EzhovUpdater(regs.bot_token_zhenya)
 updater.dispatcher.bot.send_message(93906905, 'Бот перезагружен')
 print('Бот перезагружен')
 dispatcher = updater.dispatcher
