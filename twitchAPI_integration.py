@@ -54,8 +54,8 @@ async def setup_twitch():
     return twitch_object
 print('registering twitch instance')
 
-twitch = asyncio.run(setup_twitch())
+# twitch = asyncio.run(setup_twitch())
 print('setting up webhook')
-webhook = setup_subscribe_webhook()
-print(f'webhook url - {webhook.callback_url}')
+# webhook = setup_subscribe_webhook()
+# print(f'webhook url - {webhook.callback_url}')
 
