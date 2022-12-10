@@ -14,7 +14,7 @@ import regs
 from telegram.ext import Updater, CallbackContext, CommandHandler, \
     MessageHandler, Filters, PicklePersistence, Dispatcher, ExtBot, JobQueue, \
     Defaults
-from telegram import Update, Bot, ChatPermissions
+from telegram import Update, Bot, ChatPermissions, ParseMode
 import twitchAPI_integration
 import logging
 import asyncio
@@ -123,7 +123,7 @@ def mute(update: Update, context: CallbackContext):
         else:
             duration = int(context.args[0])
         mute_id = update.message.reply_to_message.from_user.id
-        until_date = datetime.datetime.now() + datetime.timedelta(minutes=duration)
+        until_date = datetime.datetime.now(tz=pytz.timezone('Europe/Moscow')) + datetime.timedelta(minutes=duration)
         permissions = ChatPermissions(can_send_messages=False)
         context.bot.restrict_chat_member(update.effective_chat.id, mute_id,
                                          permissions, until_date)
