@@ -144,6 +144,7 @@ def send_muted_message(update: Update, context: CallbackContext, duration):
     muted_mention = f"\@{muted_username}" \
         if (
             muted_username != 'None' and muted_username is not None) else f'[{muted_name}](tg://user?id={muted_id})'
+    muted_mention = reformat_name(muted_mention)
     text = f'{muted_mention}, чел ты в муте на {duration} мин\. Заслужил\.'
     message_id = context.bot.send_message(update.effective_chat.id, text, parse_mode=ParseMode.MARKDOWN_V2).message_id
     asyncio.run(delete_muted_message(update, context, message_id))
@@ -159,6 +160,14 @@ def loud(update: Update, context: CallbackContext):
         context.bot_data['silent'] = False
         update.message.reply_text('Следующий стрим пройдёт c уведомлением')
 
+def reformat_name(name:str):
+    replacement_dict = {'_': '\_', '*': '\*', '[': '\[', ']': '\]', '(': '\(',
+                    ')': '\)', '~': '\~', '`': '\`', '>': '\>', '#': '\#',
+                    '+': '\+', '-': '\-', '=': '\=', '|': '\|', '{': '\{',
+                    '}': '\}', '.': '\.', '!': '\!'}
+    for i, j in replacement_dict.items():
+        name = name.replace(i, j)
+    return name
 
 def info(update: Update, context: CallbackContext):
     text = \
