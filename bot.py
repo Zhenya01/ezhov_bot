@@ -160,6 +160,26 @@ def loud(update: Update, context: CallbackContext):
         update.message.reply_text('Следующий стрим пройдёт c уведомлением')
 
 
+def info(update: Update, context: CallbackContext):
+    text = \
+f'''Карочи это вот ссылочки на всё что связано с моим ТВОРЧЕСТВОМ.
+Подпишитесь пожалуйста на всё, этим вы меня очень поддержите:
+
+Чаще всего стримлю на twitch:
+twitch.tv/zdarovezhov
+Общаемся все в ТГ: 
+t.me/zdarovezhov
+
+
+Нарезки со стримов в YouTube: 
+vk.cc/cjveTL
+легендарные моменты заливаем в YouTube Shorts: 
+vk.cc/cjvf3v
+Я в ТикТок:
+vk.cc/cjvifP
+из меня делают мемы в Yappi: 
+vk.cc/cjveXZ'''
+    update.message.reply_text(text)
 class EzhovDispatcher(Dispatcher):
     def start(self, ready=None):
         loop = asyncio.new_event_loop()
@@ -210,6 +230,7 @@ dispatcher.add_handler(CommandHandler('silent', silent))
 dispatcher.add_handler(CommandHandler('loud', loud))
 dispatcher.add_handler(CommandHandler('mute', mute, Filters.reply,
                                       run_async=True))
+dispatcher.add_handler(CommandHandler('info', info))
 # dispatcher.add_handler(CommandHandler('post', post_hello_message))
 dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), echo))
 updater.start_polling()
