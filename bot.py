@@ -133,7 +133,7 @@ def mute(update: Update, context: CallbackContext):
         context.bot.delete_message(update.effective_chat.id, muter_message_id)
         send_muted_message(update, context, duration)
     else:
-        print('NOT_ADMIN. SKIPPING')
+        update.message.delete()
 
 
 def send_muted_message(update: Update, context: CallbackContext, duration):
