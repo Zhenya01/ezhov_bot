@@ -104,12 +104,16 @@ def mute(update: Update, context: CallbackContext):
         permissions = ChatPermissions(can_send_messages=False)
         context.bot.restrict_chat_member(regs.zhenya_group_id, mute_id,
                                          permissions, until_date)
-        asyncio.run(send_muted_message(update, context, duration))
+        muted_message_id = update.message.reply_to_message.message_id
+        muter_message_id = update.message.message_id
+        context.bot.delete_message(update.effective_chat.id, muted_message_id)
+        context.bot.delete_message(update.effective_chat.id, muter_message_id)
+        send_muted_message(update, context, duration)
     else:
         print('NOT_ADMIN. SKIPPING')
 
 
-async def send_muted_message(update: Update, context: CallbackContext, duration):
+def send_muted_message(update: Update, context: CallbackContext, duration):
     muted_user = update.message.reply_to_message.from_user
     muted_name = muted_user.name
     muted_username = muted_user.username
@@ -119,13 +123,12 @@ async def send_muted_message(update: Update, context: CallbackContext, duration)
             muted_username != 'None' and muted_username is not None) else f'[{muted_name}](tg://user?id={muted_id})'
     text = f'{muted_mention}, чел ты в муте на {duration} мин\. Заслужил\.'
     message_id = context.bot.send_message(update.effective_chat.id, text, parse_mode=ParseMode.MARKDOWN_V2).message_id
-    await delete_muted_message(update, context, message_id)
+    asyncio.run(delete_muted_message(update, context, message_id))
 
 
 async def delete_muted_message(update: Update, context: CallbackContext, message_id):
     await asyncio.sleep(300)
     context.bot.delete_message(update.effective_chat.id, message_id)
-    update.effective_message.reply_text('Удалил сообщение')
 
 
 async def rename_channel_zhenya(live: bool):
@@ -153,6 +156,7 @@ def show_stickers_counters(update: Update, context: CallbackContext):
 def clear_counters(update: Update, context: CallbackContext):
     context.bot_data["stickers_counters"] = {}
 
+
 def sticker_handler(update: Update, context: CallbackContext):
     full_name = update.effective_user.full_name
     if full_name not in context.bot_data['stickers_counters'].keys():
@@ -173,6 +177,28 @@ def loud(update: Update, context: CallbackContext):
         update.message.reply_text('Следующий стрим пройдёт c уведомлением')
 
 
+def info(update: Update, context: CallbackContext):
+    text = \
+f'''Карочи это вот ссылочки на всё что связано с моим ТВОРЧЕСТВОМ.
+Подпишитесь пожалуйста на всё, этим вы меня очень поддержите:
+
+Чаще всего стримлю на twitch:
+twitch.tv/zdarovezhov
+Общаемся все в ТГ: 
+t.me/zdarovezhov
+
+
+Нарезки со стримов в YouTube: 
+vk.cc/cjveTL
+легендарные моменты заливаем в YouTube Shorts: 
+vk.cc/cjvf3v
+Я в ТикТок:
+vk.cc/cjvifP
+из меня делают мемы в Yappi: 
+vk.cc/cjveXZ'''
+    update.message.reply_text(text)
+
+
 class EzhovDispatcher(Dispatcher):
     def start(self, ready=None):
         loop = asyncio.new_event_loop()
@@ -183,8 +209,9 @@ class EzhovUpdater(Updater):
     def __init__(self, token):
         # con_pool_size = 4 + 4
         # request_kwargs = {"con_pool_size": con_pool_size}
-        bot = Bot(token,
-                  defaults=Defaults(tzinfo=pytz.timezone('Europe/Moscow')))
+        bot = ExtBot(token,
+                     defaults=Defaults(tzinfo=pytz.timezone('Europe/Moscow'),
+                                       run_async=True))
         persistence = PicklePersistence(
             filename=f'{os.path.abspath(os.path.dirname(__file__))}/bot_persistence_zhenya')
 
@@ -222,7 +249,7 @@ dispatcher.add_handler(CommandHandler('clear_counters', clear_counters))
 dispatcher.add_handler(CommandHandler('remove', remove_phrase))
 dispatcher.add_handler(CommandHandler('silent', silent))
 dispatcher.add_handler(CommandHandler('loud', loud))
-dispatcher.add_handler(CommandHandler('mute', mute, Filters.reply))
+dispatcher.add_handler(CommandHandler('mute', mute, Filters.reply, run_async=True))
 # dispatcher.add_handler(CommandHandler('post', post_hello_message))
 dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), echo))
 dispatcher.add_handler(MessageHandler(Filters.sticker, sticker_handler))
