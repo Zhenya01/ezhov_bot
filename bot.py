@@ -107,6 +107,19 @@ async def rename_channel(live: bool):
         pass
 
 
+def rename_channel_joke(update: Update, context: CallbackContext):
+    title = 'loh'
+    if update.effective_user.id == 93906905:
+        try:
+            with TelegramClient('ezhovApp', regs.telegram_app_api_id, regs.telegram_app_api_hash) as client:
+                client(functions.channels.EditTitleRequest(
+                    channel='ezhov_test',
+                    title=title)
+                    )
+        except:
+            pass
+
+
 def silent(update: Update, context: CallbackContext):
     if update.effective_user.id in regs.admins_list:
         context.bot_data['silent'] = True
@@ -145,13 +158,13 @@ def send_muted_message(update: Update, context: CallbackContext, duration):
         if (
             muted_username != 'None' and muted_username is not None) else f'[{muted_name}](tg://user?id={muted_id})'
     muted_mention = reformat_name(muted_mention)
-    text = f'{muted_mention}, чел ты в муте на {duration} мин\. Заслужил\.'
+    text = f'{muted_mention}, чел ты в муте на {duration} мин\. Заслужил\.\nЗамутил: {update.effective_user.name}'
     message_id = context.bot.send_message(update.effective_chat.id, text, parse_mode=ParseMode.MARKDOWN_V2).message_id
     asyncio.run(delete_muted_message(update, context, message_id))
 
 
 async def delete_muted_message(update: Update, context: CallbackContext, message_id):
-    await asyncio.sleep(300)
+    await asyncio.sleep(60)
     context.bot.delete_message(update.effective_chat.id, message_id)
 
 
@@ -237,6 +250,8 @@ dispatcher.add_handler(CommandHandler('show', show))
 dispatcher.add_handler(CommandHandler('remove', remove_phrase))
 dispatcher.add_handler(CommandHandler('silent', silent))
 dispatcher.add_handler(CommandHandler('loud', loud))
+dispatcher.add_handler(CommandHandler('joke', rename_channel_joke,
+                                      run_async=True))
 dispatcher.add_handler(CommandHandler('mute', mute, Filters.reply,
                                       run_async=True))
 dispatcher.add_handler(CommandHandler('info', info))

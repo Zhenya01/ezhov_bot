@@ -199,6 +199,28 @@ vk.cc/cjveXZ'''
     update.message.reply_text(text)
 
 
+def joke(update: Update, context: CallbackContext):
+    asyncio.run(rename_channel_joke(update, context))
+
+
+async def rename_channel_joke(update: Update, context: CallbackContext):
+    title = 'zdarovezhov family'
+    if update.effective_user.id == 93906905:
+        print('RENAMING')
+        try:
+            print('RENAMING')
+            async with TelegramClient('ezhovApp', regs.telegram_app_api_id, regs.telegram_app_api_hash) as client:
+                print('RENAMING')
+                await client(functions.channels.EditTitleRequest(
+                    channel='zdarovezhov',
+                    title=title)
+                    )
+        except:
+            pass
+    else:
+        print('NOT ZHENYA')
+
+
 class EzhovDispatcher(Dispatcher):
     def start(self, ready=None):
         loop = asyncio.new_event_loop()
@@ -250,6 +272,7 @@ dispatcher.add_handler(CommandHandler('remove', remove_phrase))
 dispatcher.add_handler(CommandHandler('silent', silent))
 dispatcher.add_handler(CommandHandler('loud', loud))
 dispatcher.add_handler(CommandHandler('mute', mute, Filters.reply, run_async=True))
+dispatcher.add_handler(CommandHandler('joke', joke))
 # dispatcher.add_handler(CommandHandler('post', post_hello_message))
 dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), echo))
 dispatcher.add_handler(MessageHandler(Filters.sticker, sticker_handler))
