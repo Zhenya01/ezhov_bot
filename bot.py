@@ -186,7 +186,7 @@ def reformat_name(name:str):
 
 def kick_from_group(update: Update, context: CallbackContext):
     path = f'{os.path.abspath(os.path.dirname(__file__))}\\uhodi.png'
-    message_id = update.message.reply_photo(open(path, 'rb'), 'Этот чат не чат, тут Eжов за сообщениями в группе следит').message_id
+    message_id = update.message.reply_photo(open('uhodi.png', 'rb'), 'Этот чат не чат, тут Eжов за сообщениями в группе следит').message_id
     # message_id = update.message.reply_text('Этот чат не чат, тут ежов за сообщениями в группе следит').message_id
     asyncio.run(kick_after_wait(update, context, message_id))
 
