@@ -158,7 +158,7 @@ def send_muted_message(update: Update, context: CallbackContext, duration):
         if (
             muted_username != 'None' and muted_username is not None) else f'[{muted_name}](tg://user?id={muted_id})'
     muted_mention = reformat_name(muted_mention)
-    text = f'{muted_mention}, чел ты в муте на {duration} мин\. Заслужил\.\nЗамутил: {update.effective_user.name}'
+    text = f'{muted_mention}, чел ты в муте на {duration} мин\. Заслужил\.\nЗамутил: {reformat_name(update.effective_user.name)}'
     message_id = context.bot.send_message(update.effective_chat.id, text, parse_mode=ParseMode.MARKDOWN_V2).message_id
     asyncio.run(delete_muted_message(update, context, message_id))
 
@@ -173,6 +173,7 @@ def loud(update: Update, context: CallbackContext):
         context.bot_data['silent'] = False
         update.message.reply_text('Следующий стрим пройдёт c уведомлением')
 
+
 def reformat_name(name:str):
     replacement_dict = {'_': '\_', '*': '\*', '[': '\[', ']': '\]', '(': '\(',
                     ')': '\)', '~': '\~', '`': '\`', '>': '\>', '#': '\#',
@@ -181,6 +182,23 @@ def reformat_name(name:str):
     for i, j in replacement_dict.items():
         name = name.replace(i, j)
     return name
+
+
+def kick_from_group(update: Update, context: CallbackContext):
+    path = f'{os.path.abspath(os.path.dirname(__file__))}\\uhodi.png'
+    message_id = update.message.reply_photo(open(path, 'rb'), 'Этот чат не чат, тут Eжов за сообщениями в группе следит').message_id
+    # message_id = update.message.reply_text('Этот чат не чат, тут ежов за сообщениями в группе следит').message_id
+    asyncio.run(kick_after_wait(update, context, message_id))
+
+
+async def kick_after_wait(update: Update, context: CallbackContext, message_id):
+    await asyncio.sleep(15)
+    context.bot.unban_chat_member(update.effective_chat.id, update.effective_user.id)
+    context.bot.delete_message(update.effective_chat.id, message_id)
+
+
+def delete_chat_rename_message(update: Update, context: CallbackContext):
+    update.effective_message.delete()
 
 def info(update: Update, context: CallbackContext):
     text = \
@@ -240,28 +258,36 @@ async def main():
     tasks = [subscribe_stream_online(), subscribe_stream_offline()]
     return asyncio.gather(*tasks)
 
-updater = EzhovUpdater(regs.bot_token_main)
-updater.dispatcher.bot.send_message(93906905, 'Бот перезагружен')
-print('Бот перезагружен')
-dispatcher = updater.dispatcher
-dispatcher.add_handler(CommandHandler('start', start))
-dispatcher.add_handler(CommandHandler('add', add_phrase))
-dispatcher.add_handler(CommandHandler('show', show))
-dispatcher.add_handler(CommandHandler('remove', remove_phrase))
-dispatcher.add_handler(CommandHandler('silent', silent))
-dispatcher.add_handler(CommandHandler('loud', loud))
-dispatcher.add_handler(CommandHandler('joke', rename_channel_joke,
-                                      run_async=True))
-dispatcher.add_handler(CommandHandler('mute', mute, Filters.reply,
-                                      run_async=True))
-dispatcher.add_handler(CommandHandler('info', info))
-# dispatcher.add_handler(CommandHandler('post', post_hello_message))
-dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), echo))
-updater.start_polling()
-# asyncio.run(main())
-logger.debug('STARTING TO SUBSCRIBE TO STREAM ONLINE')
-# subscribe_stream_online()
-logger.debug('STARTING TO SUBSCRIBE TO STREAM OFFLINE')
-# subscribe_stream_offline()
-# twitchAPI_integration.webhook.listen_channel_subscribe(regs.ezhov_broadcaster_id, post_stream_notification)
-updater.idle()
+
+if __name__ == 'main':
+    updater = EzhovUpdater(regs.bot_token_main)
+    updater.dispatcher.bot.send_message(93906905, 'Бот перезагружен')
+    print('Бот перезагружен')
+    dispatcher = updater.dispatcher
+    dispatcher.add_handler(CommandHandler('start', start))
+    dispatcher.add_handler(CommandHandler('add', add_phrase))
+    dispatcher.add_handler(CommandHandler('show', show))
+    dispatcher.add_handler(CommandHandler('remove', remove_phrase))
+    dispatcher.add_handler(CommandHandler('silent', silent))
+    dispatcher.add_handler(CommandHandler('loud', loud))
+    dispatcher.add_handler(CommandHandler('joke', rename_channel_joke,
+                                          run_async=True))
+    dispatcher.add_handler(CommandHandler('mute', mute, Filters.reply,
+                                          run_async=True))
+    dispatcher.add_handler(CommandHandler('info', info))
+    dispatcher.add_handler(
+        MessageHandler(Filters.status_update.new_chat_members, kick_from_group,
+                       run_async=True))
+    dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_title,
+                                          delete_chat_rename_message,
+                                          run_async=True))
+    # dispatcher.add_handler(CommandHandler('post', post_hello_message))
+    dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), echo))
+    updater.start_polling()
+    # asyncio.run(main())
+    logger.debug('STARTING TO SUBSCRIBE TO STREAM ONLINE')
+    # subscribe_stream_online()
+    logger.debug('STARTING TO SUBSCRIBE TO STREAM OFFLINE')
+    # subscribe_stream_offline()
+    # twitchAPI_integration.webhook.listen_channel_subscribe(regs.ezhov_broadcaster_id, post_stream_notification)
+    updater.idle()

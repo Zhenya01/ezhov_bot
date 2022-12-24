@@ -11,14 +11,16 @@ from telethon.sync import TelegramClient
 from telethon import functions
 
 import regs
-from telegram.ext import Updater, CallbackContext, CommandHandler, \
+from telegram.ext import Updater, CallbackContext, CommandHandler, ChatMemberHandler,\
     MessageHandler, Filters, PicklePersistence, Dispatcher, ExtBot, JobQueue, \
     Defaults
-from telegram import Update, Bot, ChatPermissions, ParseMode
+from telegram import Update, Bot, ChatPermissions, ParseMode, ChatMember
 import twitchAPI_integration
 import logging
 import asyncio
 from queue import Queue
+
+from bot import reformat_name
 from regs import logger
 
 
@@ -121,7 +123,8 @@ def send_muted_message(update: Update, context: CallbackContext, duration):
     muted_mention = f"\@{muted_username}" \
         if (
             muted_username != 'None' and muted_username is not None) else f'[{muted_name}](tg://user?id={muted_id})'
-    text = f'{muted_mention}, чел ты в муте на {duration} мин\. Заслужил\.'
+    text = f'{muted_mention}, чел ты в муте на {duration} мин. Заслужил.\nЗамутил: {update.effective_user.name}'
+    text = reformat_name(text)
     message_id = context.bot.send_message(update.effective_chat.id, text, parse_mode=ParseMode.MARKDOWN_V2).message_id
     asyncio.run(delete_muted_message(update, context, message_id))
 
@@ -203,8 +206,20 @@ def joke(update: Update, context: CallbackContext):
     asyncio.run(rename_channel_joke(update, context))
 
 
+def kick_from_group(update: Update, context: CallbackContext):
+    path = f'{os.path.abspath(os.path.dirname(__file__))}\\uhodi.png'
+    message_id = update.message.reply_photo(open(path, 'rb'), 'Этот чат не чат, тут Eжов за сообщениями в группе следит').message_id
+    # message_id = update.message.reply_text('Этот чат не чат, тут ежов за сообщениями в группе следит').message_id
+    asyncio.run(kick_after_wait(update, context, message_id))
+
+
+async def kick_after_wait(update: Update, context: CallbackContext, message_id):
+    await asyncio.sleep(15)
+    context.bot.unban_chat_member(update.effective_chat.id, update.effective_user.id)
+    context.bot.delete_message(update.effective_chat.id, message_id)
+
 async def rename_channel_joke(update: Update, context: CallbackContext):
-    title = 'zdarovezhov family'
+    title = 'zdarovezhov'
     if update.effective_user.id == 93906905:
         print('RENAMING')
         try:
@@ -219,6 +234,10 @@ async def rename_channel_joke(update: Update, context: CallbackContext):
             pass
     else:
         print('NOT ZHENYA')
+
+
+def delete_chat_rename_message(update: Update, context: CallbackContext):
+    update.effective_message.delete()
 
 
 class EzhovDispatcher(Dispatcher):
@@ -272,7 +291,10 @@ dispatcher.add_handler(CommandHandler('remove', remove_phrase))
 dispatcher.add_handler(CommandHandler('silent', silent))
 dispatcher.add_handler(CommandHandler('loud', loud))
 dispatcher.add_handler(CommandHandler('mute', mute, Filters.reply, run_async=True))
-dispatcher.add_handler(CommandHandler('joke', joke))
+# dispatcher.add_handler(CommandHandler('joke', joke))
+# dispatcher.add_handler(ChatMemberHandler(callback=kick_from_group, chat_member_types=ChatMemberHandler.CHAT_MEMBER))
+# dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_members, kick_from_group, run_async=True))
+# dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_title, delete_chat_rename_message, run_async=True))
 # dispatcher.add_handler(CommandHandler('post', post_hello_message))
 dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), echo))
 dispatcher.add_handler(MessageHandler(Filters.sticker, sticker_handler))
