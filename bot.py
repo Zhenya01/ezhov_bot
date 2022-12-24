@@ -259,35 +259,35 @@ async def main():
     return asyncio.gather(*tasks)
 
 
-if __name__ == 'main':
-    updater = EzhovUpdater(regs.bot_token_main)
-    updater.dispatcher.bot.send_message(93906905, 'Бот перезагружен')
-    print('Бот перезагружен')
-    dispatcher = updater.dispatcher
-    dispatcher.add_handler(CommandHandler('start', start))
-    dispatcher.add_handler(CommandHandler('add', add_phrase))
-    dispatcher.add_handler(CommandHandler('show', show))
-    dispatcher.add_handler(CommandHandler('remove', remove_phrase))
-    dispatcher.add_handler(CommandHandler('silent', silent))
-    dispatcher.add_handler(CommandHandler('loud', loud))
-    dispatcher.add_handler(CommandHandler('joke', rename_channel_joke,
-                                          run_async=True))
-    dispatcher.add_handler(CommandHandler('mute', mute, Filters.reply,
-                                          run_async=True))
-    dispatcher.add_handler(CommandHandler('info', info))
-    dispatcher.add_handler(
-        MessageHandler(Filters.status_update.new_chat_members, kick_from_group,
-                       run_async=True))
-    dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_title,
-                                          delete_chat_rename_message,
-                                          run_async=True))
-    # dispatcher.add_handler(CommandHandler('post', post_hello_message))
-    dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), echo))
-    updater.start_polling()
-    # asyncio.run(main())
-    logger.debug('STARTING TO SUBSCRIBE TO STREAM ONLINE')
-    # subscribe_stream_online()
-    logger.debug('STARTING TO SUBSCRIBE TO STREAM OFFLINE')
-    # subscribe_stream_offline()
-    # twitchAPI_integration.webhook.listen_channel_subscribe(regs.ezhov_broadcaster_id, post_stream_notification)
-    updater.idle()
+
+updater = EzhovUpdater(regs.bot_token_main)
+updater.dispatcher.bot.send_message(93906905, 'Бот перезагружен')
+print('Бот перезагружен')
+dispatcher = updater.dispatcher
+dispatcher.add_handler(CommandHandler('start', start))
+dispatcher.add_handler(CommandHandler('add', add_phrase))
+dispatcher.add_handler(CommandHandler('show', show))
+dispatcher.add_handler(CommandHandler('remove', remove_phrase))
+dispatcher.add_handler(CommandHandler('silent', silent))
+dispatcher.add_handler(CommandHandler('loud', loud))
+dispatcher.add_handler(CommandHandler('joke', rename_channel_joke,
+                                      run_async=True))
+dispatcher.add_handler(CommandHandler('mute', mute, Filters.reply,
+                                      run_async=True))
+dispatcher.add_handler(CommandHandler('info', info))
+dispatcher.add_handler(
+    MessageHandler(Filters.status_update.new_chat_members, kick_from_group,
+                   run_async=True))
+dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_title,
+                                      delete_chat_rename_message,
+                                      run_async=True))
+# dispatcher.add_handler(CommandHandler('post', post_hello_message))
+dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), echo))
+updater.start_polling()
+# asyncio.run(main())
+logger.debug('STARTING TO SUBSCRIBE TO STREAM ONLINE')
+# subscribe_stream_online()
+logger.debug('STARTING TO SUBSCRIBE TO STREAM OFFLINE')
+# subscribe_stream_offline()
+# twitchAPI_integration.webhook.listen_channel_subscribe(regs.ezhov_broadcaster_id, post_stream_notification)
+updater.idle()
