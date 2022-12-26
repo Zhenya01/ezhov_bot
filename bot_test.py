@@ -34,6 +34,16 @@ def start(update: Update, context: CallbackContext):
         context.bot_data['stickers_counters'] = {}
 
 
+def add_phrase_to_start(update: Update, context: CallbackContext):
+    if len(context.args) == 0:
+        update.message.reply_text(
+            'Укажите фразу после /add_first (Например: /add_first привет)')
+    else:
+        phrases = ' '.join(context.args).split(';')
+        context.bot_data['phrases_list'] = phrases + context.bot_data['phrases_list']
+        update.message.reply_text("Добавил")
+
+
 def add_phrase(update: Update, context: CallbackContext):
     if len(context.args) == 0:
         update.message.reply_text(
@@ -284,6 +294,7 @@ print('Бот перезагружен')
 dispatcher = updater.dispatcher
 dispatcher.add_handler(CommandHandler('start', start))
 dispatcher.add_handler(CommandHandler('add', add_phrase))
+dispatcher.add_handler(CommandHandler('add_first', add_phrase_to_start))
 dispatcher.add_handler(CommandHandler('show', show))
 dispatcher.add_handler(CommandHandler('show_sticks', show_stickers_counters))
 dispatcher.add_handler(CommandHandler('clear_counters', clear_counters))

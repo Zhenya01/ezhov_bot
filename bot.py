@@ -35,9 +35,11 @@ def add_phrase_to_start(update: Update, context: CallbackContext):
         update.message.reply_text(
             'Укажите фразу после /add_first (Например: /add_first привет)')
     else:
-        phrase = ' '.join(context.args).split(';')
-        context.bot_data['phrases_list'].insert(0, phrase)
+        phrases = ' '.join(context.args).split(';')
+        context.bot_data['phrases_list'] = phrases + context.bot_data['phrases_list']
         update.message.reply_text("Добавил")
+
+
 def add_phrase(update: Update, context: CallbackContext):
     if len(context.args) == 0:
         update.message.reply_text(
