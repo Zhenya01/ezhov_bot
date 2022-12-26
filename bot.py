@@ -276,6 +276,7 @@ print('Бот перезагружен')
 dispatcher = updater.dispatcher
 dispatcher.add_handler(CommandHandler('start', start))
 dispatcher.add_handler(CommandHandler('add', add_phrase))
+dispatcher.add_handler(CommandHandler('add_first', add_phrase_to_start))
 dispatcher.add_handler(CommandHandler('show', show))
 dispatcher.add_handler(CommandHandler('remove', remove_phrase))
 dispatcher.add_handler(CommandHandler('silent', silent))
