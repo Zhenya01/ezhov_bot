@@ -295,7 +295,7 @@ dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_title,
 # dispatcher.add_handler(CommandHandler('post', post_hello_message))
 dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), echo))
 updater.start_polling()
-# asyncio.run(main())
+asyncio.run(main())
 logger.debug('STARTING TO SUBSCRIBE TO STREAM ONLINE')
 # subscribe_stream_online()
 logger.debug('STARTING TO SUBSCRIBE TO STREAM OFFLINE')
