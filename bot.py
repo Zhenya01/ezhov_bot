@@ -97,7 +97,7 @@ async def post_stream_live_notification(data):
         notification_text += '\ntwitch.tv/zdarovezhov'
         updater.dispatcher.bot.send_message(regs.zdarovezhov_channel_id, notification_text)
     else:
-        updater.dispatcher.bot_data['silent'] = True
+        updater.dispatcher.bot_data['silent'] = False
     await rename_channel(live=True)
 
 
