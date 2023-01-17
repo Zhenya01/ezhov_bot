@@ -301,7 +301,7 @@ async def setup_twitch_objects():
 
 defaults=Defaults(tzinfo=pytz.timezone('Europe/Moscow'))
 persistence = PicklePersistence(filepath=f'{os.path.abspath(os.path.dirname(__file__))}/bot_persistence')
-token=regs.bot_token_zhenya
+token=regs.bot_token_main
 
 application = ApplicationBuilder().token(token).persistence(persistence).defaults(defaults).build()
 print('Бот перезагружен')
