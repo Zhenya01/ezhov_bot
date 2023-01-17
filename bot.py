@@ -162,7 +162,7 @@ async def send_muted_message(update: Update, context: ContextTypes.DEFAULT_TYPE,
     muted_mention = reformat_name(muted_mention)
     text = f'{muted_mention}, чел ты в муте на {duration} мин\. Заслужил\.\nЗамутил: {reformat_name(update.effective_user.name)}'
     message_id = await context.bot.send_message(update.effective_chat.id, text, parse_mode=ParseMode.MARKDOWN_V2).message_id
-    await delete_muted_message(update, context, message_id)
+    context.application.job_queue.run_once(delete_muted_message(update, context, message_id), 60)
 
 
 async def delete_muted_message(update: Update, context: ContextTypes.DEFAULT_TYPE, message_id):
@@ -191,7 +191,7 @@ async def kick_from_group(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if update.effective_user.id not in regs.group_list:
             message_id = update.message.reply_photo(open('uhodi.png', 'rb'), 'Этот чат не чат, тут Eжов за сообщениями в группе следит').message_id
             # message_id = await update.message.reply_text('Этот чат не чат, тут ежов за сообщениями в группе следит').message_id
-            await kick_after_wait(update, context, message_id)
+            context.application.job_queue.run_once(kick_after_wait(update, context, message_id), 15)
 
 
 async def kick_after_wait(update: Update, context: ContextTypes.DEFAULT_TYPE, message_id):
@@ -202,6 +202,7 @@ async def kick_after_wait(update: Update, context: ContextTypes.DEFAULT_TYPE, me
 
 async def delete_chat_rename_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.effective_message.delete()
+
 
 async def info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = \
@@ -264,9 +265,9 @@ async def send_reboot_message():
 
 
 async def main(context):
-    await setup_twitch_objects()
-    await subscribe_stream_online()
-    await subscribe_stream_offline()
+    # await setup_twitch_objects()
+    # await subscribe_stream_online()
+    # await subscribe_stream_offline()
     await send_reboot_message()
 
 
@@ -291,7 +292,7 @@ application.add_handler(CommandHandler('show', show))
 application.add_handler(CommandHandler('remove', remove_phrase))
 application.add_handler(CommandHandler('silent', silent))
 application.add_handler(CommandHandler('loud', loud))
-application.add_handler(CommandHandler('mute', mute, filters.REPLY)) # TODO run_async=True
+application.add_handler(CommandHandler('mute', mute, filters.REPLY))
 
 application.add_handler(CommandHandler('info', info))
 application.add_handler(
