@@ -245,12 +245,14 @@ vk.cc/cjveXZ'''
 
 
 async def subscribe_stream_online():
+    global webhook
     await webhook.listen_stream_online(
         regs.zhenya_broadcaster_id,
         callback=post_stream_live_notification)
 
 
 async def subscribe_stream_offline():
+    global webhook
     await webhook.listen_stream_offline(
         regs.zhenya_broadcaster_id,
         callback=post_stream_offline_notification)
@@ -261,7 +263,8 @@ async def send_reboot_message():
 
 
 async def main(context):
-    tasks = [setup_twitch_objects(), subscribe_stream_online(), subscribe_stream_offline(), send_reboot_message()]
+    tasks = [setup_twitch_objects(), subscribe_stream_online(),
+             subscribe_stream_offline(), send_reboot_message()]
     # tasks = [send_reboot_message()]
     return asyncio.gather(*tasks)
 
