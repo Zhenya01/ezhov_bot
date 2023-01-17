@@ -264,10 +264,10 @@ async def send_reboot_message():
 
 
 async def main(context):
-    asyncio.run(setup_twitch_objects())
-    asyncio.run(subscribe_stream_online())
-    asyncio.run(subscribe_stream_offline())
-    asyncio.run(send_reboot_message())
+    await setup_twitch_objects()
+    await subscribe_stream_online()
+    await subscribe_stream_offline()
+    await send_reboot_message()
 
 
 async def setup_twitch_objects():
