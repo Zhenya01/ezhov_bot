@@ -276,7 +276,8 @@ async def send_reboot_message():
 
 
 async def main(context):
-    tasks = [setup_twitch_objects(), subscribe_stream_online(), subscribe_stream_offline(), send_reboot_message()]
+    # tasks = [setup_twitch_objects(), subscribe_stream_online(), subscribe_stream_offline(), send_reboot_message()]
+    tasks = [send_reboot_message()]
     return asyncio.gather(*tasks)
 
 
