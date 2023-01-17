@@ -161,13 +161,19 @@ async def send_muted_message(update: Update, context: ContextTypes.DEFAULT_TYPE,
             muted_username != 'None' and muted_username is not None) else f'[{muted_name}](tg://user?id={muted_id})'
     muted_mention = reformat_name(muted_mention)
     text = f'{muted_mention}, чел ты в муте на {duration} мин\. Заслужил\.\nЗамутил: {reformat_name(update.effective_user.name)}'
-    message_id = await context.bot.send_message(update.effective_chat.id, text, parse_mode=ParseMode.MARKDOWN_V2).message_id
-    context.application.job_queue.run_once(delete_muted_message(update, context, message_id), 60)
+    print(text)
+    message = await context.bot.send_message(update.effective_chat.id, text, parse_mode=ParseMode.MARKDOWN_V2)
+    message_id = message.message_id
+    context.application.job_queue.run_once(callback=delete_muted_message,
+                                           when=60,
+                                           data={'chat_id': update.effective_chat.id,
+                                                 'message_id': message_id})
 
 
-async def delete_muted_message(update: Update, context: ContextTypes.DEFAULT_TYPE, message_id):
-    # await asyncio.sleep(60)
-    await context.bot.delete_message(update.effective_chat.id, message_id)
+async def delete_muted_message(context: ContextTypes.DEFAULT_TYPE):
+    chat_id = context.job.data['chat_id']
+    message_id = context.job.data['message_id']
+    await context.bot.delete_message(chat_id, message_id)
 
 
 async def loud(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -176,7 +182,7 @@ async def loud(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text('Следующий стрим пройдёт c уведомлением')
 
 
-async def reformat_name(name:str):
+def reformat_name(name:str):
     replacement_dict = {'_': '\_', '*': '\*', '[': '\[', ']': '\]', '(': '\(',
                     ')': '\)', '~': '\~', '`': '\`', '>': '\>', '#': '\#',
                     '+': '\+', '-': '\-', '=': '\=', '|': '\|', '{': '\{',
@@ -194,13 +200,23 @@ async def kick_from_group(update: Update, context: ContextTypes.DEFAULT_TYPE):
             message = await update.message.reply_photo(open('uhodi.png', 'rb'), 'Этот чат не чат, тут Eжов за сообщениями в группе следит')
             message_id = message.message_id
             # message_id = await update.message.reply_text('Этот чат не чат, тут ежов за сообщениями в группе следит').message_id
-            context.application.job_queue.run_once(await kick_after_wait(update, context, message_id), 15)
+            context.bot_data['user_to_kick'] = update.message.from_user.id
+            context.bot_data['chat_to_kick_from'] = update.message.chat.id
+            context.application.job_queue.run_once(callback=kick_after_wait,
+                                                   when=datetime.timedelta(seconds=10),
+                                                   name='kick_after_wait',
+                                                   data={'user_to_kick': update.message.from_user.id,
+                                                         'chat_to_kick_from': update.message.chat.id,
+                                                         'message_to_delete': message_id})
 
 
-async def kick_after_wait(update: Update, context: ContextTypes.DEFAULT_TYPE, message_id):
+async def kick_after_wait(context: ContextTypes.DEFAULT_TYPE):
     # await asyncio.sleep(15)
-    await context.bot.unban_chat_member(update.effective_chat.id, update.effective_user.id)
-    await context.bot.delete_message(update.effective_chat.id, message_id)
+    chat_id = context.job.data['chat_to_kick_from']
+    user_id = context.job.data['user_to_kick']
+    message_id = context.job.data['message_to_delete']
+    await context.bot.unban_chat_member(chat_id, user_id)
+    await context.bot.delete_message(chat_id, message_id)
 
 
 async def delete_chat_rename_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -299,7 +315,7 @@ application.add_handler(CommandHandler('mute', mute, filters.REPLY))
 
 application.add_handler(CommandHandler('info', info))
 application.add_handler(
-    MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, kick_from_group))  # TODO run_async=True
+    MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, kick_from_group))
 application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_TITLE,
                                       delete_chat_rename_message))
 # application.add_handler(CommandHandler('post', post_hello_message))
