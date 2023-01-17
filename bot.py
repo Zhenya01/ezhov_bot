@@ -309,8 +309,8 @@ application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_TITLE,
                                       delete_chat_rename_message))
 # application.add_handler(CommandHandler('post', post_hello_message))
 application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), echo))
-job_queue:JobQueue = application.job_queue
-job_queue.run_custom(main, job_kwargs={})
+job_queue: JobQueue = application.job_queue
+application.job_queue.run_custom(main, job_kwargs={})
 # async def main():
 #     await application.initialize()
 #     await application.start()
