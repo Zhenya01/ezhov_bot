@@ -273,6 +273,7 @@ async def main(context):
 async def setup_twitch_objects():
     global twitch, webhook
     twitch = await twitchAPI_integration.setup_twitch()
+    twitch.authenticate_app([])
     print('setting up webhook')
     webhook = await twitchAPI_integration.setup_subscribe_webhook(twitch)
 
