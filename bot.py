@@ -194,7 +194,7 @@ async def kick_from_group(update: Update, context: ContextTypes.DEFAULT_TYPE):
             message = await update.message.reply_photo(open('uhodi.png', 'rb'), 'Этот чат не чат, тут Eжов за сообщениями в группе следит')
             message_id = message.message_id
             # message_id = await update.message.reply_text('Этот чат не чат, тут ежов за сообщениями в группе следит').message_id
-            context.application.job_queue.run_once(kick_after_wait(update, context, message_id), 15)
+            context.application.job_queue.run_once(await kick_after_wait(update, context, message_id), 15)
 
 
 async def kick_after_wait(update: Update, context: ContextTypes.DEFAULT_TYPE, message_id):
