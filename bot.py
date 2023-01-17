@@ -6,6 +6,7 @@ import traceback
 import random
 
 import pytz
+import twitchAPI
 from telethon.errors import ChatNotModifiedError
 from telethon.sync import TelegramClient
 from telethon import functions
@@ -245,7 +246,7 @@ vk.cc/cjveXZ'''
 
 
 async def subscribe_stream_online():
-    global webhook
+    print(webhook)
     await webhook.listen_stream_online(
         regs.zhenya_broadcaster_id,
         callback=post_stream_live_notification)
