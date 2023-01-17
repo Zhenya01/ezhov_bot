@@ -261,13 +261,13 @@ async def print_ds():
 
 async def subscribe_stream_online():
     await webhook.listen_stream_online(
-        regs.ezhov_broadcaster_id,
+        regs.zhenya_broadcaster_id,
         callback=post_stream_live_notification)
 
 
 async def subscribe_stream_offline():
     await webhook.listen_stream_offline(
-        regs.ezhov_broadcaster_id,
+        regs.zhenya_broadcaster_id,
         callback=post_stream_offline_notification)
 
 
