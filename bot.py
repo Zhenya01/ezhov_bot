@@ -12,11 +12,10 @@ from telethon.sync import TelegramClient
 from telethon import functions
 
 import regs
-from telegram.ext import Updater, CallbackContext, CommandHandler, \
-    MessageHandler, filters, PicklePersistence, ExtBot, JobQueue, \
-    Defaults, ContextTypes, ApplicationBuilder
+from telegram.ext import CommandHandler, MessageHandler, filters, \
+    PicklePersistence, JobQueue, Defaults, ContextTypes, ApplicationBuilder
 from telegram.constants import ParseMode
-from telegram import Update, Bot, ChatPermissions
+from telegram import Update, ChatPermissions
 import twitchAPI_integration
 import logging
 import asyncio
@@ -110,22 +109,28 @@ async def post_stream_offline_notification(data):
 
 
 async def rename_channel(live: bool):
-    title = '🔴 zdarovNeEzhov' if live else 'zdarovNeEzhov'
+    title = '🔴 zdarovezhov' if live else 'zdarovezhov'
     try:
         async with TelegramClient('ezhovApp', regs.telegram_app_api_id, regs.telegram_app_api_hash) as client:
             await client(functions.channels.EditTitleRequest(
-                channel='ezhov_test',
+                channel='zdarovezhov',
                 title=title)
                 )
     except:
         pass
 
 
-
 async def silent(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id in regs.admins_list:
         context.bot_data['silent'] = True
         await update.message.reply_text('Следующий стрим пройдёт без уведомления')
+
+
+async def loud(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id in regs.admins_list:
+        context.bot_data['silent'] = False
+        await update.message.reply_text('Следующий стрим пройдёт c уведомлением')
+
 
 
 async def mute(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -176,10 +181,6 @@ async def delete_muted_message(context: ContextTypes.DEFAULT_TYPE):
     await context.bot.delete_message(chat_id, message_id)
 
 
-async def loud(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id in regs.admins_list:
-        context.bot_data['silent'] = False
-        await update.message.reply_text('Следующий стрим пройдёт c уведомлением')
 
 
 def reformat_name(name:str):
@@ -268,14 +269,14 @@ vk.cc/cjveXZ'''
 async def subscribe_stream_online():
     print(webhook)
     await webhook.listen_stream_online(
-        regs.zhenya_broadcaster_id,
+        regs.ezhov_broadcaster_id,
         callback=post_stream_live_notification)
 
 
 async def subscribe_stream_offline():
     global webhook
     await webhook.listen_stream_offline(
-        regs.zhenya_broadcaster_id,
+        regs.ezhov_broadcaster_id,
         callback=post_stream_offline_notification)
 
 
