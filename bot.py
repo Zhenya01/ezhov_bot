@@ -187,6 +187,7 @@ async def reformat_name(name:str):
 
 
 async def kick_from_group(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print('KICK_FROM_GROUP')
     if update.effective_chat in [regs.zdarovezhov_group_id, regs.zhenya_group_id]:
         if update.effective_user.id not in regs.group_list:
             message_id = update.message.reply_photo(open('uhodi.png', 'rb'), 'Этот чат не чат, тут Eжов за сообщениями в группе следит').message_id
