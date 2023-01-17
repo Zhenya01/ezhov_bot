@@ -10,6 +10,7 @@ import regs
 import twitchAPI
 from twitchAPI import EventSub, Twitch
 from regs import logger
+global twitch
 
 
 def get_user_id_by_login(login):
@@ -38,13 +39,13 @@ def get_user_login_by_id(user_id):
         return {'status_code': req.status_code, 'data': None}
 
 
-def setup_subscribe_webhook():
+async def setup_subscribe_webhook(twitch):
     subscribe_webhook = EventSub(regs.twith_callback_url,
                                  regs.twitch_client_id,
                                  5555,
                                  twitch)
     subscribe_webhook.wait_for_subscription_confirm_timeout = 15
-    subscribe_webhook.unsubscribe_all()
+    await subscribe_webhook.unsubscribe_all()
     subscribe_webhook.start()
     return subscribe_webhook
 
@@ -54,8 +55,6 @@ async def setup_twitch():
     return twitch_object
 print('registering twitch instance')
 
-twitch = asyncio.run(setup_twitch())
-print('setting up webhook')
-webhook = setup_subscribe_webhook()
+
 # print(f'webhook url - {webhook.callback_url}')
 
