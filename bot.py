@@ -245,32 +245,32 @@ vk.cc/cjveXZ'''
 #         super().__init__(application=application, workers=None)
 
 
-async def subscribe_stream_online(_):
+async def subscribe_stream_online():
     print(webhook)
     await webhook.listen_stream_online(
         regs.zhenya_broadcaster_id,
         callback=post_stream_live_notification)
 
 
-async def subscribe_stream_offline(_):
+async def subscribe_stream_offline():
     global webhook
     await webhook.listen_stream_offline(
         regs.zhenya_broadcaster_id,
         callback=post_stream_offline_notification)
 
 
-async def send_reboot_message(_):
+async def send_reboot_message():
     await application.bot.send_message(93906905, 'Бот перезагружен')
 
 
 async def main(context):
-    tasks = [setup_twitch_objects(), subscribe_stream_online(),
-             subscribe_stream_offline(), send_reboot_message()]
-    # tasks = [send_reboot_message()]
-    return asyncio.gather(*tasks)
+    asyncio.run(setup_twitch_objects())
+    asyncio.run(subscribe_stream_online())
+    asyncio.run(subscribe_stream_offline())
+    asyncio.run(send_reboot_message())
 
 
-async def setup_twitch_objects(_):
+async def setup_twitch_objects():
     global twitch, webhook
     twitch = await twitchAPI_integration.setup_twitch()
     print('setting up webhook')
@@ -300,10 +300,7 @@ application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_TITLE,
 # application.add_handler(CommandHandler('post', post_hello_message))
 application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), echo))
 job_queue: JobQueue = application.job_queue
-application.job_queue.run_custom(setup_twitch_objects, job_kwargs={})
-application.job_queue.run_custom(subscribe_stream_online, job_kwargs={})
-application.job_queue.run_custom(subscribe_stream_offline, job_kwargs={})
-application.job_queue.run_custom(send_reboot_message, job_kwargs={})
+application.job_queue.run_custom(main, job_kwargs={})
 # async def main():
 #     await application.initialize()
 #     await application.start()
