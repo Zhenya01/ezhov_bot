@@ -191,7 +191,8 @@ async def kick_from_group(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_chat.id in [regs.zdarovezhov_group_id, regs.zhenya_group_id]:
         print('KICK_FROM_GROUP_START')
         if update.effective_user.id not in regs.group_list:
-            message_id = update.message.reply_photo(open('uhodi.png', 'rb'), 'Этот чат не чат, тут Eжов за сообщениями в группе следит').message_id
+            message = await update.message.reply_photo(open('uhodi.png', 'rb'), 'Этот чат не чат, тут Eжов за сообщениями в группе следит')
+            message_id = message.message_id
             # message_id = await update.message.reply_text('Этот чат не чат, тут ежов за сообщениями в группе следит').message_id
             context.application.job_queue.run_once(kick_after_wait(update, context, message_id), 15)
 
