@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 import os
+import pprint
 import sys
 import traceback
 import random
@@ -26,6 +27,7 @@ twitch = None
 webhook = None
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    logger.debug('STARTING')
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Привет. Я Жижов. Добро пожаловать!")
     await context.bot.send_message(chat_id=update.effective_chat.id,
                              text="Кстааати, купи слона!")
@@ -280,9 +282,10 @@ async def subscribe_stream_offline():
 
 async def send_reboot_message():
     await application.bot.send_message(93906905, 'Бот перезагружен')
+    pprint.pprint(f'LOGGER_DICT - {logging.root.manager.loggerDict}')
 
 
-async def main(_):
+async def functions_to_run_at_the_beginning(_):
     await setup_twitch_objects()
     await subscribe_stream_online()
     await subscribe_stream_offline()
@@ -320,7 +323,7 @@ application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_TITLE,
 # application.add_handler(CommandHandler('post', post_hello_message))
 application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), echo))
 job_queue: JobQueue = application.job_queue
-application.job_queue.run_custom(main, job_kwargs={})
+application.job_queue.run_custom(functions_to_run_at_the_beginning, job_kwargs={})
 # async def main():
 #     await application.initialize()
 #     await application.start()
