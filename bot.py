@@ -285,9 +285,9 @@ async def send_reboot_message():
 
 
 async def main(context):
-    # await setup_twitch_objects()
-    # await subscribe_stream_online()
-    # await subscribe_stream_offline()
+    await setup_twitch_objects()
+    await subscribe_stream_online()
+    await subscribe_stream_offline()
     await send_reboot_message()
 
 
