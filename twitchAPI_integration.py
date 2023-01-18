@@ -50,7 +50,7 @@ async def setup_subscribe_webhook(twitch):
     return subscribe_webhook
 
 
-async def setup_twitch():
+def setup_twitch():
     twitch_object = Twitch(regs.twitch_client_id, regs.twitch_client_secret)
     print(f'TWITCH_OBJECT - {twitch_object}')
     return twitch_object

@@ -181,8 +181,6 @@ async def delete_muted_message(context: ContextTypes.DEFAULT_TYPE):
     await context.bot.delete_message(chat_id, message_id)
 
 
-
-
 def reformat_name(name:str):
     replacement_dict = {'_': '\_', '*': '\*', '[': '\[', ']': '\]', '(': '\(',
                     ')': '\)', '~': '\~', '`': '\`', '>': '\>', '#': '\#',
@@ -284,7 +282,7 @@ async def send_reboot_message():
     await application.bot.send_message(93906905, 'Бот перезагружен')
 
 
-async def main(context):
+async def main(_):
     await setup_twitch_objects()
     await subscribe_stream_online()
     await subscribe_stream_offline()
@@ -293,7 +291,7 @@ async def main(context):
 
 async def setup_twitch_objects():
     global twitch, webhook
-    twitch = await twitchAPI_integration.setup_twitch()
+    twitch = twitchAPI_integration.setup_twitch()
     await twitch.authenticate_app([])
     print('setting up webhook')
     webhook = await twitchAPI_integration.setup_subscribe_webhook(twitch)
