@@ -24,7 +24,7 @@ from queue import Queue
 
 import twitch_module
 import chat_management_module
-from regs import logger
+from regs import logger, application
 
 
 
@@ -86,11 +86,7 @@ async def functions_to_run_at_the_beginning(_):
     await send_reboot_message()
 
 
-defaults=Defaults(tzinfo=pytz.timezone('Europe/Moscow'))
-persistence = PicklePersistence(filepath=f'{os.path.abspath(os.path.dirname(__file__))}/bot_persistence')
-token=regs.bot_token_main
 
-application = ApplicationBuilder().token(token).persistence(persistence).defaults(defaults).build()
 print('Бот перезагружен')
 application.add_handler(CommandHandler('start', start))
 application.add_handler(CommandHandler('add', twitch_module.add_phrase))

@@ -3,8 +3,7 @@ import random
 from telethon import TelegramClient, functions
 
 import regs
-from bot import application
-from regs import logger
+from regs import logger, application
 
 
 async def post_stream_live_notification(data):

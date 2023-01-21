@@ -8,8 +8,7 @@ from telethon import TelegramClient, functions
 import regs
 import twitchAPI_integration
 import zhenya_test
-from bot import application
-from regs import logger
+from regs import logger, application
 
 twitch: twitchAPI.twitch = None
 webhook: twitchAPI.eventsub = None
