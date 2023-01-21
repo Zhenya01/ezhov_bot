@@ -80,6 +80,7 @@ async def rename_channel(live: bool):
 
 
 async def delete_channel_rename_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    logger.debug('Removing rename message')
     await update.effective_message.delete()
 
 

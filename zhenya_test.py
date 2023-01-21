@@ -20,9 +20,9 @@ async def post_stream_live_notification(data):
             del application.bot_data['phrases_list'][0]
         notification_text = f'{emoji} {phrase}'
         notification_text += '\ntwitch.tv/zdarovezhov'
-        await application.bot.send_message(regs.zdarovezhov_channel_id, notification_text)
+        await application.bot.send_message(regs.zhenya_channel_id, notification_text)
     else:
-        logger.info('Loudness is set to "silent". Setting loudness to "loud"')
+        logger.info('Loudness was set to "silent". Setting loudness to "loud"')
         application.bot_data['silent'] = False
     await rename_channel(live=True)
 
