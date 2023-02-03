@@ -6,7 +6,6 @@ from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
 import regs
-from regs import application
 from helpers_module import reformat_name
 
 

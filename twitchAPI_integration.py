@@ -9,7 +9,7 @@ import requests
 import regs
 import twitchAPI
 from twitchAPI import EventSub, Twitch
-from regs import logger
+from helpers_module import logger
 global twitch
 
 

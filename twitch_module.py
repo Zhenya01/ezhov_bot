@@ -8,7 +8,7 @@ from telethon import TelegramClient, functions
 import regs
 import twitchAPI_integration
 import zhenya_test
-from regs import logger, application
+from helpers_module import logger, application
 
 twitch: twitchAPI.twitch = None
 webhook: twitchAPI.eventsub = None
@@ -79,9 +79,21 @@ async def rename_channel(live: bool):
         pass
 
 
-async def delete_channel_rename_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    logger.debug('Removing rename message')
-    await update.effective_message.delete()
+async def schedule_remove_rename_message(update: Update,
+                                         context: ContextTypes.DEFAULT_TYPE):
+    logger.debug('Добавляем таск на удаление сообщения в job_queue')
+    context.application.job_queue.run_once(callback=remove_message,
+                                           when=5,
+                                           data={
+                                               'chat_id': update.effective_chat.id,
+                                               'message_id': update.effective_message.message_id})
+
+
+async def remove_message(context: ContextTypes.DEFAULT_TYPE):
+    logger.debug('Удаляем сообщение о переименовании канала')
+    chat_id = context.job.data['chat_id']
+    message_id = context.job.data['message_id']
+    await context.bot.delete_message(chat_id, message_id)
 
 
 async def silent(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -142,3 +154,4 @@ async def remove_phrase(update: Update, context: ContextTypes.DEFAULT_TYPE):
         index = int(index) - 1
         del context.bot_data['phrases_list'][index]
         await update.message.reply_text('Удалил')
+

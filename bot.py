@@ -1,33 +1,17 @@
-import asyncio
-import datetime
-import os
 import pprint
-import sys
-import traceback
-import random
-
-import pytz
-import twitchAPI
-from telethon.errors import ChatNotModifiedError
-from telethon.sync import TelegramClient
-from telethon import functions
+from telegram.ext import CommandHandler, MessageHandler, filters, JobQueue, \
+    ContextTypes, ConversationHandler, CallbackQueryHandler
+from telegram import Update
+import logging
 
 import regs
-from telegram.ext import CommandHandler, MessageHandler, filters, \
-    PicklePersistence, JobQueue, Defaults, ContextTypes, ApplicationBuilder
-from telegram.constants import ParseMode
-from telegram import Update, ChatPermissions
-import twitchAPI_integration
-import logging
-import asyncio
-from queue import Queue
-
+import tiktok_module
 import twitch_module
 import chat_management_module
-from regs import logger, application
-
-
-
+from helpers_module import logger, application
+from helpers_module import WAITING_FOR_TIKTOK, WAITING_FOR_TIKTOK_DESISION
+from helpers_module import APPROVE_TIKTOK, REJECT_TIKTOK, STOP_TIKTOKS_APPROVAL
+from helpers_module import SEND_TIKTOK_DEEPLINK
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -80,49 +64,79 @@ async def send_reboot_message():
 
 
 async def functions_to_run_at_the_beginning(_):
-    await twitch_module.setup_twitch_objects()
-    await twitch_module.subscribe_stream_online()
-    await twitch_module.subscribe_stream_offline()
+    # await twitch_module.setup_twitch_objects()
+    # await twitch_module.subscribe_stream_online()
+    # await twitch_module.subscribe_stream_offline()
     await send_reboot_message()
 
 
+conv_handler = ConversationHandler(
+        entry_points=[CommandHandler("send_tiktok", tiktok_module.waiting_for_ticktock, filters=filters.ChatType.PRIVATE),
+                      CommandHandler("start", tiktok_module.waiting_for_ticktock,
+                                     filters=filters.Regex(rf'{SEND_TIKTOK_DEEPLINK}')&filters.ChatType.PRIVATE),
+                      CommandHandler('start_approval', tiktok_module.show_tiktok_to_approve)],
+        states={
+            WAITING_FOR_TIKTOK:
+            [
+                CommandHandler('cancel', tiktok_module.cancel_waiting_for_tiktok),
+                MessageHandler(filters.Entity('url'), tiktok_module.got_tiktok_link),
+                MessageHandler(filters.VIDEO, tiktok_module.got_tiktok_file),
+                MessageHandler(filters.ALL, tiktok_module.got_wrong_answer),
+            ],
+            WAITING_FOR_TIKTOK_DESISION:
+            [
+                CallbackQueryHandler(tiktok_module.tiktok_approval_callback_handler,
+                                     pattern=rf'^.*({APPROVE_TIKTOK}_)|({REJECT_TIKTOK}_)|({STOP_TIKTOKS_APPROVAL}_)*.$')
+            ]
+
+
+        },
+        fallbacks=[],
+        name="main_conversation",
+        persistent=True,
+        allow_reentry=True
+    )
 
 print('Бот перезагружен')
+application.add_handler(conv_handler)
 application.add_handler(CommandHandler('start', start))
-application.add_handler(CommandHandler('add', twitch_module.add_phrase))
-application.add_handler(CommandHandler('add_first', twitch_module.add_phrase_to_start))
-application.add_handler(CommandHandler('show', twitch_module.show))
-application.add_handler(CommandHandler('remove', twitch_module.remove_phrase))
-application.add_handler(CommandHandler('silent', twitch_module.silent))
-application.add_handler(CommandHandler('loud', twitch_module.loud))
+application.add_handler(CommandHandler('start_tiktoks', tiktok_module.start_ticktock_evening,
+                                       filters=filters.Chat(chat_id=regs.twitch_commands_users_list)))
+application.add_handler(CommandHandler('add', twitch_module.add_phrase,
+                                       filters=filters.Chat(chat_id=regs.twitch_commands_users_list)))
+application.add_handler(CommandHandler('add_first', twitch_module.add_phrase_to_start,
+                                       filters=filters.Chat(chat_id=regs.twitch_commands_users_list)))
+application.add_handler(CommandHandler('show', twitch_module.show,
+                                       filters=filters.Chat(chat_id=regs.twitch_commands_users_list)))
+application.add_handler(CommandHandler('remove', twitch_module.remove_phrase,
+                                       filters=filters.Chat(chat_id=regs.twitch_commands_users_list)))
+application.add_handler(CommandHandler('silent', twitch_module.silent,
+                                       filters=filters.Chat(chat_id=regs.twitch_commands_users_list)))
+application.add_handler(CommandHandler('loud', twitch_module.loud,
+                                       filters=filters.Chat(chat_id=regs.twitch_commands_users_list)))
+
 application.add_handler(CommandHandler('mute', chat_management_module.mute, filters.REPLY))
 
 application.add_handler(CommandHandler('info', info))
+application.add_handler(CommandHandler('publish_tiktoks', tiktok_module.publish_ticktocks))
 application.add_handler(
     MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS,
                    chat_management_module.kick_from_group))
 application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_TITLE,
-                                       twitch_module.delete_channel_rename_message))
+                                       twitch_module.schedule_remove_rename_message))
+# application.add_handler(MessageHandler(filters.ATTACHMENT,
+#                                        tiktok_module.get_ticktock_file))
+# application.add_handler(CommandHandler('file', tiktok_module.get_ticktock_file))
 # application.add_handler(CommandHandler('post', post_hello_message))
 application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), echo))
 job_queue: JobQueue = application.job_queue
 application.job_queue.run_custom(functions_to_run_at_the_beginning, job_kwargs={})
-# async def main():
-#     await application.initialize()
-#     await application.start()
-#     await application.updater.start_polling()
-#     # Start other asyncio frameworks here
-#     await application.bot.send_message(93906905, 'Бот перезагружен')
-#     # Add some logic that keeps the event loop running until you want to shutdown
-#     # Stop the other asyncio frameworks here
-#     await application.updater.stop()
-#     await application.stop()
-#     await application.shutdown()
-application.run_polling(close_loop=False)
+application.run_polling()
 
 
-#TODO добавить логи
-#TODO тикток вечерок
+
+# TODO добавить логи
+# TODO тикток вечерок
 
 
 
