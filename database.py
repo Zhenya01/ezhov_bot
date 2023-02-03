@@ -39,10 +39,12 @@ def pick_user_latest_tiktok(user_id):
 
 def count_unapproved_tiktoks(user_id):
     command = '''
-    SELECT COUNT(tiktok_id)
+    SELECT COUNT(tiktok_id) AS count
     FROM ezhov_bot.tiktoks
-    WHERE sender_user_id = %s AND is_rejected = False and is_approved = False'''
-    cursor.execute(command, (user_id))
+    WHERE sender_user_id = '%s' AND is_rejected = False AND is_approved = False'''
+    cursor.execute(command, (user_id,))
+    count = cursor.fetchone()
+    return count
 
 def select_tiktok_to_approve():
     command = '''

@@ -53,47 +53,16 @@ async def waiting_for_ticktock(update: Update,
                                        'Сейчас нельзя отправлять тиктоки.'
                                        'Дождитесь объявления на канале')
         return ConversationHandler.END
-    logger.debug(
-        f'{update.effective_user.name}({update.effective_user.id}) Проверяем последний отправленный тикток')
-    latest_tiktok = database.pick_user_latest_tiktok(update.effective_user.id)
-    if latest_tiktok is None:
+    unapproved_tiktoks_count = database.count_unapproved_tiktoks(update.effective_user.id)['count']
+    if unapproved_tiktoks_count <= 9:
         logger.debug(
-            f'{update.effective_user.name}({update.effective_user.id}) до этого не отправлял тиктоки. Запрашиваем ссылку или файл')
+            f'{update.effective_user.name}({update.effective_user.id}) Запрашиваем ссылку или файл')
         await context.bot.send_message(update.effective_chat.id,
                                        'Отправьте сюда тикток файлом или ссылкой')
         return WAITING_FOR_TIKTOK
-    logger.debug(
-        f'{update.effective_user.name}({update.effective_user.id}) Последний тикток - {latest_tiktok}')
-    current_datetime = datetime.datetime.now(
-        tz=pytz.timezone('Europe/Moscow')).replace(tzinfo=None)
-    latest_tiktok_approved = latest_tiktok['is_approved']
-    last_sent_datetime = latest_tiktok['time_sent']
-    time_from_latest_tiktok = current_datetime - last_sent_datetime
-    tiktok_interval_passed = time_from_latest_tiktok >= regs.tiktok_send_interval
-    if not tiktok_interval_passed:
-        logger.debug(
-            f'{update.effective_user.name}({update.effective_user.id}) Нужное время ({regs.tiktok_send_interval}) еще не прошло. Прошло - {time_from_latest_tiktok} Проверяем подтверждён ли последний тикток')
-        if not latest_tiktok_approved:
-            logger.debug(
-                f'{update.effective_user.name}({update.effective_user.id}) Последний тикток не подтверждён. Отменяем')
-            waiting_time_left = regs.tiktok_send_interval - time_from_latest_tiktok
-            delta = helpers_module.seconds_to_delta(
-                waiting_time_left.total_seconds())
-            waiting_time_string = f'{delta["days"] if delta["days"] != 0 else ""}{" дн." if delta["days"] != 0 else ""} {delta["hours"]:02}:{delta["minutes"]:02}:{delta["seconds"]:02}'
-            await context.bot.send_message(update.effective_chat.id,
-                                           f'Время еще не пришло. Подождите, пока Ежов подтвердит ваш предыдущий тикток или отправьте снова через {waiting_time_string}')
-            return ConversationHandler.END
-        else:
-            logger.debug(
-                f'{update.effective_user.name}({update.effective_user.id}) Последний тикток подтверждён. Запрашиваем ссылку или файл')
-            await context.bot.send_message(update.effective_chat.id,
-                                           'Отправьте сюда тикток файлом или ссылкой')
-            return WAITING_FOR_TIKTOK
-    logger.debug(
-        f'{update.effective_user.name}({update.effective_user.id}) Прошло нужное время: {time_from_latest_tiktok} (Больше, чем {regs.tiktok_send_interval}). Запрашиваем ссылку или файл')
-    await context.bot.send_message(update.effective_chat.id,
-                                   'Отправьте сюда тикток файлом или ссылкой')
-    return WAITING_FOR_TIKTOK
+    else:
+        await context.bot.send_message(update.effective_chat.id,
+                                       'Вы уже отправили 10 видео, но не один пока не подтвердили. Пока больше нельзя отправлять тиктоки.')
 
 
 async def download_youtube_short(update: Update,
@@ -130,7 +99,7 @@ async def download_tiktok_video(update: Update,
     api_url = "https://aiov-download-youtube-videos.p.rapidapi.com/GetVideoDetails"
     querystring = {"URL": tiktok_url}
     headers = {
-        "X-RapidAPI-Key": "a8953cec83mshaa87f5d6fda6d1cp1c01bbjsn094881cf51b9",
+        "X-RapidAPI-Key": regs.x_rapid_api_key,
         "X-RapidAPI-Host": "aiov-download-youtube-videos.p.rapidapi.com"
     }
     response = requests.request("GET", api_url, headers=headers,
@@ -196,8 +165,10 @@ async def got_tiktok(update: Update,
     is_approved = update.effective_user.id == regs.ezhov_user_id or update.effective_user.id == regs.zhenya_user_id
     database.add_tiktok(message_id, update.effective_user.id, file_id,
                         is_approved)
-    message_text = 'Тикток отправлен на одобрение Ежову' if not is_approved \
-        else 'Тикток добавлен в очередь на отправление'
+    message_text = 'Тикток отправлен на одобрение Ежову.' if not is_approved \
+        else 'Тикток добавлен в очередь на отправление.'
+    message_text += ' Чтобы отправить ещё один, нажмите /send_tiktok или перейдите по кнопке в посте на канале'
+
     await context.bot.send_message(update.effective_chat.id, message_text)
     return ConversationHandler.END
 
