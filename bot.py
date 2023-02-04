@@ -64,9 +64,9 @@ async def send_reboot_message():
 
 
 async def functions_to_run_at_the_beginning(_):
-    # await twitch_module.setup_twitch_objects()
-    # await twitch_module.subscribe_stream_online()
-    # await twitch_module.subscribe_stream_offline()
+    await twitch_module.setup_twitch_objects()
+    await twitch_module.subscribe_stream_online()
+    await twitch_module.subscribe_stream_offline()
     await send_reboot_message()
 
 
