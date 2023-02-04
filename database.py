@@ -3,12 +3,12 @@ from pprint import pprint
 from regs import cursor
 
 
-def add_tiktok(message_id, sender_id, file_id, is_approved):
+def add_tiktok(message_id, sender_id, file_id, is_approved, in_chat_message_id):
     command = '''
     INSERT INTO ezhov_bot.tiktoks 
-    (message_id, sender_user_id, file_id, is_approved) 
-    VALUES (%s, %s, %s, %s);'''
-    cursor.execute(command, (message_id, sender_id, file_id, is_approved))
+    (message_id, sender_user_id, file_id, is_approved, in_chat_message_id) 
+    VALUES (%s, %s, %s, %s, %s);'''
+    cursor.execute(command, (message_id, sender_id, file_id, is_approved, in_chat_message_id))
 
 
 def find_tiktok(tiktol_id):

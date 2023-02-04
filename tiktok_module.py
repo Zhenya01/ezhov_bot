@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 import datetime
+import os
 import re
 import shutil
 
 import pytz
 import requests
+import telegram.error
 import urllib3
 from pytube import YouTube
 from pytube import exceptions as pytube_exceptions
@@ -160,11 +162,12 @@ async def got_tiktok(update: Update,
         message = await context.bot.send_video(regs.ezhov_files_group_id,
                                                video=file_path,
                                                caption=update.message.text)
+        os.remove(file_path)
     file_id = message.video.file_id
-    message_id = message.message_id
+    forwarded_message_id = message.message_id
     is_approved = update.effective_user.id == regs.ezhov_user_id or update.effective_user.id == regs.zhenya_user_id
-    database.add_tiktok(message_id, update.effective_user.id, file_id,
-                        is_approved)
+    database.add_tiktok(forwarded_message_id, update.effective_user.id, file_id,
+                        is_approved, update.effective_message.id)
     message_text = 'Тикток отправлен на одобрение Ежову.' if not is_approved \
         else 'Тикток добавлен в очередь на отправление.'
     message_text += ' Чтобы отправить ещё один, нажмите /send_tiktok или перейдите по кнопке в посте на канале'
@@ -220,7 +223,7 @@ async def show_tiktok_to_approve(update: Update,
                                        InlineKeyboardButton("👍", callback_data=f'{APPROVE_TIKTOK}_{tiktok["tiktok_id"]}'),
                                        InlineKeyboardButton("👎", callback_data=f'{REJECT_TIKTOK}_{tiktok["tiktok_id"]}')
                                    ],
-
+                                   [InlineKeyboardButton("Забанить человека", callback_data=f'{STOP_TIKTOKS_APPROVAL}_|')],
                                    [InlineKeyboardButton("Закончить отбор", callback_data=f'{STOP_TIKTOKS_APPROVAL}_|')]
                                ]
                            )
@@ -231,26 +234,54 @@ async def show_tiktok_to_approve(update: Update,
 async def tiktok_approval_callback_handler(update: Update,
                                            context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
-    message_id = update.effective_message.message_id
+    panel_message_id = update.effective_message.message_id
     data = update.callback_query.data.split('_')
     action = data[0]
     print(f'action - {action}')
     if action == str(APPROVE_TIKTOK) or action == str(REJECT_TIKTOK):
         tiktok_id = int(data[1])
-        print(tiktok_id)
-        if action == str(APPROVE_TIKTOK):
-            database.approve_tiktok(tiktok_id)
+        tiktok = database.find_tiktok(tiktok_id)
+        if tiktok is None:
+            await context.bot.send_message(chat_id, 'Что-то пошло не так с предыдущим тиктоком. Скипаем')
         else:
-            database.reject_tiktok(tiktok_id)
+            sender_user_id = tiktok['sender_user_id']
+            is_approved = action == str(APPROVE_TIKTOK)
+            # try:
+            #     await context.bot.forward_message(regs.ezhov_technical_group_id,
+            #                                       sender_user_id,
+            #                                       tiktok['in_chat_message_id'])
+            #     sender_message_id = tiktok['in_chat_message_id']
+            # except:
+            try:
+                message = context.bot.get_message(chat_id=sender_user_id,
+                                                  message_id=tiktok['in_chat_message_id'])
+                sender_message_id = tiktok['in_chat_message_id']
+            except Exception as e:
+                logger.error(e)
+                print("Message not found or has been deleted")
+                sender_message = await context.bot.forward_message(sender_user_id,
+                                                  regs.ezhov_files_group_id,
+                                                  tiktok['message_id'])
+                sender_message_id = sender_message.message_id
+            if is_approved:
+                database.approve_tiktok(tiktok_id)
+                await context.bot.send_message(sender_user_id,
+                                               'Поздравляем. Стримлер одобрил твой тикток. Можно отправить ещё через /send_tiktok',
+                                               reply_to_message_id=sender_message_id)
+            else:
+                database.reject_tiktok(tiktok_id)
+                await context.bot.send_message(sender_user_id,
+                                               'Cтримеру не понравился твой тикток. Можно отправить ещё через /send_tiktok',
+                                               reply_to_message_id=sender_message_id)
         next_tiktok = database.select_tiktok_to_approve()
         if next_tiktok is not None:
             await next_tiktok_to_approve(update, context, next_tiktok)
         else:
-            await context.bot.delete_message(chat_id, message_id)
+            await context.bot.delete_message(chat_id, panel_message_id)
             await context.bot.send_message(chat_id, 'Тиктоки на одобрение закончились')
             return ConversationHandler.END
     elif action == str(STOP_TIKTOKS_APPROVAL):
-        await context.bot.delete_message(chat_id, message_id)
+        await context.bot.delete_message(chat_id, panel_message_id)
         await context.bot.send_message(chat_id,
                                        'Хорошо. Отбор тиктоков завершён')
         return ConversationHandler.END
