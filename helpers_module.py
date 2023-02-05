@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 import traceback
+import platform
 
 import pytz
 from telegram.ext import Defaults, PicklePersistence, ApplicationBuilder
@@ -76,7 +77,8 @@ logging.getLogger('mtprotosender').setLevel(logging.INFO)
 
 defaults=Defaults(tzinfo=pytz.timezone('Europe/Moscow'))
 persistence = PicklePersistence(filepath=f'{os.path.abspath(os.path.dirname(__file__))}/bot_persistence')
-token = regs.bot_token_zhenya
+current_os = platform.system()
+token = regs.bot_token_zhenya if current_os == 'Windows' else regs.bot_token_main
 
 application = ApplicationBuilder().token(token).persistence(persistence).defaults(defaults).build()
 

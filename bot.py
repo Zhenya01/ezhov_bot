@@ -4,6 +4,7 @@ from telegram.ext import CommandHandler, MessageHandler, filters, JobQueue, \
 from telegram import Update
 import logging
 
+import platform
 import regs
 import tiktok_module
 import twitch_module
@@ -98,6 +99,9 @@ conv_handler = ConversationHandler(
     )
 
 print('Бот перезагружен')
+os = platform.system()
+print(f'os - {os}')
+
 application.add_handler(conv_handler)
 application.add_handler(CommandHandler('start', start))
 application.add_handler(CommandHandler('start_tiktoks', tiktok_module.start_ticktock_evening,
@@ -130,7 +134,8 @@ application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_TITLE,
 # application.add_handler(CommandHandler('post', post_hello_message))
 application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), echo))
 job_queue: JobQueue = application.job_queue
-application.job_queue.run_custom(functions_to_run_at_the_beginning, job_kwargs={})
+if os!= 'Windows':
+    application.job_queue.run_custom(functions_to_run_at_the_beginning, job_kwargs={})
 application.run_polling()
 
 
