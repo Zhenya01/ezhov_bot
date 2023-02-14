@@ -81,7 +81,7 @@ async def waiting_for_ticktock(update: Update,
         logger.debug(
             f'{update.effective_user.name}({update.effective_user.id}) Запрашиваем ссылку или файл')
         await context.bot.send_message(update.effective_chat.id,
-                                       'Отправьте сюда тикток файлом или ссылку на youtube shorts. Отправлять можно только по 1 видео. Если отправите много - я приму только первое')
+                                       'Отправьте сюда видео тиктока или ссылку на youtube shorts. Отправлять можно только по 1 видео. Если отправите много - я приму только первое')
         return WAITING_FOR_TIKTOK
 
 
@@ -131,7 +131,7 @@ async def download_tiktok_video(update: Update,
                                 params=querystring)
     if response.status_code != 200:
         await context.bot.send_message(update.effective_chat.id,
-                                       'Что-то не так с серверами. Лучше отправте видео файлом')
+                                       'Что-то не так с серверами. Лучше отправьте видео файлом')
         return None
     response = response.json()
     if response['extractor'] != 'TikTok':
@@ -191,7 +191,7 @@ async def got_tiktok(update: Update,
         os.remove(file_path)
     file_id = message.video.file_id
     forwarded_message_id = message.message_id
-    is_approved = update.effective_user.id == regs.ezhov_user_id or update.effective_user.id == regs.zhenya_user_id
+    is_approved = update.effective_user.id == regs.ezhov_user_id
     database.add_tiktok(forwarded_message_id, update.effective_user.id,
                         file_id,
                         is_approved, update.effective_message.id)
@@ -238,7 +238,8 @@ async def publish_ticktocks(update: Update,
             for ticktok in ticktoks:
                 user = await database.get_user_info(ticktok["sender_user_id"])
                 media.append(InputMediaVideo(ticktok['file_id']))
-                caption = caption + f'{ticktoks.index(ticktok) + 1}й тикток прислал(а) {user["full_name"]}\n'
+                if update.effective_user.id != regs.ezhov_user_id:
+                    caption = caption + f'{ticktoks.index(ticktok) + 1}й тикток прислал(а) {user["full_name"]}\n'
 
             await context.bot.send_media_group(regs.tiktoks_channel_id,
                                                media=media, caption=caption)
