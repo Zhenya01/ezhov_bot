@@ -5,16 +5,19 @@ from telegram import Update
 import logging
 
 import platform
+
+import database
 import regs
 import tiktok_module
 import twitch_module
 import chat_management_module
-from helpers_module import logger, application
+from helpers_module import logger, application, update_user_info
 from helpers_module import WAITING_FOR_TIKTOK, WAITING_FOR_TIKTOK_DESISION
-from helpers_module import APPROVE_TIKTOK, REJECT_TIKTOK, STOP_TIKTOKS_APPROVAL
+from helpers_module import TIKTOK_APPROVAL_STATES
 from helpers_module import SEND_TIKTOK_DEEPLINK
 
 
+@update_user_info
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger.debug('STARTING')
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Привет. Я Жижов. Добро пожаловать!")
@@ -24,6 +27,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.bot_data['phrases_list'] = []
 
 
+@update_user_info
 async def post_hello_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id == 93906905:
         await context.bot.send_message(93906905, 'Отправил')
@@ -31,11 +35,13 @@ async def post_hello_message(update: Update, context: ContextTypes.DEFAULT_TYPE)
         await context.bot.send_message(id=-1001684055869, text=text)
 
 
+@update_user_info
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_chat.type == 'private':
         await context.bot.send_message(chat_id=update.effective_chat.id, text=f'Все говорят: "{update.message.text}", а ты возьми, да и купи слона!')
 
 
+@update_user_info
 async def info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = \
 f'''Карочи это вот ссылочки на всё что связано с моим ТВОРЧЕСТВОМ.
@@ -45,7 +51,9 @@ f'''Карочи это вот ссылочки на всё что связан�
 twitch.tv/zdarovezhov
 Общаемся все в ТГ: 
 t.me/zdarovezhov
-
+t.me/zdarovezhov2
+Дискордик:
+https://discord.gg/QGsCrV2F
 
 
 Нарезки со стримов в YouTube: 
@@ -59,6 +67,13 @@ vk.cc/cjveXZ'''
     await update.message.reply_text(text)
 
 
+@update_user_info
+async def bugs_and_improvements(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    text = 'Ссылка на группу с багами и предложениями: https://t.me/+7dycu9-YYJUxMGMy'
+    await update.message.reply_text(text)
+
+
+@update_user_info
 async def send_reboot_message():
     await application.bot.send_message(93906905, 'Бот перезагружен')
     pprint.pprint(f'LOGGER_DICT - {logging.root.manager.loggerDict}')
@@ -87,7 +102,7 @@ conv_handler = ConversationHandler(
             WAITING_FOR_TIKTOK_DESISION:
             [
                 CallbackQueryHandler(tiktok_module.tiktok_approval_callback_handler,
-                                     pattern=rf'^.*({APPROVE_TIKTOK}_)|({REJECT_TIKTOK}_)|({STOP_TIKTOKS_APPROVAL}_)*.$')
+                                     pattern=rf'^{TIKTOK_APPROVAL_STATES}')
             ]
 
 
@@ -97,6 +112,11 @@ conv_handler = ConversationHandler(
         persistent=True,
         allow_reentry=True
     )
+
+
+
+
+
 
 print('Бот перезагружен')
 os = platform.system()
@@ -118,11 +138,13 @@ application.add_handler(CommandHandler('silent', twitch_module.silent,
                                        filters=filters.Chat(chat_id=regs.twitch_commands_users_list)))
 application.add_handler(CommandHandler('loud', twitch_module.loud,
                                        filters=filters.Chat(chat_id=regs.twitch_commands_users_list)))
+application.add_handler(CommandHandler('bugs', bugs_and_improvements))
+application.add_handler(CommandHandler('improvements', bugs_and_improvements))
 
 application.add_handler(CommandHandler('mute', chat_management_module.mute, filters.REPLY))
 
 application.add_handler(CommandHandler('info', info))
-application.add_handler(CommandHandler('publish_tiktoks', tiktok_module.publish_ticktocks))
+application.add_handler(CommandHandler('publish', tiktok_module.publish_ticktocks))
 application.add_handler(
     MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS,
                    chat_management_module.kick_from_group))

@@ -4,6 +4,7 @@ import twitchAPI
 from telegram import Update
 from telegram.ext import ContextTypes
 from telethon import TelegramClient, functions
+from helpers_module import update_user_info
 
 import regs
 import twitchAPI_integration
@@ -96,24 +97,28 @@ async def remove_message(context: ContextTypes.DEFAULT_TYPE):
     await context.bot.delete_message(chat_id, message_id)
 
 
+@update_user_info
 async def silent(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id in regs.admins_list:
         context.bot_data['silent'] = True
         await update.message.reply_text('Следующий стрим пройдёт без уведомления')
 
 
+@update_user_info
 async def loud(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id in regs.admins_list:
         context.bot_data['silent'] = False
         await update.message.reply_text('Следующий стрим пройдёт c уведомлением')
 
 
+@update_user_info
 async def loudness(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f'Следующий стрим пройдёт'
                                     + f' c уведомлением' if context.bot_data['silent'] == False
                                     else ' без уведомления')
 
 
+@update_user_info
 async def add_phrase(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if len(context.args) == 0:
         await update.message.reply_text(
@@ -124,6 +129,7 @@ async def add_phrase(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Добавил")
 
 
+@update_user_info
 async def add_phrase_to_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if len(context.args) == 0:
         await update.message.reply_text(
@@ -134,6 +140,7 @@ async def add_phrase_to_start(update: Update, context: ContextTypes.DEFAULT_TYPE
         await update.message.reply_text("Добавил")
 
 
+@update_user_info
 async def show(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.bot_data['phrases_list'] != []:
         for phrase in context.bot_data['phrases_list']:
@@ -142,6 +149,7 @@ async def show(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text('В списке нет ни одной фразы используйте /add фраза')
 
 
+@update_user_info
 async def remove_phrase(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if len(context.args) == 0:
         await update.message.reply_text('Укажите индекс фразы после /remove (Например: /remove 2)')

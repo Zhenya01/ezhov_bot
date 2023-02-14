@@ -5,9 +5,12 @@ import traceback
 import platform
 
 import pytz
+import telegram.ext
 from telegram.ext import Defaults, PicklePersistence, ApplicationBuilder
 
+import database
 import regs
+from regs import cursor
 
 # Deeplink_types
 SEND_TIKTOK_DEEPLINK, ANONIMOUS_QUESTIONS_DEEPLINK = \
@@ -16,7 +19,8 @@ SEND_TIKTOK_DEEPLINK, ANONIMOUS_QUESTIONS_DEEPLINK = \
 WAITING_FOR_TIKTOK, WAITING_FOR_TIKTOK_DESISION = \
     (int(f'20{number}') for number in range(1, 2 + 1))
 # Tiktok approval query states
-APPROVE_TIKTOK, REJECT_TIKTOK, SKIP_TIKTOK, STOP_TIKTOKS_APPROVAL = \
+TIKTOK_APPROVAL_STATES = '3'
+APPROVE_TIKTOK, REJECT_TIKTOK, BAN_TIKTOK_SENDER, STOP_TIKTOKS_APPROVAL = \
     (int(f'30{number}') for number in range(1, 4 + 1))
 
 
@@ -43,8 +47,72 @@ sys.excepthook = logging_uncaught_exceptions
 logger = logging.getLogger(__name__)
 
 
+# Users
+async def get_user_info(user_id):
+    user_id = str(user_id)
+    command = '''
+    SELECT * FROM ezhov_bot.users
+    WHERE user_id = %s
+    '''
+    print(command)
+    cursor.execute(command, (user_id,))
+    user_info = cursor.fetchone()
+    print(user_info)
+    return user_info
 
 
+async def add_user(user_id, full_name):
+    user_id = str(user_id)
+    command = '''
+    INSERT INTO ezhov_bot.users (user_id, full_name)
+    VALUES (%s, %s)'''
+    cursor.execute(command, (user_id, full_name,))
+
+
+async def update_user(user_id, nickname='', place_of_living='', bio='',
+                     is_moderator='', is_admin='', can_send_tiktok='',
+                     tiktoks_banned_until='', full_name='', title=''):
+    user_id = str(user_id)
+    where_clause = f"user_id = %s"
+    fields_dict = {'nickname': nickname,
+                   'place_of_living': place_of_living,
+                   'bio': bio,
+                   'is_moderator': is_moderator,
+                   'is_admin': is_admin,
+                   'can_send_tiktok': can_send_tiktok,
+                   'tiktoks_banned_until': tiktoks_banned_until,
+                   'full_name': full_name,
+                   'title': title}
+    set_string = ''
+    fields_tuple = ()
+    for key in fields_dict:
+        if fields_dict[key] != '':
+            set_string = set_string + f"{key} = %s, "
+            fields_tuple = fields_tuple + (fields_dict[key],)
+    fields_tuple = fields_tuple + (user_id,)
+    set_string = set_string[0:-2]
+    print(set_string)
+    command = f'UPDATE ezhov_bot.users SET {set_string} WHERE {where_clause}'
+    print(command)
+    print(fields_tuple)
+    cursor.execute(command, fields_tuple)
+    cursor.execute('commit')
+
+
+def update_user_info(function):
+    async def wrapper(*args, **kwargs):
+        update: telegram.Update = args[0]
+        context: telegram.ext.ContextTypes.DEFAULT_TYPE = args[1]
+        user_id = update.effective_user.id
+        user_info = await get_user_info(user_id)
+        if user_info is None:
+            await add_user(user_id, update.effective_user.full_name)
+        else:
+            if user_info['full_name'] != update.effective_user.full_name:
+                await update_user(user_id, full_name=update.effective_user.full_name)
+            context.user_data['user_info'] = user_info
+        return await function(*args, **kwargs)
+    return wrapper
 
 
 class FilterRepeatingBot(logging.Filter):
