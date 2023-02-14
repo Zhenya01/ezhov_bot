@@ -39,7 +39,7 @@ async def start_ticktock_evening(update: Update,
 Начинаем набор видео на Тик-Ток вечерок! 
 Просто скиньте видео боту, нажав кнопку.
 Бот принимает видео СКАЧАННЫЕ с тик-тока или ссылки на ютуб-шортс! Ссылки на тик-ток пока не работают)'''
-    await context.bot.send_message(regs.zhenya_channel_id, text,
+    await context.bot.send_message(regs.tiktoks_channel_id, text,
                                    reply_markup=InlineKeyboardMarkup(
                                        [[InlineKeyboardButton(
                                            "Отправить тикток", url=url)]]))
@@ -50,9 +50,7 @@ async def waiting_for_ticktock(update: Update,
                                context: ContextTypes.DEFAULT_TYPE):
     logger.debug(
         f'{update.effective_user.name}({update.effective_user.id}) перешел по ссылке или по команде /send_tiktok')
-    if not ('ticktock_evening_active' in context.bot_data[
-        regs.ezhov_broadcaster_id] and
-            context.bot_data[regs.ezhov_broadcaster_id][
+    if not ('ticktock_evening_active' in context.bot_data[regs.ezhov_broadcaster_id] and context.bot_data[regs.ezhov_broadcaster_id][
                 'ticktock_evening_active'] is True):
         logger.debug(
             f'{update.effective_user.name}({update.effective_user.id}). Тикток вечерок не запущен. Отменяем')
