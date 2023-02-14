@@ -197,7 +197,7 @@ async def got_tiktok(update: Update,
                         is_approved, update.effective_message.id)
     message_text = 'Тикток отправлен на одобрение Ежову' if not is_approved \
         else 'Тикток добавлен в очередь на отправление'
-    unapproved_count = database.count_unapproved_tiktoks(update.effective_user.id)
+    unapproved_count = database.count_unapproved_tiktoks(update.effective_user.id)['count']
     if unapproved_count <= 9:
         message_text += ' Чтобы отправить ещё один, нажмите /send_tiktok'
     else:
