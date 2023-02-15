@@ -195,15 +195,15 @@ async def got_tiktok(update: Update,
     database.add_tiktok(forwarded_message_id, update.effective_user.id,
                         file_id,
                         is_approved, update.effective_message.id)
-    message_text = 'Тикток отправлен на одобрение Ежову' if not is_approved \
+    message_text = 'Я посмотрю, а пока' if not is_approved \
         else 'Тикток добавлен в очередь на отправление'
     unapproved_count = database.count_unapproved_tiktoks(update.effective_user.id)['count']
     if unapproved_count <= 9:
-        message_text += ' Чтобы отправить ещё один, нажмите /send_tiktok'
+        message_text += ' можешь отправить еще) /send_tiktok'
     else:
-        message_text += ' У вас есть 9 неодобренных стримером тиктоков. Подождите одобрения или отклонения хотя бы одного, чтобы можно было продолжать отправлять тиктоки'
+        message_text += ' отдохни) Ты отправил(а) слишком много. Я напишу, когда можно будет отправить ещё'
     if unapproved_count == 5:
-        context.bot.send_message(regs.ezhov_user_id, f'Пользователь {update.effective_user.full_name} уже имеет 5 неодобренных тиктоков. Скоро он не сможет отправлять тиктоки. Пора бы отфильтровать')
+        context.bot.send_message(regs.ezhov_user_id, f'Пользователь {update.effective_user.full_name} уже имеет 5 неодобренных тиктоков. Скоро он не сможет отправлять тиктоки. Пора бы отфильтровать :)')
     await context.bot.send_message(update.effective_chat.id, message_text)
     return ConversationHandler.END
 
@@ -233,13 +233,17 @@ async def publish_ticktocks(update: Update,
     if update.effective_user.id == regs.ezhov_user_id:
         media = []
         caption = 'Спасибо всем кто присылает видева!)\n'
+        names = []
         ticktoks = database.select_tiktoks_to_send()
         if ticktoks is not None:
             for ticktok in ticktoks:
                 user = await database.get_user_info(ticktok["sender_user_id"])
                 media.append(InputMediaVideo(ticktok['file_id']))
                 if update.effective_user.id != regs.ezhov_user_id:
-                    caption = caption + f'{ticktoks.index(ticktok) + 1}й тикток прислал(а) {user["full_name"]}\n'
+                    names.append(user["full_name"])
+                    # caption = caption + f'{ticktoks.index(ticktok) + 1}й тикток прислал(а) {user["full_name"]}\n'
+
+            caption += helpers_module.generate_tiktok_senders_string(names)
 
             await context.bot.send_media_group(regs.tiktoks_channel_id,
                                                media=media, caption=caption)

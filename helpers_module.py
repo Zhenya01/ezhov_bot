@@ -175,6 +175,32 @@ def seconds_to_delta(duration):
             'seconds': int(seconds)}
 
 
+def generate_tiktok_senders_string(names):
+    name_dict = {}
+
+    for i, name in enumerate(names):
+        if name in name_dict:
+            name_dict[name].append(i+1)
+        else:
+            name_dict[name] = [i+1]
+
+    sorted_result = sorted(name_dict.items(), key=lambda item: item[1][0])
+    print(sorted_result)
+    string = ''
+    for value in sorted_result:
+        indexes_sting = ''
+        name = value[0]
+        indexes_list = value[1]
+        for index in indexes_list:
+            indexes_sting += f'{index}й, '
+        indexes_sting = indexes_sting[:-2]
+        string += f'{indexes_sting} тикток{"и" if len(indexes_list) > 1 else ""} отправил(а) {value[0]}\n'
+    string = string[:-1]
+    return string
+
+
+
+
 
 
 
