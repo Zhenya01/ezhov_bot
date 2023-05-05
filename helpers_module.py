@@ -196,6 +196,7 @@ def generate_tiktok_senders_string(names):
         indexes_sting = indexes_sting[:-2]
         string += f'{indexes_sting} тикток{"и" if len(indexes_list) > 1 else ""} отправил(а) {value[0]}\n'
     string = string[:-1]
+    logger.debug(f'string - {string}')
     return string
 
 

@@ -244,6 +244,7 @@ async def publish_ticktocks(update: Update,
                     # caption = caption + f'{ticktoks.index(ticktok) + 1}й тикток прислал(а) {user["full_name"]}\n'
 
             caption += helpers_module.generate_tiktok_senders_string(names)
+            logger.debug(f'caption - {caption}')
 
             await context.bot.send_media_group(regs.tiktoks_channel_id,
                                                media=media, caption=caption)
