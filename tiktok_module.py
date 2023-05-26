@@ -55,6 +55,8 @@ async def test_thread_sending(update: Update,
     threads = ['tiktoks', 'comments']
     text = 'Tест. Бип-боп. Сорян за флуд заранее)'
     for thread in threads:
+        logger.debug(
+            f'{update.effective_user.name}({update.effective_user.id}) thread_id - {regs.ezhov_forum_threads[thread]}')
         await context.bot.send_message(regs.tiktoks_channel_id, text, reply_to_message_id=regs.ezhov_forum_threads[thread])
 
 @update_user_info
