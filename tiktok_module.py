@@ -40,10 +40,11 @@ async def start_ticktock_evening(update: Update,
 Начинаем набор видео на Тик-Ток вечерок! 
 Просто скиньте видео боту, нажав кнопку.
 Бот принимает видео СКАЧАННЫЕ с тик-тока! Ссылки на тик-ток пока не работают)'''
-    await context.bot.send_message(regs.tiktoks_channel_id, text, reply_to_message_id=7986,
-                                   reply_markup=InlineKeyboardMarkup(
-                                       [[InlineKeyboardButton(
-                                           "Отправить тикток", url=url)]]))
+    for thread in threads:
+        await context.bot.send_message(regs.ezhov_forum_id, text, message_thread_id=regs.ezhov_forum_threads[thread],
+                                       reply_markup=InlineKeyboardMarkup(
+                                           [[InlineKeyboardButton(
+                                               "Отправить тикток", url=url)]]))
     # await context.bot.send_message(regs.tiktoks_channel_id, text,
     #                                reply_markup=InlineKeyboardMarkup(
     #                                    [[InlineKeyboardButton(
