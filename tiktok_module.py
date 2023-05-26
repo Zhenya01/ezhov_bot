@@ -273,7 +273,8 @@ async def publish_ticktocks(update: Update,
 @update_user_info
 async def show_tiktok_to_approve(update: Update,
                                  context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id == regs.ezhov_user_id:
+    # if update.effective_user.id == regs.ezhov_user_id:
+    if update.effective_user.id in [regs.ezhov_user_id, regs.zhenya_user_id]:
         tiktok = database.select_tiktok_to_approve()
         if tiktok is None:
             await context.bot.send_message(update.effective_chat.id,
