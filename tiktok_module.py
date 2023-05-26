@@ -264,12 +264,12 @@ async def publish_ticktocks(update: Update,
             caption += helpers_module.generate_tiktok_senders_string(names)
             logger.debug(
                 f'{update.effective_user.name}({update.effective_user.id}) caption - {caption}')
-            threads = ['tiktoks', 'comments']
-            for thread in threads:
-                await context.bot.send_media_group(regs.ezhov_forum_id,
-                                                   media=media, caption=caption, message_thread_id=regs.ezhov_forum_threads[thread])
-            for tiktok in ticktoks:
-                database.tiktok_posted(tiktok['tiktok_id'])
+            # threads = ['tiktoks', 'comments']
+            # for thread in threads:
+            #     await context.bot.send_media_group(regs.ezhov_forum_id,
+            #                                        media=media, caption=caption, message_thread_id=regs.ezhov_forum_threads[thread])
+            # for tiktok in ticktoks:
+            #     database.tiktok_posted(tiktok['tiktok_id'])
         else:
             await context.bot.send_message(update.effective_chat.id,
                                            'В базе данных нет тиктоков для отправки')
