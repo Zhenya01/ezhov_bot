@@ -35,7 +35,7 @@ async def start_ticktock_evening(update: Update,
         'ticktock_evening_active'] = True
     bot = await context.bot.get_me()
     url = create_deep_linked_url(bot.username, f'{SEND_TIKTOK_DEEPLINK}')
-    threads = ['tiktok_evening', 'comments']
+    threads = ['tiktoks', 'comments']
     text = '''
 Начинаем набор видео на Тик-Ток вечерок! 
 Просто скиньте видео боту, нажав кнопку.
@@ -52,7 +52,7 @@ async def start_ticktock_evening(update: Update,
 
 async def test_thread_sending(update: Update,
                               context: ContextTypes.DEFAULT_TYPE):
-    threads = ['tiktok_evening', 'comments']
+    threads = ['tiktoks', 'comments']
     text = 'Tест. Бип-боп. Сорян за флуд заранее)'
     for thread in threads:
         await context.bot.send_message(regs.tiktoks_channel_id, text, reply_to_message_id=regs.ezhov_forum_threads[thread])
