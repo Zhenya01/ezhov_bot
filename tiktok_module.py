@@ -256,15 +256,19 @@ async def publish_ticktocks(update: Update,
                 media.append(InputMediaVideo(ticktok['file_id']))
                 if update.effective_user.id != regs.ezhov_user_id:
                     names.append(user["full_name"])
+                    logger.debug(
+                        f'{update.effective_user.name}({update.effective_user.id}) names - {names}')
                     # caption = caption + f'{ticktoks.index(ticktok) + 1}й тикток прислал(а) {user["full_name"]}\n'
 
             caption += helpers_module.generate_tiktok_senders_string(names)
-            logger.debug(f'caption - {caption}')
-
-            await context.bot.send_media_group(regs.tiktoks_channel_id,
-                                               media=media, caption=caption)
-            for tiktok in ticktoks:
-                database.tiktok_posted(tiktok['tiktok_id'])
+            logger.debug(
+                f'{update.effective_user.name}({update.effective_user.id}) caption - {caption}')
+            # threads = ['tiktoks', 'comments']
+            # for thread in threads:
+            #     await context.bot.send_media_group(regs.ezhov_forum_id,
+            #                                        media=media, caption=caption, message_thread_id=regs.ezhov_forum_threads[thread])
+            # for tiktok in ticktoks:
+            #     database.tiktok_posted(tiktok['tiktok_id'])
         else:
             await context.bot.send_message(update.effective_chat.id,
                                            'В базе данных нет тиктоков для отправки')
