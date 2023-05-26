@@ -273,6 +273,8 @@ async def publish_ticktocks(update: Update,
             for thread in threads:
                 await context.bot.send_media_group(regs.zhenya_forum_id,
                                                    media=media, caption=caption, message_thread_id=thread)
+                for tiktok in ticktoks:
+                    database.tiktok_posted(tiktok['tiktok_id'])
 
         else:
             await context.bot.send_message(update.effective_chat.id,
