@@ -257,10 +257,9 @@ async def publish_ticktocks(update: Update,
                 media.append(InputMediaVideo(ticktok['file_id']))
                 if update.effective_user.id != regs.ezhov_user_id:
                     names.append(user["full_name"])
-                    logger.debug(
-                        f'{update.effective_user.name}({update.effective_user.id}) names - {names}')
                     # caption = caption + f'{ticktoks.index(ticktok) + 1}й тикток прислал(а) {user["full_name"]}\n'
-
+            logger.debug(
+                f'{update.effective_user.name}({update.effective_user.id}) names - {names}')
             caption += helpers_module.generate_tiktok_senders_string(names)
             logger.debug(
                 f'{update.effective_user.name}({update.effective_user.id}) caption - {caption}')
