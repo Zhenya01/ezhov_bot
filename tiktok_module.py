@@ -245,7 +245,8 @@ async def cancel_waiting_for_tiktok(update: Update,
 @update_user_info
 async def publish_ticktocks(update: Update,
                             context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id == regs.ezhov_user_id:
+    if update.effective_user.id in [regs.ezhov_user_id, regs.zhenya_user_id]:
+    # if update.effective_user.id == regs.ezhov_user_id:
         media = []
         caption = 'Спасибо всем кто присылает видева!)\n'
         names = []
