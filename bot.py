@@ -150,8 +150,8 @@ application.add_handler(
                    chat_management_module.kick_from_group))
 application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_TITLE,
                                        twitch_module.schedule_remove_rename_message))
-# application.add_handler(MessageHandler(filters.ATTACHMENT,
-#                                        tiktok_module.get_ticktock_file))
+application.add_handler(MessageHandler(filters.VIDEO,
+                                       tiktok_module.waiting_for_ticktock))
 # application.add_handler(CommandHandler('file', tiktok_module.get_ticktock_file))
 # application.add_handler(CommandHandler('post', post_hello_message))
 application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), echo))
