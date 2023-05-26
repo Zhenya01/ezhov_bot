@@ -151,7 +151,7 @@ application.add_handler(
 application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_TITLE,
                                        twitch_module.schedule_remove_rename_message))
 application.add_handler(MessageHandler(filters.VIDEO,
-                                       tiktok_module.waiting_for_ticktock))
+                                       tiktok_module.got_tiktok_file))
 # application.add_handler(CommandHandler('file', tiktok_module.get_ticktock_file))
 # application.add_handler(CommandHandler('post', post_hello_message))
 application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), echo))

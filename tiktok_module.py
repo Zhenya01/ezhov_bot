@@ -190,6 +190,33 @@ async def got_tiktok_link(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def got_tiktok(update: Update,
                      context: ContextTypes.DEFAULT_TYPE,
                      is_file):
+    if not ('ticktock_evening_active' in context.bot_data[regs.ezhov_broadcaster_id] and context.bot_data[regs.ezhov_broadcaster_id][
+                'ticktock_evening_active'] is True):
+        logger.debug(
+            f'{update.effective_user.name}({update.effective_user.id}). Тикток вечерок не запущен. Отменяем')
+        await context.bot.send_message(update.effective_chat.id,
+                                       'Сейчас нельзя отправлять тиктоки.'
+                                       'Дождитесь объявления на канале')
+        return ConversationHandler.END
+    unapproved_tiktoks_count = \
+    database.count_unapproved_tiktoks(update.effective_user.id)['count']
+    user_info = context.user_data['user_info']
+    can_send_tiktok = user_info['can_send_tiktok']
+    print(f'can_send_tiktok - {can_send_tiktok}')
+    if not can_send_tiktok:
+        tiktoks_banned_until = user_info['tiktoks_banned_until']
+        print(f'tiktoks_banned_until - {tiktoks_banned_until},'
+              f'datetime.now() - {datetime.datetime.now()}')
+        if tiktoks_banned_until < datetime.datetime.now():
+            can_send_tiktok = True
+            database.unban_user_from_tiktoks(update.effective_user.id)
+    if unapproved_tiktoks_count > 9:
+        await context.bot.send_message(update.effective_chat.id,
+                                       'Вы уже отправили 10 видео, но не один пока не подтвердили. Пока больше нельзя отправлять тиктоки')
+    elif not can_send_tiktok:
+        time_banned_string = tiktoks_banned_until.strftime("%Y-%m-%d %H:%M:%S")
+        await context.bot.send_message(update.effective_chat.id,
+                                       f'Вы не можете отправлять тиктоки, потому что вы были временно забанены стримером (до {time_banned_string})')
     if is_file:
         message = await context.bot.forward_message(regs.ezhov_files_group_id,
                                                     update.effective_chat.id,
