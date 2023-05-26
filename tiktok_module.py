@@ -61,8 +61,8 @@ async def test_thread_sending(update: Update,
         await context.bot.send_message(regs.ezhov_forum_id, text, message_thread_id=regs.ezhov_forum_threads[thread])
 
 @update_user_info
-async def waiting_for_ticktock(update: Update,
-                               context: ContextTypes.DEFAULT_TYPE):
+async def waiting_for_tiktok(update: Update,
+                             context: ContextTypes.DEFAULT_TYPE):
     logger.debug(
         f'{update.effective_user.name}({update.effective_user.id}) перешел по ссылке или по команде /send_tiktok')
     if not ('ticktock_evening_active' in context.bot_data[regs.ezhov_broadcaster_id] and context.bot_data[regs.ezhov_broadcaster_id][
@@ -217,37 +217,38 @@ async def got_tiktok(update: Update,
         time_banned_string = tiktoks_banned_until.strftime("%Y-%m-%d %H:%M:%S")
         await context.bot.send_message(update.effective_chat.id,
                                        f'Вы не можете отправлять тиктоки, потому что вы были временно забанены стримером (до {time_banned_string})')
-    if is_file:
-        message = await context.bot.forward_message(regs.ezhov_files_group_id,
-                                                    update.effective_chat.id,
-                                                    update.effective_message.id)
     else:
-        result = await download_youtube_short(update, context,
-                                              update.effective_message.text)
-        if result == WAITING_FOR_TIKTOK:
-            return WAITING_FOR_TIKTOK
-        file_path = result
-        message = await context.bot.send_video(regs.ezhov_files_group_id,
-                                               video=file_path,
-                                               caption=update.message.text)
-        os.remove(file_path)
-    file_id = message.video.file_id
-    forwarded_message_id = message.message_id
-    is_approved = update.effective_user.id == regs.ezhov_user_id
-    database.add_tiktok(forwarded_message_id, update.effective_user.id,
-                        file_id,
-                        is_approved, update.effective_message.id)
-    message_text = 'Я посмотрю, а пока' if not is_approved \
-        else 'Тикток добавлен в очередь на отправление'
-    unapproved_count = database.count_unapproved_tiktoks(update.effective_user.id)['count']
-    if unapproved_count <= 9:
-        message_text += ' можешь отправить еще) /send_tiktok'
-    else:
-        message_text += ' отдохни) Ты отправил(а) слишком много. Я напишу, когда можно будет отправить ещё'
-    if unapproved_count == 5:
-        context.bot.send_message(regs.ezhov_user_id, f'Пользователь {update.effective_user.full_name} уже имеет 5 неодобренных тиктоков. Скоро он не сможет отправлять тиктоки. Пора бы отфильтровать :)')
-    await context.bot.send_message(update.effective_chat.id, message_text)
-    return ConversationHandler.END
+        if is_file:
+            message = await context.bot.forward_message(regs.ezhov_files_group_id,
+                                                        update.effective_chat.id,
+                                                        update.effective_message.id)
+        else:
+            result = await download_youtube_short(update, context,
+                                                  update.effective_message.text)
+            if result == WAITING_FOR_TIKTOK:
+                return WAITING_FOR_TIKTOK
+            file_path = result
+            message = await context.bot.send_video(regs.ezhov_files_group_id,
+                                                   video=file_path,
+                                                   caption=update.message.text)
+            os.remove(file_path)
+        file_id = message.video.file_id
+        forwarded_message_id = message.message_id
+        is_approved = update.effective_user.id == regs.ezhov_user_id
+        database.add_tiktok(forwarded_message_id, update.effective_user.id,
+                            file_id,
+                            is_approved, update.effective_message.id)
+        message_text = 'Я посмотрю, а пока' if not is_approved \
+            else 'Тикток добавлен в очередь на отправление'
+        unapproved_count = database.count_unapproved_tiktoks(update.effective_user.id)['count']
+        if unapproved_count <= 9:
+            message_text += ' можешь отправить еще) /send_tiktok'
+        else:
+            message_text += ' отдохни) Ты отправил(а) слишком много. Я напишу, когда можно будет отправить ещё'
+        if unapproved_count == 5:
+            context.bot.send_message(regs.ezhov_user_id, f'Пользователь {update.effective_user.full_name} уже имеет 5 неодобренных тиктоков. Скоро он не сможет отправлять тиктоки. Пора бы отфильтровать :)')
+        await context.bot.send_message(update.effective_chat.id, message_text)
+        return ConversationHandler.END
 
 
 @update_user_info

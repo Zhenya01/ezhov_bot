@@ -87,8 +87,8 @@ async def functions_to_run_at_the_beginning(_):
 
 
 conv_handler = ConversationHandler(
-        entry_points=[CommandHandler("send_tiktok", tiktok_module.waiting_for_ticktock, filters=filters.ChatType.PRIVATE),
-                      CommandHandler("start", tiktok_module.waiting_for_ticktock,
+        entry_points=[CommandHandler("send_tiktok", tiktok_module.waiting_for_tiktok, filters=filters.ChatType.PRIVATE),
+                      CommandHandler("start", tiktok_module.waiting_for_tiktok,
                                      filters=filters.Regex(rf'{SEND_TIKTOK_DEEPLINK}')&filters.ChatType.PRIVATE),
                       CommandHandler('start_approval', tiktok_module.show_tiktok_to_approve)],
         states={
