@@ -51,7 +51,8 @@ f'''Карочи это вот ссылочки на всё что связан�
 twitch.tv/zdarovezhov
 Общаемся все в ТГ: 
 t.me/zdarovezhov
-t.me/zdarovezhov2
+Уведомления о стримах:
+t.me/zdarovezhovstreams
 Дискордик:
 https://discord.gg/QGsCrV2F
 
