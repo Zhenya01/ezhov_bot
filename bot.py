@@ -87,18 +87,19 @@ async def functions_to_run_at_the_beginning(_):
 
 
 conv_handler = ConversationHandler(
-        entry_points=[CommandHandler("send_tiktok", tiktok_module.waiting_for_tiktok, filters=filters.ChatType.PRIVATE),
-                      CommandHandler("start", tiktok_module.waiting_for_tiktok,
-                                     filters=filters.Regex(rf'{SEND_TIKTOK_DEEPLINK}')&filters.ChatType.PRIVATE),
+        entry_points=[
+                      # CommandHandler("send_tiktok", tiktok_module.waiting_for_tiktok, filters=filters.ChatType.PRIVATE),
+                      # CommandHandler("start", tiktok_module.waiting_for_tiktok,
+                      #                filters=filters.Regex(rf'{SEND_TIKTOK_DEEPLINK}') & filters.ChatType.PRIVATE),
                       CommandHandler('start_approval', tiktok_module.show_tiktok_to_approve)],
         states={
-            WAITING_FOR_TIKTOK:
-            [
-                CommandHandler('cancel', tiktok_module.cancel_waiting_for_tiktok),
-                MessageHandler(filters.Entity('url'), tiktok_module.got_tiktok_link),
-                MessageHandler(filters.VIDEO, tiktok_module.got_tiktok_file),
-                MessageHandler(filters.ALL, tiktok_module.got_wrong_answer),
-            ],
+            # WAITING_FOR_TIKTOK:
+            # [
+            #     CommandHandler('cancel', tiktok_module.cancel_waiting_for_tiktok),
+            #     MessageHandler(filters.Entity('url'), tiktok_module.got_tiktok_link),
+            #     MessageHandler(filters.VIDEO, tiktok_module.got_tiktok_file),
+            #     MessageHandler(filters.ALL, tiktok_module.got_wrong_answer),
+            # ],
             WAITING_FOR_TIKTOK_DESISION:
             [
                 CallbackQueryHandler(tiktok_module.tiktok_approval_callback_handler,
@@ -145,6 +146,8 @@ application.add_handler(CommandHandler('mute', chat_management_module.mute, filt
 
 application.add_handler(CommandHandler('info', info))
 application.add_handler(CommandHandler('publish', tiktok_module.publish_ticktocks))
+CommandHandler("send_tiktok", tiktok_module.waiting_for_tiktok, filters=filters.ChatType.PRIVATE),
+CommandHandler("start", tiktok_module.waiting_for_tiktok, filters=filters.Regex(rf'{SEND_TIKTOK_DEEPLINK}') & filters.ChatType.PRIVATE),
 application.add_handler(
     MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS,
                    chat_management_module.kick_from_group))

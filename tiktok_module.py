@@ -96,8 +96,7 @@ async def waiting_for_tiktok(update: Update,
         logger.debug(
             f'{update.effective_user.name}({update.effective_user.id}) Запрашиваем ссылку или файл')
         await context.bot.send_message(update.effective_chat.id,
-                                       'Отправьте сюда видео тиктока или ссылку на youtube shorts. Отправлять можно только по 1 видео. Если отправите много - я приму только первое')
-        return WAITING_FOR_TIKTOK
+                                       'Отправьте сюда видео тиктока. Отправлять можно только по 1 видео. Если отправите много - я приму только первое')
 
 
 @update_user_info
