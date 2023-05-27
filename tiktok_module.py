@@ -283,8 +283,8 @@ async def publish_ticktocks(update: Update,
             for ticktok in ticktoks:
                 user = await database.get_user_info(ticktok["sender_user_id"])
                 media.append(InputMediaVideo(ticktok['file_id']))
-                if update.effective_user.id != regs.ezhov_user_id:
-                    names.append(user["full_name"])
+                # if update.effective_user.id != regs.ezhov_user_id:
+                names.append(user["full_name"])
                     # caption = caption + f'{ticktoks.index(ticktok) + 1}й тикток прислал(а) {user["full_name"]}\n'
             logger.debug(
                 f'{update.effective_user.name}({update.effective_user.id}) names - {names}')
