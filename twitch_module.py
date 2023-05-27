@@ -4,6 +4,8 @@ import twitchAPI
 from telegram import Update
 from telegram.ext import ContextTypes
 from telethon import TelegramClient, functions
+
+import info_messages
 from helpers_module import update_user_info
 
 import regs
@@ -44,10 +46,10 @@ async def subscribe_stream_offline():
 
 
 async def post_stream_live_notification(data):
-    logger.info('Streamer is online. Changing information')
+    info_messages.info('Streamer is online. Changing information')
     logger.debug(f'Twitch data - {data}')
     if 'silent' not in application.bot_data.keys() or application.bot_data['silent'] is False:
-        logger.info('Loudness is set to "loud". Posting notification')
+        info_messages.info('Loudness is set to "loud". Posting notification')
         emoji = random.choice(regs.emoji_list)
         phrases_list = application.bot_data['phrases_list']
         if len(phrases_list) == 0:
@@ -59,7 +61,7 @@ async def post_stream_live_notification(data):
         notification_text += '\ntwitch.tv/zdarovezhov'
         await application.bot.send_message(regs.zdarovezhov_channel_id, notification_text)
     else:
-        logger.info('Loudness is set to "silent". Setting loudness to "loud"')
+        info_messages.info('Loudness is set to "silent". Setting loudness to "loud"')
         application.bot_data['silent'] = False
     await rename_channel(live=True)
 

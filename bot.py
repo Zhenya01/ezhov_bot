@@ -6,15 +6,15 @@ import logging
 
 import platform
 
-import database
 import regs
 import tiktok_module
 import twitch_module
 import chat_management_module
 from helpers_module import logger, application, update_user_info
-from helpers_module import WAITING_FOR_TIKTOK, WAITING_FOR_TIKTOK_DESISION
+from helpers_module import WAITING_FOR_TIKTOK_DESISION
 from helpers_module import TIKTOK_APPROVAL_STATES
 from helpers_module import SEND_TIKTOK_DEEPLINK
+import info_messages
 
 
 @update_user_info
@@ -39,33 +39,6 @@ async def post_hello_message(update: Update, context: ContextTypes.DEFAULT_TYPE)
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_chat.type == 'private':
         await context.bot.send_message(chat_id=update.effective_chat.id, text=f'Все говорят: "{update.message.text}", а ты возьми, да и купи слона!')
-
-
-@update_user_info
-async def info(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    text = \
-f'''Карочи это вот ссылочки на всё что связано с моим ТВОРЧЕСТВОМ.
-Подпишитесь пожалуйста на всё, этим вы меня очень поддержите:
-
-Чаще всего стримлю на twitch:
-twitch.tv/zdarovezhov
-Общаемся все в ТГ: 
-t.me/zdarovezhov
-Уведомления о стримах:
-t.me/zdarovezhovstreams
-Дискордик:
-https://discord.gg/QGsCrV2F
-
-
-Нарезки со стримов в YouTube: 
-vk.cc/cjveTL
-легендарные моменты заливаем в YouTube Shorts: 
-vk.cc/cjvf3v
-Я в ТикТок:
-vk.cc/cjvifP
-из меня делают мемы в Yappi: 
-vk.cc/cjveXZ'''
-    await update.message.reply_text(text)
 
 
 @update_user_info
@@ -140,12 +113,14 @@ application.add_handler(CommandHandler('silent', twitch_module.silent,
                                        filters=filters.Chat(chat_id=regs.twitch_commands_users_list)))
 application.add_handler(CommandHandler('loud', twitch_module.loud,
                                        filters=filters.Chat(chat_id=regs.twitch_commands_users_list)))
+application.add_handler(CommandHandler('commands', info_messages.commands,
+                                       filters=filters.Chat(chat_id=regs.twitch_commands_users_list)))
 application.add_handler(CommandHandler('bugs', bugs_and_improvements))
 application.add_handler(CommandHandler('test_message', tiktok_module.test_thread_sending))
 application.add_handler(CommandHandler('improvements', bugs_and_improvements))
 application.add_handler(CommandHandler('mute', chat_management_module.mute, filters.REPLY))
 
-application.add_handler(CommandHandler('info', info))
+application.add_handler(CommandHandler('info', info_messages.info))
 application.add_handler(CommandHandler('publish', tiktok_module.publish_ticktocks))
 CommandHandler("send_tiktok", tiktok_module.waiting_for_tiktok, filters=filters.ChatType.PRIVATE),
 CommandHandler("start", tiktok_module.waiting_for_tiktok, filters=filters.Regex(rf'{SEND_TIKTOK_DEEPLINK}') & filters.ChatType.PRIVATE),
