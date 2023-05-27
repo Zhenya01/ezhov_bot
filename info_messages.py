@@ -1,5 +1,6 @@
 from telegram import Update
 from telegram.ext import ContextTypes
+from telegram.constants import ParseMode
 
 from helpers_module import update_user_info
 
@@ -37,15 +38,16 @@ async def commands(update: Update, context: ContextTypes.DEFAULT_TYPE):
 f'''*Комманды стримера:*
 
 *Оповещения о стримах:*
-Следующий стрим пройдёт без уведомления - /silent
-Следующий стрим пройдёт c уведомлением - /loud
-Добавить фразу последней в список оповещений о стримах - /add
-Добавить фразу первой в список оповещений о стримах - /add_first
-Убрать последнюю фразу из списка оповещений о стримах - /remove
+Следующий стрим пройдёт без уведомления - //silent
+Следующий стрим пройдёт c уведомлением - //loud
+Добавить фразу последней в список оповещений о стримах - //add
+Добавить фразу первой в список оповещений о стримах - //add_first
+Убрать последнюю фразу из списка оповещений о стримах - //remove
 
 *Тикток вечерок:*
-Отправить сообщение о наборе тиктоков - /start_tiktoks
-Начать оценивать тиктоки - /start_approval
-Опубликовать пост с тиктоками на канал - /publish
+Отправить сообщение о наборе тиктоков - //start_tiktoks
+Начать оценивать тиктоки - //start_approval
+Опубликовать пост с тиктоками на канал - //publish
 '''
-    await update.message.reply_text(streamer_text)
+    await update.message.reply_text(streamer_text,
+                                    parse_mode=ParseMode.MARKDOWN_V2)
