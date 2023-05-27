@@ -46,7 +46,7 @@ f'''*Комманды стримера:*
 
 *Тикток вечерок:*
 Отправить сообщение о наборе тиктоков \- /start\_tiktoks
-Начать оценивать тиктоки \- //start\_approval
+Начать оценивать тиктоки \- /start\_approval
 Опубликовать пост с тиктоками на канал \- /publish
 '''
     await update.message.reply_text(streamer_text,
