@@ -6,7 +6,7 @@ from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
 import regs
-from helpers_module import reformat_name
+from helpers_module import reformat_name, logger
 
 
 async def mute(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -82,3 +82,8 @@ async def kick_after_wait(context: ContextTypes.DEFAULT_TYPE):
     message_id = context.job.data['message_to_delete']
     await context.bot.unban_chat_member(chat_id, user_id)
     await context.bot.delete_message(chat_id, message_id)
+
+
+async def remove_join_left_message(update:Update, context: ContextTypes.DEFAULT_TYPE):
+    logger.debug('Удаляем сообщение о переименовании канала/заходе участника')
+    await context.bot.delete_message(update.message.chat_id, update.message.message_id)

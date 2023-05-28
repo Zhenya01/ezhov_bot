@@ -6,6 +6,7 @@ import logging
 
 import platform
 
+import forward_posts
 import regs
 import tiktok_module
 import twitch_module
@@ -26,9 +27,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if 'phrases_list' not in context.bot_data.keys():
         context.bot_data['phrases_list'] = []
 
-async def remove_join_left_message(update:Update, context: ContextTypes.DEFAULT_TYPE):
-    logger.debug('Удаляем сообщение о переименовании канала/заходе участника')
-    await context.bot.delete_message(update.message.chat_id, update.message.message_id)
 
 @update_user_info
 async def post_hello_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -125,16 +123,18 @@ application.add_handler(CommandHandler('mute', chat_management_module.mute, filt
 
 application.add_handler(CommandHandler('info', info_messages.info))
 application.add_handler(CommandHandler('publish', tiktok_module.publish_ticktocks))
-CommandHandler("send_tiktok", tiktok_module.waiting_for_tiktok, filters=filters.ChatType.PRIVATE),
-CommandHandler("start", tiktok_module.waiting_for_tiktok, filters=filters.Regex(rf'{SEND_TIKTOK_DEEPLINK}') & filters.ChatType.PRIVATE),
+# CommandHandler("send_tiktok", tiktok_module.waiting_for_tiktok, filters=filters.ChatType.PRIVATE),
+# CommandHandler("start", tiktok_module.waiting_for_tiktok, filters=filters.Regex(rf'{SEND_TIKTOK_DEEPLINK}') & filters.ChatType.PRIVATE),
 application.add_handler(
     MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS & filters.Chat(chat_id=regs.zdarovezhov_group_id),
                    chat_management_module.kick_from_group))
+application.add_handler(MessageHandler(filters.Chat(chat_id=regs.ezhov_forum_id), forward_posts.forward_post))
 application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_TITLE,
                                        twitch_module.schedule_remove_rename_message))
 application.add_handler(MessageHandler(filters.VIDEO & filters.ChatType.PRIVATE,
                                        tiktok_module.got_tiktok_file))
-application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS | filters.StatusUpdate.LEFT_CHAT_MEMBER, remove_join_left_message))
+application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS | filters.StatusUpdate.LEFT_CHAT_MEMBER,
+                                       chat_management_module.remove_join_left_message))
 # application.add_handler(CommandHandler('file', tiktok_module.get_ticktock_file))
 # application.add_handler(CommandHandler('post', post_hello_message))
 application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), echo))
