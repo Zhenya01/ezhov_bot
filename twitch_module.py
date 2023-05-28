@@ -63,7 +63,7 @@ async def post_stream_live_notification(data):
         for thread in threads:
             await application.bot.send_message(regs.ezhov_forum_id, notification_text,
                                                message_thread_id=regs.ezhov_forum_threads[thread])
-        notification_text += '\nОбсуждение здесь: t.me/zdarovezhov/1'
+        notification_text += '\n\nОбсуждение здесь: t.me/zdarovezhov/1'
         await application.bot.send_message(regs.zdarovezhov_channel_id, notification_text)
     else:
         info_messages.info('Loudness is set to "silent". Setting loudness to "loud"')
