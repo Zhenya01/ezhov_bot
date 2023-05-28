@@ -10,7 +10,6 @@ async def forward_post(update:Update, context: ContextTypes.DEFAULT_TYPE):
     logger.debug(f'Thread_id - {thread_id}, Posts_thread_id - {regs.ezhov_forum_threads["posts"]}')
     if thread_id == regs.ezhov_forum_threads['posts']:
         logger.debug(f'forward_post_triggered')
-        context.bot.forward_message(update.message.chat_id,
+        await context.bot.forward_message(update.message.chat_id,
                                     update.message.chat_id,
-                                    update.message.message_id,
-                                    message_thread_id=1)
+                                    update.message.message_id)
