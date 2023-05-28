@@ -28,9 +28,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def remove_join_left_message(update:Update, context: ContextTypes.DEFAULT_TYPE):
     logger.debug('Удаляем сообщение о переименовании канала/заходе участника')
-    chat_id = context.job.data['chat_id']
-    message_id = context.job.data['message_id']
-    await context.bot.delete_message(chat_id, message_id)
+    await context.bot.delete_message(update.message.chat_id, update.message.message_id)
 
 @update_user_info
 async def post_hello_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
