@@ -23,7 +23,7 @@ async def post_stream_live_notification(data):
         notification_text += '\ntwitch.tv/zdarovezhov'
         threads = [None, 6]
         for thread in threads:
-            await application.bot.send_media_group(regs.zhenya_forum_id,
+            await application.bot.send_message(regs.zhenya_forum_id,
                                                notification_text,
                                                message_thread_id=thread)
         notification_text += '\nОбсуждение здесь: t.me/zdarovezhov/1'
