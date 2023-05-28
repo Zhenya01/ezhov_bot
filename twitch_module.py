@@ -82,6 +82,7 @@ async def rename_channel(live: bool):
         pass
 
 
+
 async def schedule_remove_rename_message(update: Update,
                                          context: ContextTypes.DEFAULT_TYPE):
     logger.debug('Добавляем таск на удаление сообщения в job_queue')
