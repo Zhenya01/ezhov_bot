@@ -59,6 +59,11 @@ async def post_stream_live_notification(data):
             del application.bot_data['phrases_list'][0]
         notification_text = f'{emoji} {phrase}'
         notification_text += '\ntwitch.tv/zdarovezhov'
+        threads = ['posts', 'comments']
+        for thread in threads:
+            await application.bot.send_message(regs.ezhov_forum_id, notification_text,
+                                               message_thread_id=regs.ezhov_forum_threads[thread])
+        notification_text += '\nОбсуждение здесь: t.me/zdarovezhov/1'
         await application.bot.send_message(regs.zdarovezhov_channel_id, notification_text)
     else:
         info_messages.info('Loudness is set to "silent". Setting loudness to "loud"')
@@ -78,6 +83,15 @@ async def rename_channel(live: bool):
                 channel='zdarovezhov',
                 title=title)
                 )
+    except:
+        pass
+    title = '🔴 zdarovezhov уведомления о стримах' if live else 'zdarovezhov уведомления о стримах'
+    try:
+        async with TelegramClient('ezhovApp', regs.telegram_app_api_id, regs.telegram_app_api_hash) as client:
+            await client(functions.channels.EditTitleRequest(
+                channel='zdarovezhovstreams',
+                title=title)
+            )
     except:
         pass
 
