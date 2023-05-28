@@ -125,13 +125,13 @@ application.add_handler(CommandHandler('publish', tiktok_module.publish_ticktock
 CommandHandler("send_tiktok", tiktok_module.waiting_for_tiktok, filters=filters.ChatType.PRIVATE),
 CommandHandler("start", tiktok_module.waiting_for_tiktok, filters=filters.Regex(rf'{SEND_TIKTOK_DEEPLINK}') & filters.ChatType.PRIVATE),
 application.add_handler(
-    MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS,
+    MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS & filters.Chat(chat_id=regs.zdarovezhov_group_id),
                    chat_management_module.kick_from_group))
 application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_TITLE,
                                        twitch_module.schedule_remove_rename_message))
 application.add_handler(MessageHandler(filters.VIDEO & filters.ChatType.PRIVATE,
                                        tiktok_module.got_tiktok_file))
-application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, twitch_module.remove_message))
+application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS | filters.StatusUpdate.LEFT_CHAT_MEMBER, twitch_module.remove_message))
 # application.add_handler(CommandHandler('file', tiktok_module.get_ticktock_file))
 # application.add_handler(CommandHandler('post', post_hello_message))
 application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), echo))
