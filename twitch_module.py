@@ -108,7 +108,7 @@ async def schedule_remove_rename_message(update: Update,
 
 
 async def remove_message(context: ContextTypes.DEFAULT_TYPE):
-    logger.debug('Удаляем сообщение о переименовании канала')
+    logger.debug('Удаляем сообщение о переименовании канала/заходе участника')
     chat_id = context.job.data['chat_id']
     message_id = context.job.data['message_id']
     await context.bot.delete_message(chat_id, message_id)
