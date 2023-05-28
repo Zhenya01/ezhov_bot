@@ -12,4 +12,5 @@ async def forward_post(update:Update, context: ContextTypes.DEFAULT_TYPE):
     if thread_id == regs.ezhov_forum_threads['posts']:
         context.bot.forward_message(update.message.chat_id,
                                     update.message.chat_id,
-                                    update.message.message_id)
+                                    update.message.message_id,
+                                    message_thread_id=1)
