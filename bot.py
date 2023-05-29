@@ -128,6 +128,10 @@ application.add_handler(CommandHandler('publish', tiktok_module.publish_ticktock
 application.add_handler(
     MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS & filters.Chat(chat_id=regs.zdarovezhov_group_id),
                    chat_management_module.kick_from_group))
+application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS,
+                                       chat_management_module.remove_join_left_message))
+application.add_handler(MessageHandler(filters.StatusUpdate.LEFT_CHAT_MEMBER,
+                                       chat_management_module.remove_join_left_message))
 application.add_handler(MessageHandler(filters.Chat(chat_id=regs.ezhov_forum_id), forward_posts.forward_post))
 application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_TITLE,
                                        twitch_module.schedule_remove_rename_message))

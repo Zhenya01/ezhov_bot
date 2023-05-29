@@ -46,7 +46,7 @@ async def subscribe_stream_offline():
 
 
 async def post_stream_live_notification(data):
-    info_messages.info('Streamer is online. Changing information')
+    logger.info('Streamer is online. Changing information')
     logger.debug(f'Twitch data - {data}')
     if 'silent' not in application.bot_data.keys() or application.bot_data['silent'] is False:
         info_messages.info('Loudness is set to "loud". Posting notification')
@@ -103,14 +103,14 @@ async def schedule_remove_rename_message(update: Update,
     context.application.job_queue.run_once(callback=remove_message,
                                            when=5,
                                            data={
-                                               'chat_id': update.effective_chat.id,
-                                               'message_id': update.effective_message.message_id})
+                                               'chat_id_to_remove': update.effective_chat.id,
+                                               'message_id_to_remove': update.effective_message.message_id})
 
 
 async def remove_message(context: ContextTypes.DEFAULT_TYPE):
     logger.debug('Удаляем сообщение о переименовании канала/заходе участника')
-    chat_id = context.job.data['chat_id']
-    message_id = context.job.data['message_id']
+    chat_id = context.job.data['chat_id_to_remove']
+    message_id = context.job.data['message_id_to_remove']
     await context.bot.delete_message(chat_id, message_id)
 
 

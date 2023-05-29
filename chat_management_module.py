@@ -85,5 +85,5 @@ async def kick_after_wait(context: ContextTypes.DEFAULT_TYPE):
 
 
 async def remove_join_left_message(update:Update, context: ContextTypes.DEFAULT_TYPE):
-    logger.debug('Удаляем сообщение о переименовании канала/заходе участника')
+    logger.debug('Удаляем сообщение о заходе/выходе участника')
     await context.bot.delete_message(update.message.chat_id, update.message.message_id)
