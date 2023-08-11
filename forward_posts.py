@@ -5,7 +5,7 @@ import regs
 from helpers_module import logger
 
 
-async def forward_post(update:Update, context: ContextTypes.DEFAULT_TYPE):
+async def forward_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
     thread_id = update.message.message_thread_id
     logger.debug(f'Thread_id - {thread_id}, Posts_thread_id - {regs.ezhov_forum_threads["posts"]}')
     if thread_id == regs.ezhov_forum_threads['posts']:
