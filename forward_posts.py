@@ -26,5 +26,5 @@ async def forward_to_comments(update: Update, context: ContextTypes.DEFAULT_TYPE
         logger.debug(f'forwarding post from main channel')
         await context.bot.forward_message(update.effective_chat.id,
                                           forward_channel_id,
-                                          update.message.message_id,
+                                          update.effective_message.id,
                                           message_thread_id=forward_thread_id)
