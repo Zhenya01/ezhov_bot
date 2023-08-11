@@ -22,7 +22,7 @@ async def forward_to_comments(update: Update, context: ContextTypes.DEFAULT_TYPE
     forward_thread_id = None
     forward_channel_id = regs.zhenya_forum_id
     forwarded_channel_id = regs.zhenya_channel_id
-    if update.message.chat_id == forwarded_channel_id:
+    if update.effective_chat.id == forwarded_channel_id:
         logger.debug(f'forwarding post from main channel')
         await context.bot.forward_message(update.effective_chat.id,
                                           forward_channel_id,
