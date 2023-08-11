@@ -11,5 +11,21 @@ async def forward_post(update:Update, context: ContextTypes.DEFAULT_TYPE):
     if thread_id == regs.ezhov_forum_threads['posts']:
         logger.debug(f'forward_post_triggered')
         await context.bot.forward_message(update.message.chat_id,
-                                    update.message.chat_id,
-                                    update.message.message_id)
+                                          update.message.chat_id,
+                                          update.message.message_id)
+
+
+async def forward_to_comments(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    message = update.message
+    # forward_thread_id = regs.ezhov_forum_threads['comments']
+    # forward_channel_id = regs.ezhov_forum_id
+    # forwarded_message_channel_id = regs.zdarovezhov_channel_id
+    forward_thread_id = None
+    forward_channel_id = regs.zhenya_forum_id
+    forwarded_channel_id = regs.zhenya_channel_id
+    if update.message.chat_id == forwarded_channel_id:
+        logger.debug(f'forwarding post from main channel')
+        await context.bot.forward_message(update.message.chat_id,
+                                          forward_channel_id,
+                                          update.message.message_id,
+                                          message_thread_id=forward_thread_id)
