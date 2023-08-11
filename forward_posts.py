@@ -16,7 +16,6 @@ async def forward_post(update:Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def forward_to_comments(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    message = update.message
     # forward_thread_id = regs.ezhov_forum_threads['comments']
     # forward_channel_id = regs.ezhov_forum_id
     # forwarded_message_channel_id = regs.zdarovezhov_channel_id
