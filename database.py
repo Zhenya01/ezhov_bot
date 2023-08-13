@@ -121,6 +121,7 @@ def select_tiktoks_to_send():
 
 
 def tiktok_posted(tiktok_id):
+    print(tiktok_id)
     command = '''
     UPDATE ezhov_bot.tiktoks
     SET is_sent = True

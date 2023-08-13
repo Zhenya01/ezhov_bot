@@ -90,10 +90,6 @@ conv_handler = ConversationHandler(
     )
 
 
-
-
-
-
 print('Бот перезагружен')
 os = platform.system()
 print(f'os - {os}')
@@ -144,14 +140,11 @@ application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS | f
 # application.add_handler(CommandHandler('post', post_hello_message))
 application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), echo))
 job_queue: JobQueue = application.job_queue
-if os!= 'Windows':
+if os != 'Windows':
     application.job_queue.run_custom(functions_to_run_at_the_beginning, job_kwargs={})
 application.run_polling()
 
 
 
 # TODO добавить логи
-# TODO тикток вечерок
-
-
 

@@ -3,6 +3,7 @@ import datetime
 import os
 import re
 import shutil
+import time
 
 import pytz
 import requests
@@ -273,7 +274,7 @@ async def cancel_waiting_for_tiktok(update: Update,
 async def publish_ticktocks(update: Update,
                             context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id in [regs.ezhov_user_id, regs.zhenya_user_id]:
-    # if update.effective_user.id == regs.ezhov_user_id:
+    # if update.effective_user.id == regs.zhenya_user_id:
         media = []
         caption = 'Спасибо всем кто присылает видева!)\n'
         names = []
@@ -294,14 +295,18 @@ async def publish_ticktocks(update: Update,
             for thread in threads:
                 await context.bot.send_media_group(regs.ezhov_forum_id,
                                                    media=media, caption=caption, message_thread_id=regs.ezhov_forum_threads[thread])
+                time.sleep(5)
             for tiktok in ticktoks:
+                logger.debug(
+                    f'{update.effective_user.name}({update.effective_user.id}) Tiktok - {tiktok}')
                 database.tiktok_posted(tiktok['tiktok_id'])
-            # threads = [None,6]
+            # threads = [6, None]
             # for thread in threads:
-            #     await context.bot.send_media_group(regs.zhenya_forum_id,
+            #     await context.bot.send_media_group(-1001646261936,
             #                                        media=media, caption=caption, message_thread_id=thread)
-            #     for tiktok in ticktoks:
-            #         database.tiktok_posted(tiktok['tiktok_id'])
+            #     time.sleep(5)
+            # for tiktok in ticktoks:
+            #     database.tiktok_posted(tiktok['tiktok_id'])
 
         else:
             await context.bot.send_message(update.effective_chat.id,
