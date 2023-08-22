@@ -1,3 +1,4 @@
+import asyncio
 import random
 
 from telethon import TelegramClient, functions
@@ -48,6 +49,7 @@ async def rename_channel(live: bool):
                 )
     except:
         pass
+    await asyncio.sleep(5)
     title = '🔴 NeEzhovForum' if live else 'NeEzhovForum'
     try:
         async with TelegramClient('ezhovApp', regs.telegram_app_api_id, regs.telegram_app_api_hash) as client:

@@ -1,3 +1,4 @@
+import asyncio
 import random
 
 import twitchAPI
@@ -63,6 +64,7 @@ async def post_stream_live_notification(data):
         for thread in threads:
             await application.bot.send_message(regs.ezhov_forum_id, notification_text,
                                                message_thread_id=regs.ezhov_forum_threads[thread])
+            await asyncio.sleep(5)
         notification_text += '\n\nОбсуждение здесь: t.me/zdarovezhov/1'
         await application.bot.send_message(regs.zdarovezhov_channel_id, notification_text)
     else:
@@ -85,6 +87,7 @@ async def rename_channel(live: bool):
                 )
     except:
         pass
+    await asyncio.sleep(5)
     title = '🔴 zdarovezhov уведомления о стримах' if live else 'zdarovezhov уведомления о стримах'
     try:
         async with TelegramClient('ezhovApp', regs.telegram_app_api_id, regs.telegram_app_api_hash) as client:
@@ -96,12 +99,11 @@ async def rename_channel(live: bool):
         pass
 
 
-
 async def schedule_remove_rename_message(update: Update,
                                          context: ContextTypes.DEFAULT_TYPE):
     logger.debug('Добавляем таск на удаление сообщения в job_queue')
     context.application.job_queue.run_once(callback=remove_message,
-                                           when=5,
+                                           when=7,
                                            data={
                                                'chat_id_to_remove': update.effective_chat.id,
                                                'message_id_to_remove': update.effective_message.message_id})

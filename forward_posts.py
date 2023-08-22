@@ -13,36 +13,35 @@ async def forward_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
     threads = regs.zhenya_forum_threads
     if thread_id in [threads['posts'], threads['tiktoks'], threads['ezhov_news'],
                      threads['frontend_vlog'], threads['life']]:
-        if update.effective_user.id not in [regs.ezhov_user_id, regs.zhenya_user_id, regs.ezhov_user_id]:
-            return
-        logger.debug('forwarding post to comments')
-        await context.bot.forward_message(update.message.chat_id,
-                                          update.message.chat_id,
-                                          update.message.message_id)
-        logger.debug('forwarding post to channel')
-        await asyncio.sleep(3)
-        msg = await context.bot.forward_message(regs.zhenya_channel_id,
-                                          update.message.chat_id,
-                                          update.message.message_id)
-        await asyncio.sleep(3)
-        forum_dict = {
-            threads['posts']: 'постики',
-            threads['tiktoks']: 'тиктоки',
-            threads['ezhov_news']: 'новости',
-            threads['frontend_vlog']: 'новости по программированию',
-            threads['stream_time']: 'посты о стримах и их обсуждения',
-            threads['life']: 'постики о жизни',
-        }
-        print(f'<a href = "t.me/ezhov_test_chat/{thread_id}">➡️остальные {forum_dict[thread_id]} тут⬅️</a>')
-        await context.bot.send_message(regs.zhenya_channel_id,
-                                       f'<a href = "t.me/ezhov_test_chat/{thread_id}">➡️остальные {forum_dict[thread_id]} тут⬅️</a>',
-                                       reply_markup=InlineKeyboardMarkup([
-                                           [
-                                               InlineKeyboardButton('Перейти в обсуждение',
-                                                                    url='t.me/ezhov_test_chat/1')
-                                           ]
-                                       ]),
-                                       parse_mode=ParseMode.HTML)
+        if update.effective_user.id in [regs.ezhov_user_id, regs.zhenya_user_id]:
+            logger.debug('forwarding post to comments')
+            await context.bot.forward_message(update.message.chat_id,
+                                              update.message.chat_id,
+                                              update.message.message_id)
+            logger.debug('forwarding post to channel')
+            await asyncio.sleep(3)
+            msg = await context.bot.forward_message(regs.zhenya_channel_id,
+                                              update.message.chat_id,
+                                              update.message.message_id)
+            await asyncio.sleep(3)
+            forum_dict = {
+                threads['posts']: 'постики',
+                threads['tiktoks']: 'тиктоки',
+                threads['ezhov_news']: 'новости',
+                threads['frontend_vlog']: 'новости по программированию',
+                threads['stream_time']: 'посты о стримах и их обсуждения',
+                threads['life']: 'постики о жизни',
+            }
+            print(f'<a href = "t.me/ezhov_test_chat/{thread_id}">➡️остальные {forum_dict[thread_id]} тут⬅️</a>')
+            # await context.bot.send_message(regs.zhenya_channel_id,
+            #                                f'<a href = "t.me/ezhov_test_chat/{thread_id}">➡️остальные {forum_dict[thread_id]} тут⬅️</a>',
+            #                                reply_markup=InlineKeyboardMarkup([
+            #                                    [
+            #                                        InlineKeyboardButton('Перейти в обсуждение',
+            #                                                             url='t.me/ezhov_test_chat/1')
+            #                                    ]
+            #                                ]),
+            #                                parse_mode=ParseMode.HTML)
 
 
 async def forward_to_comments(update: Update, context: ContextTypes.DEFAULT_TYPE):
