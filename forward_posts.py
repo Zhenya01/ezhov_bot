@@ -48,13 +48,22 @@ async def comment_under_the_post(update: Update, context: ContextTypes.DEFAULT_T
         searching_for_post = context.bot_data['searching_for_post']
     if searching_for_post:
         if update.effective_message.text == context.bot_data['post_message_text']:
-            message_id = update.effective_message.message_id
-            await context.bot.send_message(regs.zhenya_group_id,
-                                           f'<a href = "t.me/ezhov_test_chat">👉 Всё наше каммунити тут!👈</a>\n'
-                                           f'Сейчас ты в канале с уведомлениями, здесь мы особо не общаемся, он создан для удобства получения всех постов',
-                                           reply_to_message_id=message_id,
-                                           parse_mode=ParseMode.HTML)
             context.bot_data['searching_for_post'] = False
+            message_id = update.effective_message.message_id
+            context.application.job_queue.run_once(callback=reply_to_message,
+                                                   when=7,
+                                                   data={
+                                                       'message_id': message_id})
+
+
+async def reply_to_message(context: ContextTypes.DEFAULT_TYPE):
+    message_id = context.job.data['message_id']
+    await context.bot.send_message(regs.zhenya_group_id,
+                                               f'<a href = "t.me/ezhov_test_chat">👉 Всё наше каммунити тут!👈</a>\n'
+                                               f'Сейчас ты в канале с уведомлениями, здесь мы особо не общаемся, он создан для удобства получения всех постов',
+                                               reply_to_message_id=message_id,
+                                               parse_mode=ParseMode.HTML)
+
 
 async def forward_to_comments(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # forward_thread_id = regs.ezhov_forum_threads['comments']
