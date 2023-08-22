@@ -22,12 +22,12 @@ async def post_stream_live_notification(data):
             del application.bot_data['phrases_list'][0]
         notification_text = f'{emoji} {phrase}'
         notification_text += '\ntwitch.tv/zdarovezhov'
-        threads = [None, 6]
+        threads = ['posts', 'comments']
         for thread in threads:
             await application.bot.send_message(regs.zhenya_forum_id,
                                                notification_text,
-                                               message_thread_id=thread)
-        notification_text += '\nОбсуждение здесь: t.me/zdarovezhov/1'
+                                               message_thread_id=regs.zhenya_forum_threads[thread])
+            await asyncio.sleep(5)
         await application.bot.send_message(regs.zhenya_channel_id, notification_text)
     else:
         info_messages.info('Loudness was set to "silent". Setting loudness to "loud"')
