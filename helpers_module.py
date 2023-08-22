@@ -20,8 +20,8 @@ WAITING_FOR_TIKTOK, WAITING_FOR_TIKTOK_DESISION = \
     (int(f'20{number}') for number in range(1, 2 + 1))
 # Tiktok approval query states
 TIKTOK_APPROVAL_STATES = '3'
-APPROVE_TIKTOK, REJECT_TIKTOK, BAN_TIKTOK_SENDER, STOP_TIKTOKS_APPROVAL = \
-    (int(f'30{number}') for number in range(1, 4 + 1))
+APPROVE_TIKTOK, REJECT_TIKTOK, BAN_TIKTOK_SENDER, STOP_TIKTOKS_APPROVAL, SUPER_APPROVE_TIKTOK = \
+    (int(f'30{number}') for number in range(1, 5 + 1))
 
 
 logging.basicConfig(

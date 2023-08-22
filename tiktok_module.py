@@ -25,7 +25,7 @@ from helpers_module import update_user_info
 from helpers_module import SEND_TIKTOK_DEEPLINK
 from helpers_module import WAITING_FOR_TIKTOK, WAITING_FOR_TIKTOK_DESISION
 from helpers_module import APPROVE_TIKTOK, REJECT_TIKTOK, \
-    STOP_TIKTOKS_APPROVAL, BAN_TIKTOK_SENDER
+    STOP_TIKTOKS_APPROVAL, BAN_TIKTOK_SENDER, SUPER_APPROVE_TIKTOK
 
 
 async def start_ticktock_evening(update: Update,
@@ -296,6 +296,7 @@ async def publish_ticktocks(update: Update,
                 await context.bot.send_media_group(regs.ezhov_forum_id,
                                                    media=media, caption=caption, message_thread_id=regs.ezhov_forum_threads[thread])
                 time.sleep(5)
+            await context.bot.send_media_group(regs.zdarovezhov_channel_id)
             for tiktok in ticktoks:
                 logger.debug(
                     f'{update.effective_user.name}({update.effective_user.id}) Tiktok - {tiktok}')
@@ -316,19 +317,23 @@ async def publish_ticktocks(update: Update,
 @update_user_info
 async def show_tiktok_to_approve(update: Update,
                                  context: ContextTypes.DEFAULT_TYPE):
-    # if update.effective_user.id == regs.ezhov_user_id:
+    # if update.effective_user.id == regs.zhenya_user_id:
     if update.effective_user.id in [regs.ezhov_user_id, regs.zhenya_user_id]:
+        print('Tiktok approval started')
         tiktok = database.select_tiktok_to_approve()
+        print(tiktok)
         if tiktok is None:
             await context.bot.send_message(update.effective_chat.id,
                                            'Еще нет тиктоков, требующих подтверждения')
             return ConversationHandler.END
+        print('Sending tiktok info')
         await send_tiktok_info(update, context, tiktok, first_time=True)
         return WAITING_FOR_TIKTOK_DESISION
 
 
 async def send_tiktok_info(update, context, tiktok, first_time):
-    if update.effective_user.id == regs.ezhov_user_id:
+    if update.effective_user.id in [regs.ezhov_user_id, regs.zhenya_user_id]:
+        print('Sending tiktok started')
         result = database.count_unsent_tiktoks()
         count = result['count'] if result is not None else None
         number_of_posts = count // 10
@@ -341,7 +346,11 @@ async def send_tiktok_info(update, context, tiktok, first_time):
                     InlineKeyboardButton("👎", callback_data=f'{REJECT_TIKTOK}_{tiktok["tiktok_id"]}')
                 ],
                 [
-                    InlineKeyboardButton("Забанить отправителя", callback_data=f'{BAN_TIKTOK_SENDER}_{tiktok["tiktok_id"]}')
+                    InlineKeyboardButton("🔥🔥🔥", callback_data=f'{SUPER_APPROVE_TIKTOK}_{tiktok["tiktok_id"]}')
+                ],
+                [
+                    InlineKeyboardButton("Забанить отправителя",
+                                         callback_data=f'{BAN_TIKTOK_SENDER}_{tiktok["tiktok_id"]}')
                 ],
                 [
                     InlineKeyboardButton("Закончить отбор", callback_data=f'{STOP_TIKTOKS_APPROVAL}_|')
@@ -382,15 +391,17 @@ async def send_tiktok_info(update, context, tiktok, first_time):
 @update_user_info
 async def tiktok_approval_callback_handler(update: Update,
                                            context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id == regs.ezhov_user_id:
+    if update.effective_user.id in [regs.ezhov_user_id, regs.zhenya_user_id]:
         print('STARTING TO DEFINE TIKTOK ACTION')
         chat_id = update.effective_chat.id
         panel_message_id = update.effective_message.message_id
         data = update.callback_query.data.split('_')
         action = data[0]
         print(f'action - {action}')
-        if action == str(APPROVE_TIKTOK) or action == str(
-                REJECT_TIKTOK) or action == str(BAN_TIKTOK_SENDER):
+        if action == str(APPROVE_TIKTOK) \
+                or action == str(REJECT_TIKTOK) \
+                or action == str(BAN_TIKTOK_SENDER) \
+                or action == str(SUPER_APPROVE_TIKTOK):
             tiktok_id = int(data[1])
             tiktok = database.find_tiktok(tiktok_id)
             if tiktok is None:
@@ -398,12 +409,15 @@ async def tiktok_approval_callback_handler(update: Update,
                                                'Что-то пошло не так с предыдущим тиктоком. Скипаем')
             else:
                 sender_user_id = tiktok['sender_user_id']
-                is_approved = action == str(APPROVE_TIKTOK)
+                is_approved = action in [str(APPROVE_TIKTOK), str(SUPER_APPROVE_TIKTOK)]
                 is_banned = action == str(BAN_TIKTOK_SENDER)
                 print(f'is_banned - {is_banned}')
                 if is_approved:
                     database.approve_tiktok(tiktok_id)
-                    message_text = 'ВАААААУ, тик-ток шикарен, СПО СИ БО! Скинь ещё: /send_tiktok'
+                    if action == str(APPROVE_TIKTOK):
+                        message_text = 'ВАААААУ, тик-ток шикарен, СПО СИ БО! Скинь ещё: /send_tiktok'
+                    else:
+                        message_text = 'ЕЕЕБАТЬ ЭТО РАЗЪЕБ реально ВАУ! Скинь ещё: /send_tiktok'
                 else:
                     database.reject_tiktok(tiktok_id)
                     if is_banned:
@@ -443,6 +457,8 @@ async def tiktok_approval_callback_handler(update: Update,
             await context.bot.send_message(chat_id,
                                            'Хорошо. Отбор тиктоков завершён')
             return ConversationHandler.END
+        else:
+            print("ШО БЛИН")
 
 
 @update_user_info
