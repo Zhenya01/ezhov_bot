@@ -28,7 +28,9 @@ async def post_stream_live_notification(data):
                                                notification_text,
                                                message_thread_id=regs.zhenya_forum_threads[thread])
             await asyncio.sleep(5)
-        await application.bot.send_message(regs.zhenya_channel_id, notification_text)
+        msg = await application.bot.send_message(regs.zhenya_channel_id, notification_text)
+        application.bot_data['searching_for_post'] = True
+        application.bot_data['post_message_text'] = msg.text
     else:
         info_messages.info('Loudness was set to "silent". Setting loudness to "loud"')
         application.bot_data['silent'] = False
