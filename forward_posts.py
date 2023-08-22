@@ -51,7 +51,7 @@ async def comment_under_the_post(update: Update, context: ContextTypes.DEFAULT_T
             context.bot_data['searching_for_post'] = False
             message_id = update.effective_message.message_id
             context.application.job_queue.run_once(callback=reply_to_message,
-                                                   when=7,
+                                                   when=20,
                                                    data={
                                                        'message_id': message_id})
 

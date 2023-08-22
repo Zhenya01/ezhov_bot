@@ -28,6 +28,7 @@ async def post_stream_live_notification(data):
                                                notification_text,
                                                message_thread_id=regs.zhenya_forum_threads[thread])
             await asyncio.sleep(5)
+        await asyncio.sleep(5)
         msg = await application.bot.send_message(regs.zhenya_channel_id, notification_text)
         application.bot_data['searching_for_post'] = True
         application.bot_data['post_message_text'] = msg.text
@@ -51,7 +52,7 @@ async def rename_channel(live: bool):
                 )
     except:
         pass
-    await asyncio.sleep(5)
+    await asyncio.sleep(10)
     title = '🔴 NeEzhovForum' if live else 'NeEzhovForum'
     try:
         async with TelegramClient('ezhovApp', regs.telegram_app_api_id, regs.telegram_app_api_hash) as client:
