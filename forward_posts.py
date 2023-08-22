@@ -5,6 +5,8 @@ from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
 import regs
 from helpers_module import logger
+from telethon.sync import TelegramClient
+from telethon import functions, types
 
 
 async def forward_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -21,8 +23,8 @@ async def forward_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
             logger.debug('forwarding post to channel')
             await asyncio.sleep(3)
             msg = await context.bot.forward_message(regs.zhenya_channel_id,
-                                              update.message.chat_id,
-                                              update.message.message_id)
+                                                    update.message.chat_id,
+                                                    update.message.message_id)
             await asyncio.sleep(3)
             forum_dict = {
                 threads['posts']: 'постики',
@@ -32,17 +34,27 @@ async def forward_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 threads['stream_time']: 'посты о стримах и их обсуждения',
                 threads['life']: 'постики о жизни',
             }
-            print(f'<a href = "t.me/ezhov_test_chat/{thread_id}">➡️остальные {forum_dict[thread_id]} тут⬅️</a>')
-            # await context.bot.send_message(regs.zhenya_channel_id,
-            #                                f'<a href = "t.me/ezhov_test_chat/{thread_id}">➡️остальные {forum_dict[thread_id]} тут⬅️</a>',
-            #                                reply_markup=InlineKeyboardMarkup([
-            #                                    [
-            #                                        InlineKeyboardButton('Перейти в обсуждение',
-            #                                                             url='t.me/ezhov_test_chat/1')
-            #                                    ]
-            #                                ]),
-            #                                parse_mode=ParseMode.HTML)
+            # print(f'<a href = "t.me/ezhov_test_chat/{thread_id}">➡️остальные {forum_dict[thread_id]} тут⬅️</a>')
+            print(f'msg - {msg}')
+            context.bot_data['searching_for_post'] = True
+            context.bot_data['post_message_text'] = msg.text
 
+
+async def comment_under_the_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print('entered comments function')
+    if 'searching_for_post' not in context.bot_data.keys():
+        searching_for_post = False
+    else:
+        searching_for_post = context.bot_data['searching_for_post']
+    if searching_for_post:
+        if update.effective_message.text == context.bot_data['post_message_text']:
+            message_id = update.effective_message.message_id
+            await context.bot.send_message(regs.zhenya_group_id,
+                                           f'<a href = "t.me/ezhov_test_chat">👉 Всё наше каммунити тут!👈</a>\n'
+                                           f'Сейчас ты в канале с уведомлениями, здесь мы особо не общаемся, он создан для удобства получения всех постов',
+                                           reply_to_message_id=message_id,
+                                           parse_mode=ParseMode.HTML)
+            context.bot_data['searching_for_post'] = False
 
 async def forward_to_comments(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # forward_thread_id = regs.ezhov_forum_threads['comments']

@@ -96,6 +96,7 @@ print(f'os - {os}')
 
 application.add_handler(conv_handler)
 application.add_handler(CommandHandler('start', start))
+application.add_handler(MessageHandler(filters.Chat(chat_id=regs.zhenya_group_id), forward_posts.comment_under_the_post))
 application.add_handler(CommandHandler('start_tiktoks', tiktok_module.start_ticktock_evening,
                                        filters=filters.Chat(chat_id=regs.twitch_commands_users_list)))
 application.add_handler(CommandHandler('add', twitch_module.add_phrase,
