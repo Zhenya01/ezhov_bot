@@ -144,6 +144,7 @@ application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), echo))
 job_queue: JobQueue = application.job_queue
 if os != 'Windows':
     application.job_queue.run_custom(functions_to_run_at_the_beginning, job_kwargs={})
+# application.job_queue.run_custom(group_calls_module.join_group_call, job_kwargs={})
 application.run_polling()
 
 
