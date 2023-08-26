@@ -100,27 +100,6 @@ async def rename_channel(live: bool):
         pass
 
 
-async def schedule_remove_rename_message(update: Update,
-                                         context: ContextTypes.DEFAULT_TYPE):
-    logger.debug('Добавляем таск на удаление сообщения в job_queue')
-    logger.debug(f'До удаления: chat_id - {update.effective_chat.id}\n'
-                 f'             message_id - {update.effective_message.message_id}')
-    context.application.job_queue.run_once(callback=remove_message,
-                                           when=5,
-                                           data={
-                                               'chat_id_to_remove': update.effective_chat.id,
-                                               'message_id_to_remove': update.effective_message.message_id})
-
-
-async def remove_message(context: ContextTypes.DEFAULT_TYPE):
-    logger.debug('Удаляем сообщение о переименовании канала/заходе участника')
-    chat_id = context.job.data['chat_id_to_remove']
-    message_id = context.job.data['message_id_to_remove']
-    logger.debug(f'Во время удаления: chat_id - {chat_id}\n'
-                 f'                   message_id - {message_id}')
-
-    await context.bot.delete_message(chat_id, message_id)
-
 
 @update_user_info
 async def silent(update: Update, context: ContextTypes.DEFAULT_TYPE):

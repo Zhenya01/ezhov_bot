@@ -101,6 +101,7 @@ async def update_user(user_id, nickname='', place_of_living='', bio='',
 
 def update_user_info(function):
     async def wrapper(*args, **kwargs):
+        print(f'decorated function - {function.__name__}')
         update: telegram.Update = args[0]
         context: telegram.ext.ContextTypes.DEFAULT_TYPE = args[1]
         user_id = update.effective_user.id

@@ -96,7 +96,7 @@ print(f'os - {os}')
 
 application.add_handler(conv_handler)
 application.add_handler(CommandHandler('start', start))
-application.add_handler(MessageHandler(filters.Chat(chat_id=regs.zhenya_group_id), forward_posts.comment_under_the_post))
+application.add_handler(MessageHandler(filters.Chat(chat_id=regs.zhenya_group_id) and filters.User(user_id=777000), forward_posts.comment_under_the_post))
 application.add_handler(CommandHandler('start_tiktoks', tiktok_module.start_ticktock_evening,
                                        filters=filters.Chat(chat_id=regs.twitch_commands_users_list)))
 application.add_handler(CommandHandler('add', twitch_module.add_phrase,
@@ -125,22 +125,25 @@ application.add_handler(CommandHandler('publish', tiktok_module.publish_ticktock
 application.add_handler(
     MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS & filters.Chat(chat_id=regs.zdarovezhov_group_id),
                    chat_management_module.kick_from_group))
-application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS,
+application.add_handler(
+    MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS & filters.Chat(chat_id=regs.zhenya_group_id),
+                   chat_management_module.kick_from_group))
+application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS & filters.StatusUpdate.LEFT_CHAT_MEMBER,
                                        chat_management_module.remove_join_left_message))
-application.add_handler(MessageHandler(filters.StatusUpdate.LEFT_CHAT_MEMBER,
-                                       chat_management_module.remove_join_left_message))
+# application.add_handler(MessageHandler(filters.StatusUpdate.LEFT_CHAT_MEMBER,
+#                                        chat_management_module.remove_join_left_message))
 application.add_handler(MessageHandler(filters.Chat(chat_id=regs.ezhov_forum_id), forward_posts.forward_post))
 application.add_handler(MessageHandler(filters.Chat(chat_id=regs.zhenya_forum_id), forward_posts.forward_post))
 # application.add_handler(MessageHandler(filters.Chat(chat_id=regs.zhenya_channel_id), forward_posts.forward_to_comments))
 application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_TITLE,
-                                       twitch_module.schedule_remove_rename_message))
+                                       chat_management_module.schedule_remove_rename_message))
 application.add_handler(MessageHandler(filters.VIDEO & filters.ChatType.PRIVATE,
                                        tiktok_module.got_tiktok_file))
 application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS | filters.StatusUpdate.LEFT_CHAT_MEMBER,
                                        chat_management_module.remove_join_left_message))
 # application.add_handler(CommandHandler('file', tiktok_module.get_ticktock_file))
 # application.add_handler(CommandHandler('post', post_hello_message))
-application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), echo))
+# application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), echo))
 job_queue: JobQueue = application.job_queue
 if os != 'Windows':
     application.job_queue.run_custom(functions_to_run_at_the_beginning, job_kwargs={})

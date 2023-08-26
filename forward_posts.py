@@ -42,6 +42,7 @@ async def forward_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def comment_under_the_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print('entered comments function')
+    print(update.effective_user)
     if 'searching_for_post' not in context.bot_data.keys():
         searching_for_post = False
     else:

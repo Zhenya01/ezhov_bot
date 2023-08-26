@@ -58,21 +58,20 @@ async def delete_muted_message(context: ContextTypes.DEFAULT_TYPE):
 
 
 async def kick_from_group(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    print('KICK_FROM_GROUP')
-    if update.effective_chat.id in [regs.zdarovezhov_group_id, regs.zhenya_group_id]:
-        print('KICK_FROM_GROUP_START')
-        if update.effective_user.id not in regs.group_list:
-            message = await update.message.reply_photo(open('uhodi.png', 'rb'), 'Этот чат не чат, тут Eжов за сообщениями в группе следит')
-            message_id = message.message_id
-            # message_id = await update.message.reply_text('Этот чат не чат, тут ежов за сообщениями в группе следит').message_id
-            context.bot_data['user_to_kick'] = update.message.from_user.id
-            context.bot_data['chat_to_kick_from'] = update.message.chat.id
-            context.application.job_queue.run_once(callback=kick_after_wait,
-                                                   when=datetime.timedelta(seconds=10),
-                                                   name='kick_after_wait',
-                                                   data={'user_to_kick': update.message.from_user.id,
-                                                         'chat_to_kick_from': update.message.chat.id,
-                                                         'message_to_delete': message_id})
+    print('KICK_FROM_GROUP_START')
+    if update.effective_user.id not in regs.group_list:
+        await remove_join_left_message(update, context)
+        message = await update.message.reply_photo(open('uhodi.png', 'rb'), 'Этот чат не чат, тут Eжов за сообщениями в группе следит')
+        message_id = message.message_id
+        # message_id = await update.message.reply_text('Этот чат не чат, тут ежов за сообщениями в группе следит').message_id
+        context.bot_data['user_to_kick'] = update.message.from_user.id
+        context.bot_data['chat_to_kick_from'] = update.message.chat.id
+        context.application.job_queue.run_once(callback=kick_after_wait,
+                                               when=datetime.timedelta(seconds=10),
+                                               name='kick_after_wait',
+                                               data={'user_to_kick': update.message.from_user.id,
+                                                     'chat_to_kick_from': update.message.chat.id,
+                                                     'message_to_delete': message_id})
 
 
 async def kick_after_wait(context: ContextTypes.DEFAULT_TYPE):
@@ -84,6 +83,28 @@ async def kick_after_wait(context: ContextTypes.DEFAULT_TYPE):
     await context.bot.delete_message(chat_id, message_id)
 
 
-async def remove_join_left_message(update:Update, context: ContextTypes.DEFAULT_TYPE):
+async def remove_join_left_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger.debug('Удаляем сообщение о заходе/выходе участника')
-    await context.bot.delete_message(update.message.chat_id, update.message.message_id)
+    await schedule_remove_rename_message(update, context)
+
+
+async def schedule_remove_rename_message(update: Update,
+                                         context: ContextTypes.DEFAULT_TYPE):
+    logger.debug('Добавляем таск на удаление сообщения в job_queue')
+    logger.debug(f'До удаления: chat_id - {update.effective_chat.id}\n'
+                 f'             message_id - {update.effective_message.message_id}')
+    context.application.job_queue.run_once(callback=remove_message,
+                                           when=5,
+                                           data={
+                                               'chat_id_to_remove': update.effective_chat.id,
+                                               'message_id_to_remove': update.effective_message.message_id})
+
+
+async def remove_message(context: ContextTypes.DEFAULT_TYPE):
+    logger.debug('Удаляем сообщение о переименовании канала/заходе участника')
+    chat_id = context.job.data['chat_id_to_remove']
+    message_id = context.job.data['message_id_to_remove']
+    logger.debug(f'Во время удаления: chat_id - {chat_id}\n'
+                 f'                   message_id - {message_id}')
+
+    await context.bot.delete_message(chat_id, message_id)
