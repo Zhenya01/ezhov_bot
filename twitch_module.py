@@ -79,21 +79,21 @@ async def post_stream_offline_notification(data):
 
 
 async def rename_channel(live: bool):
-    title = '🔴 zdarovezhov' if live else 'zdarovezhov'
+    title = '🔴 zdarovezhov камунити' if live else 'zdarovezhov камунити'
     try:
         async with TelegramClient('ezhovApp', regs.telegram_app_api_id, regs.telegram_app_api_hash) as client:
             await client(functions.channels.EditTitleRequest(
-                channel='zdarovezhov',
+                channel='zdarovezhov_cummunity',
                 title=title)
                 )
     except:
         pass
     await asyncio.sleep(5)
-    title = '🔴 zdarovezhov уведомления о стримах' if live else 'zdarovezhov уведомления о стримах'
+    title = '🔴 zdarovezhov' if live else 'zdarovezhov'
     try:
         async with TelegramClient('ezhovApp', regs.telegram_app_api_id, regs.telegram_app_api_hash) as client:
             await client(functions.channels.EditTitleRequest(
-                channel='zdarovezhovstreams',
+                channel='zdarovezhov',
                 title=title)
             )
     except:

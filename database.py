@@ -5,6 +5,7 @@ import helpers_module
 from regs import cursor
 
 
+# Пользователи
 async def get_user_info(user_id):
     return await helpers_module.get_user_info(user_id)
 
@@ -19,6 +20,16 @@ async def update_user(user_id, nickname='', place_of_living='', bio='',
     return await helpers_module.update_user(user_id, nickname, place_of_living, bio,
                      is_moderator, is_admin, can_send_tiktok,
                      tiktoks_banned_until, full_name, title)
+
+
+async def get_users():
+    command = '''
+    SELECT * FROM ezhov_bot.users ORDER BY full_name'''
+    cursor.execute(command)
+    result = cursor.fetchall()
+    if result == []:
+        return None
+    return result
 
 
 # Tiktoks
@@ -158,6 +169,113 @@ def delete_in_chat_message(message_id, chat_id):
         WHERE in_chat_message_id = %s AND sender_user_id = %s;
         '''
     cursor.execute(command, (message_id, chat_id))
+
+# Баллы тг
+def add_points(user_id, points):
+    user_id = str(user_id)
+    command = '''
+    SELECT * FROM ezhov_bot.tg_points
+    WHERE user_id = %s'''
+    cursor.execute(command, (user_id,))
+    result = cursor.fetchone()
+    print(result)
+    if result is None:
+        print('Нет юзера')
+        command = '''
+        INSERT INTO ezhov_bot.tg_points 
+        (user_id) VALUES (%s)'''
+        cursor.execute(command, (user_id,))
+    command = '''
+    UPDATE ezhov_bot.tg_points
+    SET tg_points = tg_points + %s
+    WHERE user_id = %s'''
+    cursor.execute(command, (points, user_id))
+
+
+def subtract_points(user_id, points):
+    user_id = str(user_id)
+    command = '''
+        SELECT * FROM ezhov_bot.tg_points
+        WHERE user_id = %s'''
+    cursor.execute(command, (user_id,))
+    if cursor.fetchone() is None:
+        command = '''
+            INSERT INTO ezhov_bot.tg_points 
+            (user_id) VALUES (%s)'''
+        cursor.execute(command, (user_id,))
+    # command = '''
+    # UPDATE ezhov_bot.tg_points
+    # SET tg_points = tg_points - %s
+    # WHERE user_id = %s'''
+    command = '''
+    UPDATE ezhov_bot.tg_points
+    SET tg_points = 
+    CASE
+    WHEN tg_points - %s < 0 THEN 0
+    ELSE tg_points - %s
+    END
+    WHERE user_id = %s;'''
+    cursor.execute(command, (points, points, user_id))
+
+# Point rewards
+async def get_rewards():
+    command = '''
+    SELECT * FROM channel_rewards
+    ORDER BY name
+    '''
+    cursor.execute(command)
+    rewards = cursor.fetchall()
+    if rewards == []:
+        return None
+    else:
+        return rewards
+
+
+async def add_reward(name, description, price):
+    command = '''
+    INSERT INTO ezhov_bot.channel_rewards 
+    (name, description, price) 
+    VALUES (%s, %s, %s);'''
+    cursor.execute(command, (name, description, price))
+
+
+async def update_reward(reward_id, name='', description='', price=''):
+    where_clause = f"reward_id = %s"
+    fields_dict = {'name': name,
+                   'description': description,
+                   'price': price}
+    set_string = ''
+    fields_tuple = ()
+    for key in fields_dict:
+        if fields_dict[key] != '':
+            set_string = set_string + f"{key} = %s, "
+            fields_tuple = fields_tuple + (fields_dict[key],)
+    fields_tuple = fields_tuple + (reward_id,)
+    set_string = set_string[0:-2]
+    print(set_string)
+    command = f'UPDATE ezhov_bot.channel_rewards SET {set_string} WHERE {where_clause}'
+    print(command)
+    print(fields_tuple)
+    cursor.execute(command, fields_tuple)
+
+
+async def remove_reward(reward_id):
+    command = '''
+    DELETE FROM ezhov_bot.channel_rewards             
+    WHERE reward_id = %s'''
+    cursor.execute(command, (reward_id,))
+
+
+async def get_reward_info(reward_id):
+    command = '''
+    SELECT * FROM ezhov_bot.channel_rewards
+    WHERE reward_id = %s
+    '''
+    print(command)
+    cursor.execute(command, (reward_id,))
+    reward_info = cursor.fetchone()
+    print(reward_info)
+    return reward_info
 
 
 

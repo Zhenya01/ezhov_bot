@@ -12,6 +12,6 @@ group_call = group_call_factory.get_raw_group_call()
 
 @app.on(events.NewMessage(pattern='Начинай'))
 async def join_handler(event):
-    await group_call.start(regs.secrets_group_id)
+    await group_call.start(regs.ezhov_forum_id)
 
 app.run_until_disconnected()

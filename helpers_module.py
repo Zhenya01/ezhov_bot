@@ -22,7 +22,23 @@ WAITING_FOR_TIKTOK, WAITING_FOR_TIKTOK_DESISION = \
 TIKTOK_APPROVAL_STATES = '3'
 APPROVE_TIKTOK, REJECT_TIKTOK, BAN_TIKTOK_SENDER, STOP_TIKTOKS_APPROVAL, SUPER_APPROVE_TIKTOK = \
     (int(f'30{number}') for number in range(1, 5 + 1))
-
+# Points management
+ADD_OR_SUBTRACT_POINTS, ADD_POINTS, SUBTRACT_POINTS, ENTER_POINTS_MANAGEMENT, SELECT_USER =  \
+    (int(f'40{number}') for number in range(1, 5 + 1))
+# Rewards management
+SELECT_REWARD_TO_EDIT, PICK_ACTION, EDIT_REWARD, ADDING_REWARD = \
+    (int(f'50{number}') for number in range(1, 4 + 1))
+# User points interface
+USER_POINTS_MENU, SELECT_REWARD_TO_BUY, WAITING_FOR_REWARD_DECISION, WAITING_FOR_REWARD_BUY_ACCEPT = (int(f'60{number}') for number in range(1, 4 + 1))
+# Rewards vars
+CHANGE_NAME, CHANGE_DESCRIPTION, CHANGE_PRICE, REMOVE_REWARD, BACK_TO_REWARDS = 'Изменить название', 'Изменить описание', 'Изменить цену', 'Удалить награду', '⬅️ К списку наград'
+# Points vars
+LOOK_FOR_REWARDS, SEE_POINTS_INFO = '🏆 Посмотреть награды', 'ℹ️ Посмотреть подробную информацию'
+# Common buttons vars
+CANCEL_BUTTON = '❌ Отменить'
+BUY_REWARD = '💰 Купить'
+# Reward reasons
+VIEW, EDIT = 'view', 'edit'
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -51,12 +67,21 @@ logger = logging.getLogger(__name__)
 async def get_user_info(user_id):
     user_id = str(user_id)
     command = '''
-    SELECT * FROM ezhov_bot.users
-    WHERE user_id = %s
+            SELECT * FROM ezhov_bot.tg_points
+            WHERE user_id = %s'''
+    cursor.execute(command, (user_id,))
+    if cursor.fetchone() is None:
+        command = '''
+                INSERT INTO ezhov_bot.tg_points 
+                (user_id) VALUES (%s)'''
+        cursor.execute(command, (user_id,))
+    command = '''
+    SELECT * FROM ezhov_bot.users as u JOIN tg_points tp on u.user_id = tp.user_id
+    WHERE u.user_id = %s
     '''
-    print(command)
     cursor.execute(command, (user_id,))
     user_info = cursor.fetchone()
+
     print(user_info)
     return user_info
 

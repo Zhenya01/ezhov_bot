@@ -16,6 +16,7 @@ from telegram import Update, InputMediaVideo, InlineKeyboardMarkup, \
 from telegram.ext import ContextTypes, ConversationHandler
 from telegram.helpers import create_deep_linked_url
 
+import cfg
 import database
 import helpers_module
 import regs
@@ -419,8 +420,12 @@ async def tiktok_approval_callback_handler(update: Update,
                     database.approve_tiktok(tiktok_id)
                     if action == str(APPROVE_TIKTOK):
                         message_text = 'ВАААААУ, тик-ток шикарен, СПО СИ БО! Скинь ещё: /send_tiktok'
+                        points = int(cfg.BASE_ACCEPTED_TIKTOK_PRAISE)
+                        database.add_points(update.effective_user.id, points)
                     else:
                         message_text = 'ЕЕЕБАТЬ ЭТО РАЗЪЕБ реально ВАУ! Скинь ещё: /send_tiktok'
+                        points = int(cfg.BASE_FIRE_TIKTOK_PRAISE)
+                        database.add_points(update.effective_user.id, points)
                 else:
                     database.reject_tiktok(tiktok_id)
                     if is_banned:

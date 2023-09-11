@@ -5,6 +5,7 @@ from telegram import Update, ChatPermissions
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
+import database
 import regs
 from helpers_module import reformat_name, logger
 
@@ -18,16 +19,18 @@ async def mute(update: Update, context: ContextTypes.DEFAULT_TYPE):
             duration = 30
         else:
             duration = int(context.args[0])
+        points_to_deduct = duration
         mute_id = update.message.reply_to_message.from_user.id
         until_date = datetime.datetime.now(tz=pytz.timezone('Europe/Moscow')) + datetime.timedelta(minutes=duration)
         permissions = ChatPermissions(can_send_messages=False)
         await context.bot.restrict_chat_member(update.effective_chat.id, mute_id,
-                                         permissions, until_date)
+                                               permissions, until_date)
         muted_message_id = update.message.reply_to_message.message_id
         await context.bot.delete_message(update.effective_chat.id, muted_message_id)
         muter_message_id = update.message.message_id
         await context.bot.delete_message(update.effective_chat.id, muter_message_id)
         await send_muted_message(update, context, duration)
+        database.subtract_points(mute_id, points_to_deduct)
     else:
         await update.message.delete()
 

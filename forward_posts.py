@@ -3,6 +3,8 @@ import asyncio
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
+
+import channel_points_module
 import regs
 from helpers_module import logger
 from telethon.sync import TelegramClient
@@ -10,12 +12,13 @@ from telethon import functions, types
 
 
 async def forward_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await channel_points_module.add_points_for_comment(update, context)
     thread_id = update.message.message_thread_id
     logger.debug(f'Thread_id - {thread_id}, Posts_thread_id - {regs.ezhov_forum_threads["posts"]}')
-    threads = regs.zhenya_forum_threads
+    threads = regs.zhenya_forum_threads if update.effective_chat.id == regs.zhenya_forum_id else regs.ezhov_forum_threads
     if thread_id in [threads['posts'], threads['tiktoks'], threads['ezhov_news'],
                      threads['frontend_vlog'], threads['life']]:
-        if update.effective_user.id in [regs.ezhov_user_id, regs.zhenya_user_id]:
+        if update.effective_user.id in [regs.ezhov_user_id]:
             logger.debug('forwarding post to comments')
             await context.bot.forward_message(update.message.chat_id,
                                               update.message.chat_id,
