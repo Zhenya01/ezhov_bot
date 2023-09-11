@@ -62,7 +62,7 @@ async def comment_under_the_post(update: Update, context: ContextTypes.DEFAULT_T
 
 async def reply_to_message(context: ContextTypes.DEFAULT_TYPE):
     message_id = context.job.data['message_id']
-    await context.bot.send_message(regs.zhenya_group_id,
+    await context.bot.send_message(regs.zdarovezhov_group_id,
                                                f'<a href = "t.me/ezhov_test_chat">👉 Всё наше каммунити тут!👈</a>\n'
                                                f'Сейчас ты в канале с уведомлениями, здесь мы особо не общаемся, он создан для удобства получения всех постов',
                                                reply_to_message_id=message_id,
