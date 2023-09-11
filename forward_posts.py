@@ -25,7 +25,7 @@ async def forward_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
                                               update.message.message_id)
             logger.debug('forwarding post to channel')
             await asyncio.sleep(3)
-            msg = await context.bot.forward_message(regs.zhenya_channel_id,
+            msg = await context.bot.forward_message(regs.zdarovezhov_channel_id,
                                                     update.message.chat_id,
                                                     update.message.message_id)
             await asyncio.sleep(3)
