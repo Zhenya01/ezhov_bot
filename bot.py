@@ -231,7 +231,7 @@ application.add_handler(MessageHandler(filters.Chat(regs.ezhov_forum_id) & filte
                                        channel_points_module.add_points_for_comment))
 # application.add_handler(CommandHandler('file', tiktok_module.get_ticktock_file))
 # application.add_handler(CommandHandler('post', post_hello_message))
-# application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), echo))
+application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), echo))
 job_queue: JobQueue = application.job_queue
 if os != 'Windows':
     application.job_queue.run_custom(functions_to_run_at_the_beginning, job_kwargs={})
