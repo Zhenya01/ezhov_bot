@@ -421,13 +421,13 @@ async def tiktok_approval_callback_handler(update: Update,
                     if action == str(APPROVE_TIKTOK):
                         message_text = 'ВАААААУ, тик-ток шикарен, СПО СИ БО! Начислил тебе 10 баллов. Скинь ещё: /send_tiktok'
                         points = int(cfg.BASE_ACCEPTED_TIKTOK_PRAISE)
-                        database.add_points(update.effective_user.id, points)
+                        database.add_points(sender_user_id, points)
                         logger.debug(
                             f'Пользователь {update.effective_user.id} получил {points} б.')
                     else:
                         message_text = 'ЕЕЕБАТЬ ЭТО РАЗЪЕБ реально ВАУ! Начислил тебе 100 баллов. Скинь ещё: /send_tiktok'
                         points = int(cfg.BASE_FIRE_TIKTOK_PRAISE)
-                        database.add_points(update.effective_user.id, points)
+                        database.add_points(sender_user_id, points)
                         logger.debug(
                             f'Пользователь {update.effective_user.id} получил {points} б.')
                 else:
