@@ -423,13 +423,13 @@ async def tiktok_approval_callback_handler(update: Update,
                         points = int(cfg.BASE_ACCEPTED_TIKTOK_PRAISE)
                         database.add_points(update.effective_user.id, points)
                         logger.debug(
-                            f'Пользователь {update.effective_user.id} получил {cfg.BASE_ACCEPTED_TIKTOK_PRAISE} б.')
+                            f'Пользователь {update.effective_user.id} получил {points} б.')
                     else:
                         message_text = 'ЕЕЕБАТЬ ЭТО РАЗЪЕБ реально ВАУ! Начислил тебе 100 баллов. Скинь ещё: /send_tiktok'
                         points = int(cfg.BASE_FIRE_TIKTOK_PRAISE)
                         database.add_points(update.effective_user.id, points)
                         logger.debug(
-                            f'Пользователь {update.effective_user.id} получил {cfg.BASE_ACCEPTED_TIKTOK_PRAISE} б.')
+                            f'Пользователь {update.effective_user.id} получил {points} б.')
                 else:
                     database.reject_tiktok(tiktok_id)
                     if is_banned:

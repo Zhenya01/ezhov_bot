@@ -173,6 +173,7 @@ def delete_in_chat_message(message_id, chat_id):
 # Баллы тг
 def add_points(user_id, points):
     user_id = str(user_id)
+    helpers_module.logger.debug(f'Пользователь {user_id}. Начисляем {points} баллов')
     command = '''
     SELECT * FROM ezhov_bot.tg_points
     WHERE user_id = %s'''
@@ -180,7 +181,6 @@ def add_points(user_id, points):
     result = cursor.fetchone()
     print(result)
     if result is None:
-        print('Нет юзера')
         command = '''
         INSERT INTO ezhov_bot.tg_points 
         (user_id) VALUES (%s)'''
