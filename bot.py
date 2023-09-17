@@ -218,7 +218,7 @@ application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS & f
 # application.add_handler(MessageHandler(filters.StatusUpdate.LEFT_CHAT_MEMBER,
 #                                        chat_management_module.remove_join_left_message))
 application.add_handler(MessageHandler(filters.Chat(chat_id=regs.zhenya_forum_id) & filters.User(user_id=regs.zhenya_user_id), forward_posts.forward_post))
-application.add_handler(MessageHandler(filters.Chat(chat_id=regs.ezhov_forum_id) & filters.User(user_id=regs.ezhov_user_id), forward_posts.forward_post))
+application.add_handler(MessageHandler(filters.Chat(chat_id=regs.ezhov_forum_id) & filters.User(user_id=[regs.ezhov_user_id, regs.zdarovezhov_channel_id]), forward_posts.forward_post))
 application.add_handler(MessageHandler(filters.Chat(chat_id=regs.zhenya_forum_id) & filters.User(user_id=regs.ezhov_user_id), forward_posts.forward_post))
 # application.add_handler(MessageHandler(filters.Chat(chat_id=regs.zhenya_channel_id), forward_posts.forward_to_comments))
 application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_TITLE,

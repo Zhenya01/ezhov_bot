@@ -17,7 +17,7 @@ async def forward_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger.debug(f'Thread_id - {thread_id}, Posts_thread_id - {regs.ezhov_forum_threads["posts"]}')
     threads = regs.zhenya_forum_threads if update.effective_chat.id == regs.zhenya_forum_id else regs.ezhov_forum_threads
     if thread_id in [threads['posts'], threads['tiktoks'], threads['ezhov_news'],
-                     threads['frontend_vlog'], threads['life']]:
+                     threads['frontend_vlog'], threads['life'], threads['zhizhov']]:
         if update.effective_user.id in [regs.ezhov_user_id]:
             logger.debug('forwarding post to comments')
             await context.bot.forward_message(update.message.chat_id,
