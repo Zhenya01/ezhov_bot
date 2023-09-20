@@ -266,13 +266,17 @@ async def add_reward(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return ConversationHandler.END
 
 
+# ------------------------------------------------Участники----------------------------------------------------------- #
+
 async def add_points_for_comment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # TODO поменять на prestige level
     points = int(cfg.BASE_COMMENT_POINTS) + (int(cfg.PRESTIGE_LEVEL_ADDED_MULTIPLIER) * 1)
     database.add_points(update.effective_user.id, points)
+    # if 'spam_filter_reset_time' not in context.user_data.keys():
+    #     context.user_data['spam_filter_reset_time'] = None
+    # if update.message.sticker is not None:
 
 
-# ------------------------------------------------Участники----------------------------------------------------------- #
 
 @helpers_module.update_user_info
 async def points(update: Update, context: ContextTypes.DEFAULT_TYPE):

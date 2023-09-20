@@ -1,7 +1,8 @@
 import pprint
 from telegram.ext import CommandHandler, MessageHandler, filters, JobQueue, \
     ContextTypes, ConversationHandler, CallbackQueryHandler
-from telegram import Update, BotCommandScopeDefault, BotCommandScopeChatMember, BotCommandScope, BotCommand
+from telegram import Update, BotCommandScopeDefault, BotCommandScopeChatMember, BotCommandScope, BotCommand, \
+    InputMediaVideo
 import logging
 
 import platform
@@ -60,6 +61,13 @@ async def send_reboot_message(_):
 async def set_commands(_):
     await application.bot.set_my_commands([BotCommand('points', 'Управление баллами')],
                                           scope=BotCommandScopeDefault())
+    # media = []
+    # for i in range(10):
+    #     media.append(InputMediaVideo('BAACAgIAAx0EV48wTAADd2Pr6oQ_OS4TFDlAZ4vElYs5upFrAAJgKAADp2BLD8lITWKCAUYuBA'))
+    # print(media)
+    # msg = await application.bot.send_media_group(93906905,
+    #                                              media=media, caption='abc')
+    # print(msg)
     # await application.bot.set_my_commands([BotCommand('points', 'Управление баллами'),
     #                                        BotCommand('pm', 'Управление баллами (администратор)')],
     #                                       scope=BotCommandScopeChatMember(regs.ezhov_user_id, regs.ezhov_user_id))

@@ -299,8 +299,9 @@ async def publish_ticktocks(update: Update,
                 time.sleep(5)
             msg = await context.bot.send_media_group(regs.zdarovezhov_channel_id,
                                                media=media, caption=caption)
-            context.bot_data['searching_for_post'] = True
-            context.bot_data['post_message_text'] = msg.text
+            logger.debug(f'msg - {msg}')
+            # context.bot_data['searching_for_post'] = True
+            # context.bot_data['post_message_text'] = msg.text
             for tiktok in ticktoks:
                 logger.debug(
                     f'{update.effective_user.name}({update.effective_user.id}) Tiktok - {tiktok}')
