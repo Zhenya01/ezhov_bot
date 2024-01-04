@@ -2,7 +2,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
 
-from helpers_module import update_user_info
+from cfg_1 import update_user_info
 
 
 @update_user_info
@@ -51,7 +51,7 @@ f'''*Комманды стримера:*
 Опубликовать пост с тиктоками на канал \- /publish
 
 *Баллы:*
-Зайти в меню управления наградами: \- /rm
+Зайти в меню управления наградами: \- /rewards
 Добавить новую награду: \- /add\_reward
 Зайти в меню управления баллами участников: \- /pm
 Зайти в меню баллов \(как участник\): \- /points

@@ -1,13 +1,17 @@
 import datetime
 
 import pytz
-from telegram import Update, ChatPermissions
+from telegram import Update, ChatPermissions, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
+import cfg
 import database
+import cfg_1
 import regs
-from helpers_module import reformat_name, logger
+from cfg_1 import reformat_name, logger
+
+CHATS = cfg.config_data['CHATS']
 
 
 async def mute(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -19,6 +23,7 @@ async def mute(update: Update, context: ContextTypes.DEFAULT_TYPE):
             duration = 30
         else:
             duration = int(context.args[0])
+        print(duration)
         points_to_deduct = duration
         mute_id = update.message.reply_to_message.from_user.id
         until_date = datetime.datetime.now(tz=pytz.timezone('Europe/Moscow')) + datetime.timedelta(minutes=duration)
@@ -37,21 +42,61 @@ async def mute(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def send_muted_message(update: Update, context: ContextTypes.DEFAULT_TYPE, duration):
     muted_user = update.message.reply_to_message.from_user
-    muted_name = muted_user.name
+    muted_name = muted_user.full_name
     muted_username = muted_user.username
     muted_id = muted_user.id
-    muted_mention = f"\@{muted_username}" \
+    muted_mention = f"@{muted_username} ({muted_name})" \
         if (
-            muted_username != 'None' and muted_username is not None) else f'[{muted_name}](tg://user?id={muted_id})'
-    muted_mention = reformat_name(muted_mention)
-    text = f'{muted_mention}, чел ты в муте на {duration} мин\. Заслужил\.\nЗамутил: {reformat_name(update.effective_user.name)}'
+            muted_username != 'None' and muted_username is not None) else f'<a href="tg://user?id={muted_id}">{muted_name}</a>'
+    if duration % 10 == 1 and duration % 100 != 11:
+        word = "балл"
+    elif 2 <= duration % 10 <= 4 and (duration % 100 < 10 or duration % 100 >= 20):
+        word = "балла"
+    else:
+        word = "баллов"
+    text = f'{muted_mention}, чел ты в муте на {duration} мин, так еще и потерял {duration} {word}. Заслужил.\nЗамутил: {update.effective_user.name}'
     print(text)
-    message = await context.bot.send_message(update.effective_chat.id, text, parse_mode=ParseMode.MARKDOWN_V2)
-    message_id = message.message_id
-    context.application.job_queue.run_once(callback=delete_muted_message,
-                                           when=60,
-                                           data={'chat_id': update.effective_chat.id,
-                                                 'message_id': message_id})
+    message = await context.bot.send_message(update.effective_chat.id, text, parse_mode=ParseMode.HTML)
+    moderation_group = CHATS['MODERATION_GROUP']
+    until_time = datetime.datetime.now(tz=pytz.timezone("Europe/Moscow")) + datetime.timedelta(minutes=duration)
+    print(f'USER_INFO{cfg_1.UNBAN_CHATTER},{update.effective_chat.id},{muted_id}')
+    muted_mod_text = f'<b>Мут участника:</b>\n' \
+                     f'<b>Замучен</b> {muted_mention}\n' \
+                     f'<b>Время:</b> {duration} мин. (до {datetime.datetime.strftime(until_time, "%m-%d-%Y, %H:%M")})'
+    await context.bot.send_message(
+        moderation_group,
+        muted_mod_text,
+        parse_mode=ParseMode.HTML,
+        reply_markup=InlineKeyboardMarkup(
+            [
+                [InlineKeyboardButton('Размутить',
+                                      callback_data=f'{cfg_1.UNBAN_CHATTER},{update.effective_chat.id},{muted_id}')]
+            ]
+        ))
+    if 'muted_messages' not in context.bot_data.keys():
+        context.bot_data['muted_messages'] = {}
+    context.bot_data['muted_messages'][f'{cfg_1.UNBAN_CHATTER},{update.effective_chat.id},{muted_id}'] = muted_mod_text
+    # message_id = message.message_id
+    # context.application.job_queue.run_once(callback=delete_muted_message,
+    #                                        when=60,
+    #                                        data={'chat_id': update.effective_chat.id,
+    #                                              'message_id': message_id})
+
+
+async def unmute_chatter(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    text = context.bot_data['muted_messages'][update.callback_query.data]
+    del context.bot_data['muted_messages'][update.callback_query.data]
+    callback_info = update.callback_query.data.split(',')
+    chat_id = callback_info[1]
+    user_id = callback_info[2]
+    permissions = ChatPermissions().all_permissions()
+    await context.bot.restrict_chat_member(chat_id, user_id, permissions)
+    text += f'\n<i>Размучен модератором {update.effective_user.name}</i>'
+    await context.bot.edit_message_text(text,
+                                        update.effective_chat.id,
+                                        update.effective_message.id,
+                                        reply_markup=None,
+                                        parse_mode=ParseMode.HTML)
 
 
 async def delete_muted_message(context: ContextTypes.DEFAULT_TYPE):
@@ -64,7 +109,8 @@ async def kick_from_group(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print('KICK_FROM_GROUP_START')
     if update.effective_user.id not in regs.group_list:
         await remove_join_left_message(update, context)
-        message = await update.message.reply_photo(open('uhodi.png', 'rb'), 'Этот чат не чат, тут Eжов за сообщениями в группе следит')
+        message = await update.message.reply_photo(open('uhodi.png', 'rb'),
+                                                   'Этот чат не чат, тут Eжов за сообщениями в группе следит')
         message_id = message.message_id
         # message_id = await update.message.reply_text('Этот чат не чат, тут ежов за сообщениями в группе следит').message_id
         context.bot_data['user_to_kick'] = update.message.from_user.id

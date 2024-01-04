@@ -18,14 +18,14 @@ from telegram.helpers import create_deep_linked_url
 
 import cfg
 import database
-import helpers_module
+import cfg_1
 import regs
 
-from helpers_module import logger
-from helpers_module import update_user_info
-from helpers_module import SEND_TIKTOK_DEEPLINK
-from helpers_module import WAITING_FOR_TIKTOK, WAITING_FOR_TIKTOK_DESISION
-from helpers_module import APPROVE_TIKTOK, REJECT_TIKTOK, \
+from cfg_1 import logger
+from cfg_1 import update_user_info
+from cfg_1 import SEND_TIKTOK_DEEPLINK
+from cfg_1 import WAITING_FOR_TIKTOK, WAITING_FOR_TIKTOK_DESISION
+from cfg_1 import APPROVE_TIKTOK, REJECT_TIKTOK, \
     STOP_TIKTOKS_APPROVAL, BAN_TIKTOK_SENDER, SUPER_APPROVE_TIKTOK
 
 
@@ -212,8 +212,9 @@ async def got_tiktok(update: Update,
             can_send_tiktok = True
             database.unban_user_from_tiktoks(update.effective_user.id)
     if unapproved_tiktoks_count > 9:
-        await context.bot.send_message(update.effective_chat.id,
-                                       'Вы уже отправили 10 видео, но не один пока не подтвердили. Пока больше нельзя отправлять тиктоки')
+            await context.bot.send_message(update.effective_chat.id,
+                                           'Вы уже отправили 10 видео, но не один пока не подтвердили. Пока больше нельзя отправлять тиктоки')
+
     elif not can_send_tiktok:
         time_banned_string = tiktoks_banned_until.strftime("%Y-%m-%d %H:%M:%S")
         await context.bot.send_message(update.effective_chat.id,
@@ -246,6 +247,9 @@ async def got_tiktok(update: Update,
             message_text += ' можешь отправить еще) /send_tiktok'
         else:
             message_text += ' отдохни) Ты отправил(а) слишком много. Я напишу, когда можно будет отправить ещё'
+            # if update.effective_user.id == 77257773:
+            #     if unapproved_count <= 19:
+            #         message_text += ' можешь отправить еще) /send_tiktok'
         if unapproved_count == 5:
             context.bot.send_message(regs.ezhov_user_id, f'Пользователь {update.effective_user.full_name} уже имеет 5 неодобренных тиктоков. Скоро он не сможет отправлять тиктоки. Пора бы отфильтровать :)')
         await context.bot.send_message(update.effective_chat.id, message_text)
@@ -289,7 +293,7 @@ async def publish_ticktocks(update: Update,
                     # caption = caption + f'{ticktoks.index(ticktok) + 1}й тикток прислал(а) {user["full_name"]}\n'
             logger.debug(
                 f'{update.effective_user.name}({update.effective_user.id}) names - {names}')
-            caption += helpers_module.generate_tiktok_senders_string(names)
+            caption += cfg_1.generate_tiktok_senders_string(names)
             logger.debug(
                 f'{update.effective_user.name}({update.effective_user.id}) caption - {caption}')
             threads = ['tiktoks', 'comments']
@@ -298,7 +302,7 @@ async def publish_ticktocks(update: Update,
                                                    media=media, caption=caption, message_thread_id=regs.ezhov_forum_threads[thread])
                 time.sleep(5)
             msg = await context.bot.send_media_group(regs.zdarovezhov_channel_id,
-                                               media=media, caption=caption)
+                                                     media=media, caption=caption)
             logger.debug(f'msg - {msg}')
             # context.bot_data['searching_for_post'] = True
             # context.bot_data['post_message_text'] = msg.text

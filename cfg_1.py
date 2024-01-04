@@ -30,12 +30,21 @@ SELECT_REWARD_TO_EDIT, PICK_ACTION, EDIT_REWARD, ADDING_REWARD = \
     (int(f'50{number}') for number in range(1, 4 + 1))
 # User points interface
 USER_POINTS_MENU, SELECT_REWARD_TO_BUY, WAITING_FOR_REWARD_DECISION, WAITING_FOR_REWARD_BUY_ACCEPT = (int(f'60{number}') for number in range(1, 4 + 1))
+APPROVE_REWARD, DECLINE_REWARD = (int(f'70{number}') for number in range(1, 2 + 1))
+UNBAN_CHATTER = '801'
+ADD_REWARD_NAME, ADD_REWARD_DESCRIPTION, ADD_REWARD_PRICE = \
+    (int(f'90{number}') for number in range(1, 3 + 1))
 # Rewards vars
-CHANGE_NAME, CHANGE_DESCRIPTION, CHANGE_PRICE, REMOVE_REWARD, BACK_TO_REWARDS = 'Изменить название', 'Изменить описание', 'Изменить цену', 'Удалить награду', '⬅️ К списку наград'
+(CHANGE_NAME, CHANGE_DESCRIPTION, CHANGE_PRICE, CHANGE_NUMBER_LEFT, CHANGE_PERSON_TOTAL_LIMIT,
+ CHANGE_PERSON_COOLDOWN, CHANGE_TOTAL_COOLDOWN) = ('Изменить название', 'Изменить описание', 'Изменить цену',
+                                                   'Изменить остаток', 'Изменить лимит на человека',
+                                                   'Изменить кулдаун на человека', 'Изменить кулдаун на награду')
+REMOVE_REWARD, BACK_TO_REWARDS = 'Удалить награду', '⬅️ К списку наград'
 # Points vars
-LOOK_FOR_REWARDS, SEE_POINTS_INFO = '🏆 Посмотреть награды', 'ℹ️ Посмотреть подробную информацию'
+SEE_REWARDS, SEE_POINTS_INFO = '🏆 Посмотреть награды', 'ℹ️ Посмотреть подробную информацию'
 # Common buttons vars
 CANCEL_BUTTON = '❌ Отменить'
+ADD_REWARD_BUTTON = '➕ Добавить награду'
 BUY_REWARD = '💰 Купить'
 # Reward reasons
 VIEW, EDIT = 'view', 'edit'

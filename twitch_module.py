@@ -7,12 +7,12 @@ from telegram.ext import ContextTypes
 from telethon import TelegramClient, functions
 
 import info_messages
-from helpers_module import update_user_info
+from cfg_1 import update_user_info
 
 import regs
 import twitchAPI_integration
 import zhenya_test
-from helpers_module import logger, application
+from cfg_1 import logger, application
 
 twitch: twitchAPI.twitch = None
 webhook: twitchAPI.eventsub = None
@@ -50,7 +50,7 @@ async def post_stream_live_notification(data):
     logger.info('Streamer is online. Changing information')
     logger.debug(f'Twitch data - {data}')
     if 'silent' not in application.bot_data.keys() or application.bot_data['silent'] is False:
-        info_messages.info('Loudness is set to "loud". Posting notification')
+        logger.info('Loudness is set to "loud". Posting notification')
         emoji = random.choice(regs.emoji_list)
         phrases_list = application.bot_data['phrases_list']
         if len(phrases_list) == 0:
@@ -69,7 +69,7 @@ async def post_stream_live_notification(data):
         application.bot_data['searching_for_post'] = True
         application.bot_data['post_message_text'] = msg.text
     else:
-        info_messages.info('Loudness is set to "silent". Setting loudness to "loud"')
+        logger.info('Loudness is set to "silent". Setting loudness to "loud"')
         application.bot_data['silent'] = False
     await rename_channel(live=True)
 

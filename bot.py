@@ -10,19 +10,21 @@ import platform
 import cfg
 import channel_points_module
 import forward_posts
+import cfg_1
 import regs
 import tiktok_module
 import twitch_module
 import chat_management_module
-from helpers_module import logger, application, update_user_info
-from helpers_module import WAITING_FOR_TIKTOK_DESISION
-from helpers_module import TIKTOK_APPROVAL_STATES
-from helpers_module import SEND_TIKTOK_DEEPLINK
-from helpers_module import SELECT_USER, ADD_OR_SUBTRACT_POINTS, ADD_POINTS, SUBTRACT_POINTS, ENTER_POINTS_MANAGEMENT
-from helpers_module import SELECT_REWARD_TO_EDIT, PICK_ACTION, EDIT_REWARD, ADDING_REWARD, CHANGE_NAME, CHANGE_DESCRIPTION, CHANGE_PRICE, REMOVE_REWARD, BACK_TO_REWARDS, BUY_REWARD
+from cfg_1 import logger, application, update_user_info
+from cfg_1 import WAITING_FOR_TIKTOK_DESISION
+from cfg_1 import TIKTOK_APPROVAL_STATES
+from cfg_1 import SEND_TIKTOK_DEEPLINK
+from cfg_1 import SELECT_USER, ADD_OR_SUBTRACT_POINTS, ADD_POINTS, SUBTRACT_POINTS, ENTER_POINTS_MANAGEMENT
+from cfg_1 import SELECT_REWARD_TO_EDIT, PICK_ACTION, EDIT_REWARD, ADDING_REWARD, CHANGE_NAME, CHANGE_DESCRIPTION, CHANGE_PRICE, REMOVE_REWARD, BACK_TO_REWARDS, BUY_REWARD
 import info_messages
-from helpers_module import LOOK_FOR_REWARDS, SEE_POINTS_INFO, USER_POINTS_MENU, SELECT_REWARD_TO_BUY, WAITING_FOR_REWARD_DECISION, CANCEL_BUTTON
-
+from cfg_1 import SEE_REWARDS, SEE_POINTS_INFO, USER_POINTS_MENU, SELECT_REWARD_TO_BUY, WAITING_FOR_REWARD_DECISION, CANCEL_BUTTON
+from cfg_1 import ADD_REWARD_NAME, ADD_REWARD_DESCRIPTION, ADD_REWARD_PRICE
+from cfg_1 import DECLINE_REWARD, APPROVE_REWARD
 @update_user_info
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger.debug('STARTING')
@@ -55,24 +57,12 @@ async def bugs_and_improvements(update: Update, context: ContextTypes.DEFAULT_TY
 
 async def send_reboot_message(_):
     await application.bot.send_message(93906905, 'Бот перезагружен')
-    pprint.pprint(f'LOGGER_DICT - {logging.root.manager.loggerDict}')
+    # pprint.pprint(f'LOGGER_DICT - {logging.root.manager.loggerDict}')
 
 
 async def set_commands(_):
     await application.bot.set_my_commands([BotCommand('points', 'Управление баллами')],
                                           scope=BotCommandScopeDefault())
-    # media = []
-    # for i in range(10):
-    #     media.append(InputMediaVideo('BAACAgIAAx0EV48wTAADd2Pr6oQ_OS4TFDlAZ4vElYs5upFrAAJgKAADp2BLD8lITWKCAUYuBA'))
-    # print(media)
-    # msg = await application.bot.send_media_group(93906905,
-    #                                              media=media, caption='abc')
-    # print(msg)
-    # await application.bot.set_my_commands([BotCommand('points', 'Управление баллами'),
-    #                                        BotCommand('pm', 'Управление баллами (администратор)')],
-    #                                       scope=BotCommandScopeChatMember(regs.ezhov_user_id, regs.ezhov_user_id))
-    # await application.bot.set_my_commands([BotCommand('points', 'Управление баллами')],
-    #                                       scope=BotCommandScopeChatMember(regs.zhenya_user_id, regs.zhenya_user_id))
     print('set commands success')
 
 
@@ -94,9 +84,9 @@ conv_handler = ConversationHandler(
                                      filters=filters.User(user_id=regs.ezhov_user_id) & filters.ChatType.PRIVATE),
                       CommandHandler('pm', channel_points_module.points_manual_management,
                                      filters=filters.User(user_id=regs.zhenya_user_id) & filters.ChatType.PRIVATE),
-                      CommandHandler('rm', channel_points_module.rewards_command_entered,
+                      CommandHandler('rewards', channel_points_module.rewards_command_entered,
                                      filters=filters.User(user_id=regs.ezhov_user_id) & filters.ChatType.PRIVATE),
-                      CommandHandler('rm', channel_points_module.rewards_command_entered,
+                      CommandHandler('rewards', channel_points_module.rewards_command_entered,
                                      filters=filters.User(user_id=regs.zhenya_user_id) & filters.ChatType.PRIVATE),
                       CommandHandler('add_reward', channel_points_module.start_adding_reward,
                                      filters=filters.User(user_id=regs.ezhov_user_id) & filters.ChatType.PRIVATE),
@@ -146,22 +136,35 @@ conv_handler = ConversationHandler(
             ],
             PICK_ACTION:
             [
-                MessageHandler(filters.Text([CHANGE_NAME, CHANGE_DESCRIPTION, CHANGE_PRICE, REMOVE_REWARD, BACK_TO_REWARDS]),
-                               channel_points_module.manage_reward)
+                MessageHandler(filters.TEXT | filters.PHOTO | filters.AUDIO,
+                               channel_points_module.wrong_action_notification),
+                CallbackQueryHandler(channel_points_module.reward_callback_handler)
+                # MessageHandler(filters.Text([CHANGE_NAME, CHANGE_DESCRIPTION, CHANGE_PRICE, REMOVE_REWARD, BACK_TO_REWARDS]),
+                #                channel_points_module.manage_reward)
             ],
             EDIT_REWARD:
             [
                 MessageHandler(filters.TEXT,
                                channel_points_module.save_new_reward_char)
             ],
-            ADDING_REWARD:
+            ADD_REWARD_NAME:
             [
                 MessageHandler(filters.TEXT & filters.User(user_id=[regs.ezhov_user_id, regs.zhenya_user_id]),
-                               channel_points_module.add_reward)
+                               channel_points_module.reward_name_entered)
+            ],
+            ADD_REWARD_DESCRIPTION:
+            [
+                MessageHandler(filters.TEXT & filters.User(user_id=[regs.ezhov_user_id, regs.zhenya_user_id]),
+                               channel_points_module.reward_description_entered)
+            ],
+            ADD_REWARD_PRICE:
+            [
+                MessageHandler(filters.TEXT & filters.User(user_id=[regs.ezhov_user_id, regs.zhenya_user_id]),
+                               channel_points_module.reward_price_entered)
             ],
             USER_POINTS_MENU:
             [
-                MessageHandler(filters.Text([CANCEL_BUTTON, LOOK_FOR_REWARDS, SEE_POINTS_INFO]),
+                MessageHandler(filters.Text([CANCEL_BUTTON, SEE_REWARDS, SEE_POINTS_INFO]),
                                channel_points_module.points_descision)
             ],
             SELECT_REWARD_TO_BUY:
@@ -237,6 +240,12 @@ application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS | f
                                        chat_management_module.remove_join_left_message))
 application.add_handler(MessageHandler(filters.Chat(regs.ezhov_forum_id) & filters.ALL,
                                        channel_points_module.add_points_for_comment))
+application.add_handler(CallbackQueryHandler(channel_points_module.reward_moderation,
+                        pattern=rf'^{cfg_1.APPROVE_REWARD},'))
+application.add_handler(CallbackQueryHandler(channel_points_module.reward_moderation,
+                        pattern=rf'^{cfg_1.DECLINE_REWARD},'))
+application.add_handler(CallbackQueryHandler(chat_management_module.unmute_chatter,
+                        pattern=rf'^{cfg_1.UNBAN_CHATTER},'))
 # application.add_handler(CommandHandler('file', tiktok_module.get_ticktock_file))
 # application.add_handler(CommandHandler('post', post_hello_message))
 application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), echo))

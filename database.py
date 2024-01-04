@@ -1,23 +1,24 @@
 import datetime
 from pprint import pprint
 
-import helpers_module
+import cfg_1
 from regs import cursor
+import uuid
 
 
 # Пользователи
 async def get_user_info(user_id):
-    return await helpers_module.get_user_info(user_id)
+    return await cfg_1.get_user_info(user_id)
 
 
 async def add_user(user_id, full_name):
-    return await helpers_module.add_user(user_id, full_name)
+    return await cfg_1.add_user(user_id, full_name)
 
 
 async def update_user(user_id, nickname='', place_of_living='', bio='',
                      is_moderator='', is_admin='', can_send_tiktok='',
                      tiktoks_banned_until='', full_name='', title=''):
-    return await helpers_module.update_user(user_id, nickname, place_of_living, bio,
+    return await cfg_1.update_user(user_id, nickname, place_of_living, bio,
                      is_moderator, is_admin, can_send_tiktok,
                      tiktoks_banned_until, full_name, title)
 
@@ -173,7 +174,7 @@ def delete_in_chat_message(message_id, chat_id):
 # Баллы тг
 def add_points(user_id, points):
     user_id = str(user_id)
-    helpers_module.logger.debug(f'Пользователь {user_id}. Начисляем {points} баллов')
+    cfg_1.logger.debug(f'Пользователь {user_id}. Начисляем {points} баллов')
     command = '''
     SELECT * FROM ezhov_bot.tg_points
     WHERE user_id = %s'''
@@ -217,6 +218,7 @@ def subtract_points(user_id, points):
     WHERE user_id = %s;'''
     cursor.execute(command, (points, points, user_id))
 
+
 # Point rewards
 async def get_rewards():
     command = '''
@@ -231,19 +233,70 @@ async def get_rewards():
         return rewards
 
 
-async def add_reward(name, description, price):
+class Reward:
+    def __init__(self, name,
+                 reward_id=None,
+                 description=None,
+                 price=None,
+                 number_left=None,
+                 person_total_limit=None,
+                 person_cooldown=None,
+                 total_cooldown=None):
+        self.uuid = str(uuid.uuid4())
+        self.name = name
+        self.reward_id = reward_id
+        self.description = description
+        self.price = price
+        self.number_left = number_left
+        self.person_total_limit = person_total_limit
+        self.person_cooldown = person_cooldown
+        self.total_cooldown = total_cooldown
+
+    def __str__(self):
+        return (f'UUID: {self.uuid}\n'
+                f'Name: {self.name}\n'
+                f'Description: {self.description}\n'
+                f'Price: {self.price}\n'
+                f'Number_left: {self.number_left}\n'
+                f'Person_total_limit: {self.person_total_limit}\n'
+                f'Person_cooldown: {self.person_cooldown}\n'
+                f'Total cooldown: {self.total_cooldown}')
+
+    def put_to_db(self):
+        reward_id = add_reward(self.name, self.description, self.price, self.number_left, self.person_total_limit,
+                               self.person_cooldown, self.total_cooldown)
+        self.reward_id = reward_id
+
+    def update_in_db(self):
+        update_reward(self.reward_id, self.name, self.description, self.price, self.number_left,
+                      self.person_total_limit, self.person_cooldown, self.total_cooldown)
+
+    def delete_from_db(self):
+        if self.reward_id is None:
+            raise Exception('No reward_id in an object')
+        remove_reward(self.reward_id)
+
+
+def add_reward(name, description, price, number_left, person_total_limit, person_cooldown, total_cooldown):
     command = '''
     INSERT INTO ezhov_bot.channel_rewards 
-    (name, description, price) 
-    VALUES (%s, %s, %s);'''
-    cursor.execute(command, (name, description, price))
+    (name, description, price, number_left, person_total_limit, person_cooldown, total_cooldown) 
+    VALUES (%s, %s, %s, %s, %s, %s, %s)
+    RETURNING reward_id;'''
+    cursor.execute(command, (name, description, price, number_left, person_total_limit, person_cooldown, total_cooldown))
+    return cursor.fetchone()['reward_id']
 
 
-async def update_reward(reward_id, name='', description='', price=''):
+def update_reward(reward_id, name='', description='', price='', number_left='', person_total_limit='',
+                        person_cooldown='', total_cooldown=''):
     where_clause = f"reward_id = %s"
     fields_dict = {'name': name,
                    'description': description,
-                   'price': price}
+                   'price': price,
+                   'number_left': number_left,
+                   'person_total_limit': person_total_limit,
+                   'person_cooldown': person_cooldown,
+                   'total_cooldown': total_cooldown}
     set_string = ''
     fields_tuple = ()
     for key in fields_dict:
@@ -259,14 +312,14 @@ async def update_reward(reward_id, name='', description='', price=''):
     cursor.execute(command, fields_tuple)
 
 
-async def remove_reward(reward_id):
+def remove_reward(reward_id):
     command = '''
     DELETE FROM ezhov_bot.channel_rewards             
     WHERE reward_id = %s'''
     cursor.execute(command, (reward_id,))
 
 
-async def get_reward_info(reward_id):
+async def get_reward_info(reward_id) -> Reward:
     command = '''
     SELECT * FROM ezhov_bot.channel_rewards
     WHERE reward_id = %s
@@ -275,7 +328,103 @@ async def get_reward_info(reward_id):
     cursor.execute(command, (reward_id,))
     reward_info = cursor.fetchone()
     print(reward_info)
-    return reward_info
+    if reward_info is None:
+        return None
+    else:
+        reward = Reward(reward_info['name'],
+                        reward_info['reward_id'],
+                        reward_info['description'],
+                        reward_info['price'],
+                        reward_info['number_left'],
+                        reward_info['person_total_limit'],
+                        reward_info['person_cooldown'],
+                        reward_info['total_cooldown']
+                        )
+    return reward
+
+
+async def add_user_reward(user_id, reward_id):
+    command = '''
+        INSERT INTO ezhov_bot.user_rewards 
+        (user_id, reward_id, purchase_time)
+        VALUES (%s, %s, CURRENT_TIMESTAMP)
+        RETURNING ur_id
+        '''
+    print(command)
+    cursor.execute(command, (user_id, reward_id))
+    reward_id = cursor.fetchone()
+    return reward_id
+
+
+async def add_ur_message_id(ur_id, message_id):
+    command = '''
+    UPDATE ezhov_bot.user_rewards
+    SET message_id = %s
+    WHERE ur_id = %s'''
+    cursor.execute(command, (message_id, ur_id))
+    return
+
+
+async def get_user_reward_by_id(ur_id):
+    command = '''
+    SELECT * FROM ezhov_bot.user_rewards
+    WHERE ur_id = %s'''
+    cursor.execute(command, (ur_id,))
+    result = cursor.fetchone()
+    return result
+
+
+async def get_latest_reward_by_id(reward_id):
+    command = '''SELECT * FROM ezhov_bot.user_rewards
+                 WHERE reward_id = %s AND is_approved = true 
+                 AND purchase_time = 
+                 (SELECT MAX(purchase_time) FROM ezhov_bot.user_rewards
+                 WHERE reward_id = %s AND is_approved = true)'''
+    cursor.execute(command, (reward_id, reward_id))
+    result = cursor.fetchone()
+    return result
+
+
+async def get_latest_ur_by_id(reward_id, user_id):
+    user_id = str(user_id)
+    command = '''SELECT * FROM ezhov_bot.user_rewards
+                 WHERE reward_id = %s AND is_approved = true AND user_id = %s
+                 AND purchase_time = 
+                 (SELECT MAX(purchase_time) FROM ezhov_bot.user_rewards
+                 WHERE reward_id = %s AND is_approved = true AND user_id = %s)'''
+    cursor.execute(command, (reward_id, user_id, reward_id, user_id))
+    result = cursor.fetchone()
+    return result
+
+
+async def get_user_reward_count(reward_id, user_id):
+    user_id = str(user_id)
+    command = '''SELECT COUNT(*) as count FROM ezhov_bot.user_rewards
+                 WHERE reward_id = %s AND user_id = %s AND is_approved = True'''
+    cursor.execute(command, (reward_id, user_id))
+    result = cursor.fetchone()
+    return result
+
+
+async def approve_user_reward(ur_id):
+    command = '''
+    UPDATE ezhov_bot.user_rewards
+    SET is_approved = True
+    WHERE ur_id = %s'''
+    cursor.execute(command, (ur_id,))
+    return
+
+
+async def reject_user_reward(ur_id):
+    command = '''
+    UPDATE ezhov_bot.user_rewards
+    SET is_approved = False
+    WHERE ur_id = %s'''
+    cursor.execute(command, (ur_id,))
+    return
+
+
+
 
 
 

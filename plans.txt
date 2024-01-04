@@ -1,0 +1,21 @@
+Промокоды:
+1) С лимитированным количеством активаций ()
+2) По 1 активации на каждого участника
+3) С ограниченным сроком действия
+
+Таблица промокодов: (promo_codes)
+ code_id
+ code_type (LIMITED_USES, ONE_PER_PERSON, LIMITED_TIME)
+ points
+ reward_id
+ code_decay_time
+ activations_left
+
+Таблица полученных промокодов: (user_promo_codes)
+ uc_id
+ user_id
+ code_id
+ time_received
+
+
+

@@ -6,7 +6,7 @@ from telegram.constants import ParseMode
 
 import channel_points_module
 import regs
-from helpers_module import logger
+from cfg_1 import logger
 from telethon.sync import TelegramClient
 from telethon import functions, types
 

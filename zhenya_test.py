@@ -5,7 +5,7 @@ from telethon import TelegramClient, functions
 
 import info_messages
 import regs
-from helpers_module import logger, application
+from cfg_1 import logger, application
 
 
 async def post_stream_live_notification(data):
