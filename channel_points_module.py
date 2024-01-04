@@ -370,8 +370,8 @@ async def reward_callback_handler(update: Update, context: ContextTypes.DEFAULT_
     elif update.callback_query.data == 'save_changes':
         group_id = cfg.config_data['CHATS']['FORUM_GROUP']
         unupdated_reward = await database.get_reward_info(reward.reward_id)
-        if reward.number_left > unupdated_reward.number_left:
-            await context.bot.send_message(group_id, f'Добавилось количество награды "{reward.name}". Бегом покупать!!')
+        # if reward.number_left > unupdated_reward.number_left:
+        #     await context.bot.send_message(group_id, f'Добавилось количество награды "{reward.name}". Бегом покупать!!')
         text, markup = await generate_reward_text(reward)
         reward.update_in_db()
         await update.callback_query.message.edit_text('\n'.join(text.split('\n')[:-1]) + '\n\n<i>Изменения сохранены</i>',
