@@ -370,8 +370,8 @@ async def reward_callback_handler(update: Update, context: ContextTypes.DEFAULT_
     elif update.callback_query.data == 'save_changes':
         group_id = cfg.config_data['CHATS']['FORUM_GROUP']
         unupdated_reward = await database.get_reward_info(reward.reward_id)
-        # if reward.number_left > unupdated_reward.number_left:
-        #     await context.bot.send_message(group_id, f'Добавилось количество награды "{reward.name}". Бегом покупать!!')
+        if reward.number_left > unupdated_reward.number_left:
+            await context.bot.send_message(group_id, f'Добавилось количество награды "{reward.name}". Бегом покупать!!')
         text, markup = await generate_reward_text(reward)
         reward.update_in_db()
         await update.callback_query.message.edit_text('\n'.join(text.split('\n')[:-1]) + '\n\n<i>Изменения сохранены</i>',
@@ -634,7 +634,7 @@ async def user_chose_reward(update: Update, context: ContextTypes.DEFAULT_TYPE):
     total_user_cooldown_passed = latest_user_reward_of_type is None or (latest_user_reward_of_type is not None and (datetime.datetime.now() - latest_reward_of_type['purchase_time'] > datetime.timedelta(days=reward.person_cooldown)))
     user_rewards_count = await database.get_user_reward_count(reward_id, update.effective_user.id)
     user_rewards_count = user_rewards_count['count']
-    has_user_limit_left = user_rewards_count < reward.person_total_limit
+    has_user_limit_left = (user_rewards_count < reward.person_total_limit) if reward.person_total_limit != 0 else True
     number_left = reward.number_left > 0
     if total_cooldown_passed and total_user_cooldown_passed and has_user_limit_left and number_left:
         await context.bot.send_message(update.effective_chat.id,
