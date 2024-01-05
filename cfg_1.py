@@ -132,6 +132,21 @@ async def update_user(user_id, nickname='', place_of_living='', bio='',
     cursor.execute(command, fields_tuple)
     cursor.execute('commit')
 
+# def update_user_info(function):
+#     async def wrapper(*args, **kwargs):
+#         print(f'decorated function - {function.__name__}')
+#         update: telegram.Update = args[0]
+#         context: telegram.ext.ContextTypes.DEFAULT_TYPE = args[1]
+#         user_id = update.effective_user.id
+#         user_info = await get_user_info(user_id)
+#         if user_info is None:
+#             await add_user(user_id, update.effective_user.full_name)
+#         else:
+#             if user_info['full_name'] != update.effective_user.full_name:
+#                 await update_user(user_id, full_name=update.effective_user.full_name)
+#             context.user_data['user_info'] = user_info
+#         return await function(*args, **kwargs)
+#     return wrapper
 
 def update_user_info(function):
     async def wrapper(*args, **kwargs):
@@ -139,6 +154,10 @@ def update_user_info(function):
         update: telegram.Update = args[0]
         context: telegram.ext.ContextTypes.DEFAULT_TYPE = args[1]
         user_id = update.effective_user.id
+        try:
+            await add_user(user_id, update.effective_user.full_name)
+        except:
+            pass
         user_info = await get_user_info(user_id)
         if user_info is None:
             await add_user(user_id, update.effective_user.full_name)

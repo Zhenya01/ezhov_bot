@@ -11,6 +11,7 @@ import cfg
 import database
 import cfg_1
 from database import Reward
+from cfg_1 import update_user_info
 # Points management states
 from cfg_1 import ADD_OR_SUBTRACT_POINTS, ADD_POINTS, SUBTRACT_POINTS, ENTER_POINTS_MANAGEMENT, SELECT_USER
 from cfg_1 import (SELECT_REWARD_TO_EDIT, PICK_ACTION, EDIT_REWARD, ADDING_REWARD, CHANGE_NAME,
@@ -24,7 +25,7 @@ CHATS = cfg.config_data['CHATS']
 
 # -----------------------------------------------------Админ---------------------------------------------------------- #
 
-
+@update_user_info
 async def points_manual_management(update: Update, context: ContextTypes.DEFAULT_TYPE):
     users_list = await database.get_users()
     if users_list is None:
@@ -127,7 +128,7 @@ async def rewards_command_entered(update: Update, context: ContextTypes.DEFAULT_
     result = await show_rewards(update, context)
     return result
 
-
+@update_user_info
 async def show_rewards(update: Update, context: ContextTypes.DEFAULT_TYPE):
     rewards_list = await database.get_rewards()
     if rewards_list is None:
@@ -154,7 +155,7 @@ async def show_rewards(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif reason == str(VIEW):
         return SELECT_REWARD_TO_BUY
 
-
+@update_user_info
 async def generate_reward_text(reward: Reward, is_extended=False):
     keyboard = [
         [InlineKeyboardButton('❌ Отменить', callback_data='cancel')],
@@ -196,7 +197,7 @@ async def generate_reward_text(reward: Reward, is_extended=False):
 
     return text, keyboard
 
-
+@update_user_info
 async def show_reward(update: Update, context: ContextTypes.DEFAULT_TYPE, reward=None):
     if update.message.text == cfg_1.ADD_REWARD_BUTTON:
         result = await start_adding_reward(update, context)
@@ -235,7 +236,7 @@ async def show_reward(update: Update, context: ContextTypes.DEFAULT_TYPE, reward
     context.user_data['managed_reward'] = reward
     return PICK_ACTION
 
-
+@update_user_info
 async def reward_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reward = context.user_data['managed_reward']
     if update.callback_query.data == 'extend_limits_info':
@@ -550,7 +551,7 @@ async def reward_price_entered(update: Update, context: ContextTypes.DEFAULT_TYP
 
 
 # ------------------------------------------------Участники----------------------------------------------------------- #
-
+@update_user_info
 async def add_points_for_comment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # TODO поменять на prestige level
     points = int(cfg.BASE_COMMENT_POINTS) + (int(cfg.PRESTIGE_LEVEL_ADDED_MULTIPLIER) * 1)
@@ -582,7 +583,7 @@ async def points(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['points_management_user_id'] = user["user_id"]
     return USER_POINTS_MENU
 
-
+@update_user_info
 async def points_descision(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_message.text == CANCEL_BUTTON:
         await context.bot.send_message(update.effective_chat.id,
@@ -608,7 +609,7 @@ async def points_descision(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return_value = await show_rewards(update, context)
         return return_value
 
-
+@update_user_info
 async def user_chose_reward(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.text == CANCEL_BUTTON:
         result = await points(update, context)
@@ -684,7 +685,7 @@ async def user_chose_reward(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f'К сожалению, сейчас нельзя взять эту награду, потому что ты достиг(ла) своего личного лимита в {reward.person_total_limit} шт.')
             return state
 
-
+@update_user_info
 async def reward_decision(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.text == BACK_TO_REWARDS:
         result = await show_rewards(update, context)
@@ -750,7 +751,7 @@ async def reward_decision(update: Update, context: ContextTypes.DEFAULT_TYPE):
         result = await show_rewards(update, context)
         return result
 
-
+@update_user_info
 async def reward_moderation(update: Update, context: ContextTypes.DEFAULT_TYPE):
     callback_info = update.callback_query.data.split(',')
     ur_id = callback_info[1]
