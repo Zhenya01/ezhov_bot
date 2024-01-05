@@ -10,7 +10,6 @@ from telegram.ext import ContextTypes, ConversationHandler, CallbackContext
 import cfg
 import database
 import cfg_1
-import regs
 from database import Reward
 # Points management states
 from cfg_1 import ADD_OR_SUBTRACT_POINTS, ADD_POINTS, SUBTRACT_POINTS, ENTER_POINTS_MANAGEMENT, SELECT_USER
@@ -368,7 +367,7 @@ async def reward_callback_handler(update: Update, context: ContextTypes.DEFAULT_
         context.user_data['reward_action'] = CHANGE_TOTAL_COOLDOWN
         return EDIT_REWARD
     elif update.callback_query.data == 'save_changes':
-        group_id = cfg.config_data['CHATS']['FORUM_GROUP']
+        group_id = CHATS['FORUM_GROUP']
         unupdated_reward = await database.get_reward_info(reward.reward_id)
         if reward.number_left > unupdated_reward.number_left:
             await context.bot.send_message(group_id, f'Добавилось количество награды "{reward.name}". Бегом покупать!!')
@@ -721,8 +720,9 @@ async def reward_decision(update: Update, context: ContextTypes.DEFAULT_TYPE):
                                  reward.price)
         reward.number_left -= 1
         reward.update_in_db()
-        threads = regs.zhenya_forum_threads
-        await context.bot.send_message(regs.zhenya_forum_id,
+        threads = CHATS['FORUM_THREADS']
+        group_id = CHATS['FORUM_GROUP']
+        await context.bot.send_message(group_id,
                                        f'Ура! {name} приобрёл награду "{reward.name}"',
                                        message_thread_id=threads['comments'],
                                        parse_mode=ParseMode.HTML)
@@ -788,8 +788,9 @@ async def reward_moderation(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_message(user_info['user_id'],
                                            "К сожалению, ваша награда была отклонена администратором",
                                            reply_to_message_id=user_reward["message_id"])
-            threads = regs.zhenya_forum_threads
-            await context.bot.send_message(regs.zhenya_forum_id,
+            threads = CHATS['FORUM_THREADS']
+            group_id = CHATS['FORUM_GROUP']
+            await context.bot.send_message(group_id,
                                            f'Награда пользователя {name}, "{reward.name}", была отклонена модераторами :(',
                                            message_thread_id=threads['comments'],
                                            parse_mode=ParseMode.HTML)
