@@ -1,19 +1,28 @@
 import asyncio
 import random
 
+import yaml
 from telethon import TelegramClient, functions
 
+import cfg
 import info_messages
-import regs
-from cfg_1 import logger, application
+
+from logging_settings import logger
+from cfg import application
+
+with open('config_test.yaml', "r") as yamlfile:
+    test_config_data = yaml.load(yamlfile, Loader=yaml.FullLoader)
 
 
 async def post_stream_live_notification(data):
+    forum_threads = test_config_data['CHATS']['FORUM_THREADS']
+    forum_id = test_config_data['CHATS']['FORUM_GROUP']
+    channel_id = test_config_data['CHATS']['CHANNEL_ID']
     info_messages.info('Streamer is online. Changing information')
     logger.debug(f'Twitch data - {data}')
     if 'silent' not in application.bot_data.keys() or application.bot_data['silent'] is False:
         info_messages.info('Loudness is set to "loud". Posting notification')
-        emoji = random.choice(regs.emoji_list)
+        emoji = random.choice(cfg.config_data['TWITCH_NOTIFICATIONS']['EMOJI_LIST'])
         phrases_list = application.bot_data['phrases_list']
         if len(phrases_list) == 0:
             phrase = 'Присоединяйтесь к моей трансляции Twitch!'
@@ -24,12 +33,12 @@ async def post_stream_live_notification(data):
         notification_text += '\ntwitch.tv/zdarovezhov'
         threads = ['posts', 'comments']
         for thread in threads:
-            await application.bot.send_message(regs.zhenya_forum_id,
+            await application.bot.send_message(forum_id,
                                                notification_text,
-                                               message_thread_id=regs.zhenya_forum_threads[thread])
+                                               message_thread_id=forum_threads[thread])
             await asyncio.sleep(5)
         await asyncio.sleep(5)
-        msg = await application.bot.send_message(regs.zhenya_channel_id, notification_text)
+        msg = await application.bot.send_message(channel_id, notification_text)
         application.bot_data['searching_for_post'] = True
         application.bot_data['post_message_text'] = msg.text
     else:
@@ -43,9 +52,11 @@ async def post_stream_offline_notification(data):
 
 
 async def rename_channel(live: bool):
+    telegram_app_api_id = test_config_data['KEYS']['TELEGRAM_APP_API_ID']
+    telegram_app_api_hash = test_config_data['KEYS']['TELEGRAM_APP_API_HASH']
     title = '🔴 zdarovNeEzhov' if live else 'zdarovNeEzhov'
     try:
-        async with TelegramClient('ezhovApp', regs.telegram_app_api_id, regs.telegram_app_api_hash) as client:
+        async with TelegramClient('ezhovApp', telegram_app_api_id, telegram_app_api_hash) as client:
             await client(functions.channels.EditTitleRequest(
                 channel='ezhov_test',
                 title=title)
@@ -55,7 +66,7 @@ async def rename_channel(live: bool):
     await asyncio.sleep(10)
     title = '🔴 NeEzhovForum' if live else 'NeEzhovForum'
     try:
-        async with TelegramClient('ezhovApp', regs.telegram_app_api_id, regs.telegram_app_api_hash) as client:
+        async with TelegramClient('ezhovApp', telegram_app_api_id, telegram_app_api_hash) as client:
             await client(functions.channels.EditTitleRequest(
                 channel='ezhov_test_chat',
                 title=title)

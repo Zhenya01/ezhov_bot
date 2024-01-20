@@ -18,22 +18,23 @@ from telegram.helpers import create_deep_linked_url
 
 import cfg
 import database
-import cfg_1
-import regs
+import cfg
 
-from cfg_1 import logger
-from cfg_1 import update_user_info
-from cfg_1 import SEND_TIKTOK_DEEPLINK
-from cfg_1 import WAITING_FOR_TIKTOK, WAITING_FOR_TIKTOK_DESISION
-from cfg_1 import APPROVE_TIKTOK, REJECT_TIKTOK, \
+
+from logging_settings import logger
+from database import update_user_info
+from cfg import SEND_TIKTOK_DEEPLINK
+from cfg import WAITING_FOR_TIKTOK, WAITING_FOR_TIKTOK_DESISION
+from cfg import APPROVE_TIKTOK, REJECT_TIKTOK, \
     STOP_TIKTOKS_APPROVAL, BAN_TIKTOK_SENDER, SUPER_APPROVE_TIKTOK
 
-
+MAIN_BROADCASTER_ID = cfg.config_data['TWITCH_NOTIFICATIONS']['MAIN_BROADCASTER_ID']
+TEST_BROADCASTER_ID = cfg.config_data['TWITCH_NOTIFICATIONS']['TEST_BROADCASTER_ID']
 async def start_ticktock_evening(update: Update,
                                  context: ContextTypes.DEFAULT_TYPE):
-    if regs.ezhov_broadcaster_id not in context.bot_data:
-        context.bot_data[regs.ezhov_broadcaster_id] = {}
-    context.bot_data[regs.ezhov_broadcaster_id][
+    if MAIN_BROADCASTER_ID not in context.bot_data:
+        context.bot_data[MAIN_BROADCASTER_ID] = {}
+    context.bot_data[MAIN_BROADCASTER_ID][
         'ticktock_evening_active'] = True
     bot = await context.bot.get_me()
     url = create_deep_linked_url(bot.username, f'{SEND_TIKTOK_DEEPLINK}')
@@ -43,7 +44,7 @@ async def start_ticktock_evening(update: Update,
 Просто скиньте видео боту, нажав кнопку.
 Бот принимает видео СКАЧАННЫЕ с тик-тока! Ссылки на тик-ток пока не работают)'''
     for thread in threads:
-        await context.bot.send_message(regs.ezhov_forum_id, text, message_thread_id=regs.ezhov_forum_threads[thread],
+        await context.bot.send_message(cfg.FORUM_ID, text, message_thread_id=cfg.config_data['CHATS']['FORUM_THREADS'][thread],
                                        reply_markup=InlineKeyboardMarkup(
                                            [[InlineKeyboardButton(
                                                "Отправить тикток", url=url)]]))
@@ -59,15 +60,15 @@ async def test_thread_sending(update: Update,
     text = 'Tест. Бип-боп. Сорян за флуд заранее)'
     for thread in threads:
         logger.debug(
-            f'{update.effective_user.name}({update.effective_user.id}) thread_id - {regs.ezhov_forum_threads[thread]}')
-        await context.bot.send_message(regs.ezhov_forum_id, text, message_thread_id=regs.ezhov_forum_threads[thread])
+            f'{update.effective_user.name}({update.effective_user.id}) thread_id - {cfg.config_data["CHATS"]["FORUM_THREADS"][thread]}')
+        await context.bot.send_message(cfg.FORUM_ID, text, message_thread_id=cfg.config_data['CHATS']['FORUM_THREADS'][thread])
 
 @update_user_info
 async def waiting_for_tiktok(update: Update,
                              context: ContextTypes.DEFAULT_TYPE):
     logger.debug(
         f'{update.effective_user.name}({update.effective_user.id}) перешел по ссылке или по команде /send_tiktok')
-    if not ('ticktock_evening_active' in context.bot_data[regs.ezhov_broadcaster_id] and context.bot_data[regs.ezhov_broadcaster_id][
+    if not ('ticktock_evening_active' in context.bot_data[MAIN_BROADCASTER_ID] and context.bot_data[MAIN_BROADCASTER_ID][
                 'ticktock_evening_active'] is True):
         logger.debug(
             f'{update.effective_user.name}({update.effective_user.id}). Тикток вечерок не запущен. Отменяем')
@@ -140,7 +141,7 @@ async def download_tiktok_video(update: Update,
     api_url = "https://aiov-download-youtube-videos.p.rapidapi.com/GetVideoDetails"
     querystring = {"URL": tiktok_url}
     headers = {
-        "X-RapidAPI-Key": regs.x_rapid_api_key,
+        "X-RapidAPI-Key": cfg.config_data['KEYS']['X_RAPID_API_KEY'],
         "X-RapidAPI-Host": "aiov-download-youtube-videos.p.rapidapi.com"
     }
     response = requests.request("GET", api_url, headers=headers,
@@ -191,7 +192,7 @@ async def got_tiktok_link(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def got_tiktok(update: Update,
                      context: ContextTypes.DEFAULT_TYPE,
                      is_file):
-    if not ('ticktock_evening_active' in context.bot_data[regs.ezhov_broadcaster_id] and context.bot_data[regs.ezhov_broadcaster_id][
+    if not ('ticktock_evening_active' in context.bot_data[MAIN_BROADCASTER_ID] and context.bot_data[MAIN_BROADCASTER_ID][
                 'ticktock_evening_active'] is True):
         logger.debug(
             f'{update.effective_user.name}({update.effective_user.id}). Тикток вечерок не запущен. Отменяем')
@@ -221,7 +222,7 @@ async def got_tiktok(update: Update,
                                        f'Вы не можете отправлять тиктоки, потому что вы были временно забанены стримером (до {time_banned_string})')
     else:
         if is_file:
-            message = await context.bot.forward_message(regs.ezhov_files_group_id,
+            message = await context.bot.forward_message(cfg.TIKTOK_FILES_GROUP_ID,
                                                         update.effective_chat.id,
                                                         update.effective_message.id)
         else:
@@ -230,13 +231,13 @@ async def got_tiktok(update: Update,
             if result == WAITING_FOR_TIKTOK:
                 return WAITING_FOR_TIKTOK
             file_path = result
-            message = await context.bot.send_video(regs.ezhov_files_group_id,
+            message = await context.bot.send_video(cfg.TIKTOK_FILES_GROUP_ID,
                                                    video=file_path,
                                                    caption=update.message.text)
             os.remove(file_path)
         file_id = message.video.file_id
         forwarded_message_id = message.message_id
-        is_approved = update.effective_user.id == regs.ezhov_user_id
+        is_approved = update.effective_user.id == cfg.STREAMER_USER_ID
         database.add_tiktok(forwarded_message_id, update.effective_user.id,
                             file_id,
                             is_approved, update.effective_message.id)
@@ -251,7 +252,7 @@ async def got_tiktok(update: Update,
             #     if unapproved_count <= 19:
             #         message_text += ' можешь отправить еще) /send_tiktok'
         if unapproved_count == 5:
-            context.bot.send_message(regs.ezhov_user_id, f'Пользователь {update.effective_user.full_name} уже имеет 5 неодобренных тиктоков. Скоро он не сможет отправлять тиктоки. Пора бы отфильтровать :)')
+            context.bot.send_message(cfg.STREAMER_USER_ID, f'Пользователь {update.effective_user.full_name} уже имеет 5 неодобренных тиктоков. Скоро он не сможет отправлять тиктоки. Пора бы отфильтровать :)')
         await context.bot.send_message(update.effective_chat.id, message_text)
         return ConversationHandler.END
 
@@ -278,8 +279,8 @@ async def cancel_waiting_for_tiktok(update: Update,
 @update_user_info
 async def publish_ticktocks(update: Update,
                             context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id in [regs.ezhov_user_id, regs.zhenya_user_id]:
-    # if update.effective_user.id == regs.zhenya_user_id:
+    if update.effective_user.id in [cfg.STREAMER_USER_ID, cfg.TEST_STREAMER_USER_ID]:
+    # if update.effective_user.id == cfg.TEST_STREAMER_USER_ID:
         media = []
         caption = 'Спасибо всем кто присылает видева!)\n'
         names = []
@@ -288,20 +289,20 @@ async def publish_ticktocks(update: Update,
             for ticktok in ticktoks:
                 user = await database.get_user_info(ticktok["sender_user_id"])
                 media.append(InputMediaVideo(ticktok['file_id']))
-                # if update.effective_user.id != regs.ezhov_user_id:
+                # if update.effective_user.id != cfg.STREAMER_USER_ID:
                 names.append(user["full_name"])
                     # caption = caption + f'{ticktoks.index(ticktok) + 1}й тикток прислал(а) {user["full_name"]}\n'
             logger.debug(
                 f'{update.effective_user.name}({update.effective_user.id}) names - {names}')
-            caption += cfg_1.generate_tiktok_senders_string(names)
+            caption += cfg.generate_tiktok_senders_string(names)
             logger.debug(
                 f'{update.effective_user.name}({update.effective_user.id}) caption - {caption}')
             threads = ['tiktoks', 'comments']
             for thread in threads:
-                await context.bot.send_media_group(regs.ezhov_forum_id,
-                                                   media=media, caption=caption, message_thread_id=regs.ezhov_forum_threads[thread])
+                await context.bot.send_media_group(cfg.FORUM_ID,
+                                                   media=media, caption=caption, message_thread_id=cfg.config_data['CHATS']['FORUM_THREADS'][thread])
                 time.sleep(5)
-            msg = await context.bot.send_media_group(regs.zdarovezhov_channel_id,
+            msg = await context.bot.send_media_group(cfg.CHANNEL_ID,
                                                      media=media, caption=caption)
             logger.debug(f'msg - {msg}')
             # context.bot_data['searching_for_post'] = True
@@ -326,8 +327,8 @@ async def publish_ticktocks(update: Update,
 @update_user_info
 async def show_tiktok_to_approve(update: Update,
                                  context: ContextTypes.DEFAULT_TYPE):
-    # if update.effective_user.id == regs.zhenya_user_id:
-    if update.effective_user.id in [regs.ezhov_user_id, regs.zhenya_user_id]:
+    # if update.effective_user.id == cfg.TEST_STREAMER_USER_ID:
+    if update.effective_user.id in [cfg.STREAMER_USER_ID, cfg.TEST_STREAMER_USER_ID]:
         print('Tiktok approval started')
         tiktok = database.select_tiktok_to_approve()
         print(tiktok)
@@ -341,7 +342,7 @@ async def show_tiktok_to_approve(update: Update,
 
 
 async def send_tiktok_info(update, context, tiktok, first_time):
-    if update.effective_user.id in [regs.ezhov_user_id, regs.zhenya_user_id]:
+    if update.effective_user.id in [cfg.STREAMER_USER_ID, cfg.TEST_STREAMER_USER_ID]:
         print('Sending tiktok started')
         result = database.count_unsent_tiktoks()
         count = result['count'] if result is not None else None
@@ -400,7 +401,7 @@ async def send_tiktok_info(update, context, tiktok, first_time):
 @update_user_info
 async def tiktok_approval_callback_handler(update: Update,
                                            context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id in [regs.ezhov_user_id, regs.zhenya_user_id]:
+    if update.effective_user.id in [cfg.STREAMER_USER_ID, cfg.TEST_STREAMER_USER_ID]:
         print('STARTING TO DEFINE TIKTOK ACTION')
         chat_id = update.effective_chat.id
         panel_message_id = update.effective_message.message_id
@@ -455,7 +456,7 @@ async def tiktok_approval_callback_handler(update: Update,
                 except:
                     sender_message = await context.bot.forward_message(
                         sender_user_id,
-                        regs.ezhov_files_group_id,
+                        cfg.TIKTOK_FILES_GROUP_ID,
                         tiktok['message_id'])
                     sender_message_id = sender_message.message_id
                     await context.bot.send_message(sender_user_id,
@@ -482,7 +483,7 @@ async def tiktok_approval_callback_handler(update: Update,
 async def next_tiktok_to_approve(update: Update,
                                  context: ContextTypes.DEFAULT_TYPE,
                                  next_tiktok):
-    if update.effective_user.id == regs.ezhov_user_id:
+    if update.effective_user.id == cfg.STREAMER_USER_ID:
         await send_tiktok_info(update, context, next_tiktok, first_time=False)
 
     # reply_markup = InlineKeyboardMarkup(

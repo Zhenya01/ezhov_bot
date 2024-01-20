@@ -2,7 +2,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
 
-from cfg_1 import update_user_info
+from database import update_user_info
 
 
 @update_user_info

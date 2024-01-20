@@ -7,15 +7,15 @@ from telegram.ext import ContextTypes
 
 import cfg
 import database
-import cfg_1
-import regs
-from cfg_1 import reformat_name, logger
+import cfg
+
+from logging_settings import logger
 
 CHATS = cfg.config_data['CHATS']
 
 
 async def mute(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    admins_list = regs.admins_list + regs.moders_list
+    admins_list = cfg.config_data['CHATS']['ADMINS_LIST'] + cfg.config_data['MODERS_LIST']
     print('STARTING MUTE. CHECKING ADMINS')
     if update.message.from_user.id in admins_list:
         print('IS_ADMIN. MUTING')
@@ -59,7 +59,7 @@ async def send_muted_message(update: Update, context: ContextTypes.DEFAULT_TYPE,
     message = await context.bot.send_message(update.effective_chat.id, text, parse_mode=ParseMode.HTML)
     moderation_group = CHATS['MODERATION_GROUP']
     until_time = datetime.datetime.now(tz=pytz.timezone("Europe/Moscow")) + datetime.timedelta(minutes=duration)
-    print(f'USER_INFO{cfg_1.UNBAN_CHATTER},{update.effective_chat.id},{muted_id}')
+    print(f'USER_INFO{cfg.UNBAN_CHATTER},{update.effective_chat.id},{muted_id}')
     muted_mod_text = f'<b>Мут участника:</b>\n' \
                      f'<b>Замучен</b> {muted_mention}\n' \
                      f'<b>Время:</b> {duration} мин. (до {datetime.datetime.strftime(until_time, "%m-%d-%Y, %H:%M")})'
@@ -70,12 +70,12 @@ async def send_muted_message(update: Update, context: ContextTypes.DEFAULT_TYPE,
         reply_markup=InlineKeyboardMarkup(
             [
                 [InlineKeyboardButton('Размутить',
-                                      callback_data=f'{cfg_1.UNBAN_CHATTER},{update.effective_chat.id},{muted_id}')]
+                                      callback_data=f'{cfg.UNBAN_CHATTER},{update.effective_chat.id},{muted_id}')]
             ]
         ))
     if 'muted_messages' not in context.bot_data.keys():
         context.bot_data['muted_messages'] = {}
-    context.bot_data['muted_messages'][f'{cfg_1.UNBAN_CHATTER},{update.effective_chat.id},{muted_id}'] = muted_mod_text
+    context.bot_data['muted_messages'][f'{cfg.UNBAN_CHATTER},{update.effective_chat.id},{muted_id}'] = muted_mod_text
     # message_id = message.message_id
     # context.application.job_queue.run_once(callback=delete_muted_message,
     #                                        when=60,
@@ -107,10 +107,10 @@ async def delete_muted_message(context: ContextTypes.DEFAULT_TYPE):
 
 async def kick_from_group(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print('KICK_FROM_GROUP_START')
-    if update.effective_user.id not in regs.group_list:
+    if update.effective_user.id not in cfg.config_data['GROUP_LIST']:
         await remove_join_left_message(update, context)
         message = await update.message.reply_photo(open('uhodi.png', 'rb'),
-                                                   'Этот чат не чат, тут Eжов за сообщениями в группе следит')
+                                                    'Этот чат не чат, тут Eжов за сообщениями в группе следит')
         message_id = message.message_id
         # message_id = await update.message.reply_text('Этот чат не чат, тут ежов за сообщениями в группе следит').message_id
         context.bot_data['user_to_kick'] = update.message.from_user.id

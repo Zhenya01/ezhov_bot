@@ -9,18 +9,18 @@ from telegram.ext import ContextTypes, ConversationHandler, CallbackContext
 
 import cfg
 import database
-import cfg_1
+import cfg
 from database import Reward
-from cfg_1 import update_user_info
+from database import update_user_info
 # Points management states
-from cfg_1 import ADD_OR_SUBTRACT_POINTS, ADD_POINTS, SUBTRACT_POINTS, ENTER_POINTS_MANAGEMENT, SELECT_USER
-from cfg_1 import (SELECT_REWARD_TO_EDIT, PICK_ACTION, EDIT_REWARD, ADDING_REWARD, CHANGE_NAME,
-                   CHANGE_DESCRIPTION, CHANGE_PRICE, REMOVE_REWARD, BACK_TO_REWARDS, CANCEL_BUTTON,
-                   CHANGE_NUMBER_LEFT, CHANGE_PERSON_TOTAL_LIMIT, CHANGE_TOTAL_COOLDOWN, CHANGE_PERSON_COOLDOWN)
-from cfg_1 import (SEE_REWARDS, SEE_POINTS_INFO, USER_POINTS_MENU, WAITING_FOR_REWARD_DECISION,
-                   SELECT_REWARD_TO_BUY, BUY_REWARD)
-from cfg_1 import ADD_REWARD_NAME, ADD_REWARD_DESCRIPTION, ADD_REWARD_PRICE
-from cfg_1 import EDIT, VIEW
+from cfg import ADD_OR_SUBTRACT_POINTS, ADD_POINTS, SUBTRACT_POINTS, ENTER_POINTS_MANAGEMENT, SELECT_USER
+from cfg import (SELECT_REWARD_TO_EDIT, PICK_ACTION, EDIT_REWARD, ADDING_REWARD, CHANGE_NAME,
+                 CHANGE_DESCRIPTION, CHANGE_PRICE, REMOVE_REWARD, BACK_TO_REWARDS, CANCEL_BUTTON,
+                 CHANGE_NUMBER_LEFT, CHANGE_PERSON_TOTAL_LIMIT, CHANGE_TOTAL_COOLDOWN, CHANGE_PERSON_COOLDOWN)
+from cfg import (SEE_REWARDS, SEE_POINTS_INFO, USER_POINTS_MENU, WAITING_FOR_REWARD_DECISION,
+                 SELECT_REWARD_TO_BUY, BUY_REWARD)
+from cfg import ADD_REWARD_NAME, ADD_REWARD_DESCRIPTION, ADD_REWARD_PRICE
+from cfg import EDIT, VIEW
 CHATS = cfg.config_data['CHATS']
 
 # -----------------------------------------------------Админ---------------------------------------------------------- #
@@ -141,7 +141,7 @@ async def show_rewards(update: Update, context: ContextTypes.DEFAULT_TYPE):
         rewards_dict[name] = reward["reward_id"]
     reason = context.user_data['rewards_reason']
     if reason == str(EDIT):
-        rewards_keyboard = [[CANCEL_BUTTON], [cfg_1.ADD_REWARD_BUTTON]]
+        rewards_keyboard = [[CANCEL_BUTTON], [cfg.ADD_REWARD_BUTTON]]
     else:
         rewards_keyboard = [[CANCEL_BUTTON]]
     for reward in rewards_dict.keys():
@@ -199,7 +199,7 @@ async def generate_reward_text(reward: Reward, is_extended=False):
 
 @update_user_info
 async def show_reward(update: Update, context: ContextTypes.DEFAULT_TYPE, reward=None):
-    if update.message.text == cfg_1.ADD_REWARD_BUTTON:
+    if update.message.text == cfg.ADD_REWARD_BUTTON:
         result = await start_adding_reward(update, context)
         return result
     if reward is None:
@@ -561,7 +561,7 @@ async def add_points_for_comment(update: Update, context: ContextTypes.DEFAULT_T
     # if update.message.sticker is not None:
 
 
-@cfg_1.update_user_info
+@database.update_user_info
 async def points(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     user = await database.get_user_info(user_id)
@@ -605,7 +605,7 @@ async def points_descision(update: Update, context: ContextTypes.DEFAULT_TYPE):
                                        text,
                                        parse_mode=ParseMode.HTML)
     else:
-        context.user_data['rewards_reason'] = cfg_1.VIEW
+        context.user_data['rewards_reason'] = cfg.VIEW
         return_value = await show_rewards(update, context)
         return return_value
 
@@ -735,9 +735,9 @@ async def reward_decision(update: Update, context: ContextTypes.DEFAULT_TYPE):
                                        parse_mode=ParseMode.HTML,
                                        reply_markup=InlineKeyboardMarkup(
                                            [[InlineKeyboardButton('Принять',
-                                                                  callback_data=f'{cfg_1.APPROVE_REWARD},{ur_id}'),
+                                                                  callback_data=f'{cfg.APPROVE_REWARD},{ur_id}'),
                                              InlineKeyboardButton('Отклонить',
-                                                                  callback_data=f'{cfg_1.DECLINE_REWARD},{ur_id}')]
+                                                                  callback_data=f'{cfg.DECLINE_REWARD},{ur_id}')]
                                             ]
                                        )
                                        )
@@ -765,7 +765,7 @@ async def reward_moderation(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             name = f'<a href="tg://user?id={user_info["user_id"]}">{user_info["full_name"]}</a>'
         points = reward.price
-        if callback_info[0] == str(cfg_1.DECLINE_REWARD):
+        if callback_info[0] == str(cfg.DECLINE_REWARD):
             if points % 10 == 1 and points % 100 != 11:
                 word = "балл"
             elif 2 <= points % 10 <= 4 and (points % 100 < 10 or points % 100 >= 20):

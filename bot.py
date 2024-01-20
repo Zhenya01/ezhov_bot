@@ -10,21 +10,23 @@ import platform
 import cfg
 import channel_points_module
 import forward_posts
-import cfg_1
-import regs
+import cfg
+
 import tiktok_module
 import twitch_module
 import chat_management_module
-from cfg_1 import logger, application, update_user_info
-from cfg_1 import WAITING_FOR_TIKTOK_DESISION
-from cfg_1 import TIKTOK_APPROVAL_STATES
-from cfg_1 import SEND_TIKTOK_DEEPLINK
-from cfg_1 import SELECT_USER, ADD_OR_SUBTRACT_POINTS, ADD_POINTS, SUBTRACT_POINTS, ENTER_POINTS_MANAGEMENT
-from cfg_1 import SELECT_REWARD_TO_EDIT, PICK_ACTION, EDIT_REWARD, ADDING_REWARD, CHANGE_NAME, CHANGE_DESCRIPTION, CHANGE_PRICE, REMOVE_REWARD, BACK_TO_REWARDS, BUY_REWARD
+from logging_settings import logger
+from cfg import application
+from database import update_user_info
+from cfg import WAITING_FOR_TIKTOK_DESISION
+from cfg import TIKTOK_APPROVAL_STATES
+from cfg import SEND_TIKTOK_DEEPLINK
+from cfg import SELECT_USER, ADD_OR_SUBTRACT_POINTS, ADD_POINTS, SUBTRACT_POINTS, ENTER_POINTS_MANAGEMENT
+from cfg import SELECT_REWARD_TO_EDIT, PICK_ACTION, EDIT_REWARD, ADDING_REWARD, CHANGE_NAME, CHANGE_DESCRIPTION, CHANGE_PRICE, REMOVE_REWARD, BACK_TO_REWARDS, BUY_REWARD
 import info_messages
-from cfg_1 import SEE_REWARDS, SEE_POINTS_INFO, USER_POINTS_MENU, SELECT_REWARD_TO_BUY, WAITING_FOR_REWARD_DECISION, CANCEL_BUTTON
-from cfg_1 import ADD_REWARD_NAME, ADD_REWARD_DESCRIPTION, ADD_REWARD_PRICE
-from cfg_1 import DECLINE_REWARD, APPROVE_REWARD
+from cfg import SEE_REWARDS, SEE_POINTS_INFO, USER_POINTS_MENU, SELECT_REWARD_TO_BUY, WAITING_FOR_REWARD_DECISION, CANCEL_BUTTON
+from cfg import ADD_REWARD_NAME, ADD_REWARD_DESCRIPTION, ADD_REWARD_PRICE
+from cfg import DECLINE_REWARD, APPROVE_REWARD
 @update_user_info
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger.debug('STARTING')
@@ -81,17 +83,17 @@ conv_handler = ConversationHandler(
                                      filters=filters.Regex(rf'{SEND_TIKTOK_DEEPLINK}') & filters.ChatType.PRIVATE),
                       CommandHandler('start_approval', tiktok_module.show_tiktok_to_approve),
                       CommandHandler('pm', channel_points_module.points_manual_management,
-                                     filters=filters.User(user_id=regs.ezhov_user_id) & filters.ChatType.PRIVATE),
+                                     filters=filters.User(user_id=cfg.STREAMER_USER_ID) & filters.ChatType.PRIVATE),
                       CommandHandler('pm', channel_points_module.points_manual_management,
-                                     filters=filters.User(user_id=regs.zhenya_user_id) & filters.ChatType.PRIVATE),
+                                     filters=filters.User(user_id=cfg.TEST_STREAMER_USER_ID) & filters.ChatType.PRIVATE),
                       CommandHandler('rewards', channel_points_module.rewards_command_entered,
-                                     filters=filters.User(user_id=regs.ezhov_user_id) & filters.ChatType.PRIVATE),
+                                     filters=filters.User(user_id=cfg.STREAMER_USER_ID) & filters.ChatType.PRIVATE),
                       CommandHandler('rewards', channel_points_module.rewards_command_entered,
-                                     filters=filters.User(user_id=regs.zhenya_user_id) & filters.ChatType.PRIVATE),
+                                     filters=filters.User(user_id=cfg.TEST_STREAMER_USER_ID) & filters.ChatType.PRIVATE),
                       CommandHandler('add_reward', channel_points_module.start_adding_reward,
-                                     filters=filters.User(user_id=regs.ezhov_user_id) & filters.ChatType.PRIVATE),
+                                     filters=filters.User(user_id=cfg.STREAMER_USER_ID) & filters.ChatType.PRIVATE),
                       CommandHandler('add_reward', channel_points_module.start_adding_reward,
-                                     filters=filters.User(user_id=regs.zhenya_user_id) & filters.ChatType.PRIVATE),
+                                     filters=filters.User(user_id=cfg.TEST_STREAMER_USER_ID) & filters.ChatType.PRIVATE),
                       CommandHandler('points', channel_points_module.points,
                                      filters=filters.ChatType.PRIVATE)
         ],
@@ -149,17 +151,17 @@ conv_handler = ConversationHandler(
             ],
             ADD_REWARD_NAME:
             [
-                MessageHandler(filters.TEXT & filters.User(user_id=[regs.ezhov_user_id, regs.zhenya_user_id]),
+                MessageHandler(filters.TEXT & filters.User(user_id=[cfg.STREAMER_USER_ID, cfg.TEST_STREAMER_USER_ID]),
                                channel_points_module.reward_name_entered)
             ],
             ADD_REWARD_DESCRIPTION:
             [
-                MessageHandler(filters.TEXT & filters.User(user_id=[regs.ezhov_user_id, regs.zhenya_user_id]),
+                MessageHandler(filters.TEXT & filters.User(user_id=[cfg.STREAMER_USER_ID, cfg.TEST_STREAMER_USER_ID]),
                                channel_points_module.reward_description_entered)
             ],
             ADD_REWARD_PRICE:
             [
-                MessageHandler(filters.TEXT & filters.User(user_id=[regs.ezhov_user_id, regs.zhenya_user_id]),
+                MessageHandler(filters.TEXT & filters.User(user_id=[cfg.STREAMER_USER_ID, cfg.TEST_STREAMER_USER_ID]),
                                channel_points_module.reward_price_entered)
             ],
             USER_POINTS_MENU:
@@ -189,26 +191,27 @@ conv_handler = ConversationHandler(
 print('Бот перезагружен')
 os = platform.system()
 print(f'os - {os}')
+twitch_commands_users_list = cfg.config_data['TWITCH_NOTIFICATIONS']['TWITCH_COMMANDS_USERS_LIST']
 application.add_handler(conv_handler)
 application.add_handler(CommandHandler('start', start))
-application.add_handler(MessageHandler(filters.Chat(chat_id=regs.zhenya_group_id) and filters.User(user_id=777000), forward_posts.comment_under_the_post))
-application.add_handler(MessageHandler(filters.Chat(chat_id=regs.zdarovezhov_group_id) and filters.User(user_id=777000), forward_posts.comment_under_the_post))
+application.add_handler(MessageHandler(filters.Chat(chat_id=cfg.TEST_CHANNEL_GROUP_ID) and filters.User(user_id=777000), forward_posts.comment_under_the_post))
+application.add_handler(MessageHandler(filters.Chat(chat_id=cfg.CHANNEL_GROUP_ID) and filters.User(user_id=777000), forward_posts.comment_under_the_post))
 application.add_handler(CommandHandler('start_tiktoks', tiktok_module.start_ticktock_evening,
-                                       filters=filters.Chat(chat_id=regs.twitch_commands_users_list)))
+                                       filters=filters.Chat(chat_id=twitch_commands_users_list)))
 application.add_handler(CommandHandler('add', twitch_module.add_phrase,
-                                       filters=filters.Chat(chat_id=regs.twitch_commands_users_list)))
+                                       filters=filters.Chat(chat_id=twitch_commands_users_list)))
 application.add_handler(CommandHandler('add_first', twitch_module.add_phrase_to_start,
-                                       filters=filters.Chat(chat_id=regs.twitch_commands_users_list)))
+                                       filters=filters.Chat(chat_id=twitch_commands_users_list)))
 application.add_handler(CommandHandler('show', twitch_module.show,
-                                       filters=filters.Chat(chat_id=regs.twitch_commands_users_list)))
+                                       filters=filters.Chat(chat_id=twitch_commands_users_list)))
 application.add_handler(CommandHandler('remove', twitch_module.remove_phrase,
-                                       filters=filters.Chat(chat_id=regs.twitch_commands_users_list)))
+                                       filters=filters.Chat(chat_id=twitch_commands_users_list)))
 application.add_handler(CommandHandler('silent', twitch_module.silent,
-                                       filters=filters.Chat(chat_id=regs.twitch_commands_users_list)))
+                                       filters=filters.Chat(chat_id=twitch_commands_users_list)))
 application.add_handler(CommandHandler('loud', twitch_module.loud,
-                                       filters=filters.Chat(chat_id=regs.twitch_commands_users_list)))
+                                       filters=filters.Chat(chat_id=twitch_commands_users_list)))
 application.add_handler(CommandHandler('commands', info_messages.commands,
-                                       filters=filters.Chat(chat_id=regs.twitch_commands_users_list)))
+                                       filters=filters.Chat(chat_id=twitch_commands_users_list)))
 application.add_handler(CommandHandler('bugs', bugs_and_improvements))
 application.add_handler(CommandHandler('test_message', tiktok_module.test_thread_sending))
 application.add_handler(CommandHandler('improvements', bugs_and_improvements))
@@ -219,33 +222,33 @@ application.add_handler(CommandHandler('publish', tiktok_module.publish_ticktock
 # CommandHandler("send_tiktok", tiktok_module.waiting_for_tiktok, filters=filters.ChatType.PRIVATE),
 # CommandHandler("start", tiktok_module.waiting_for_tiktok, filters=filters.Regex(rf'{SEND_TIKTOK_DEEPLINK}') & filters.ChatType.PRIVATE),
 application.add_handler(
-    MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS & filters.Chat(chat_id=regs.zdarovezhov_group_id),
+    MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS & filters.Chat(chat_id=cfg.CHANNEL_GROUP_ID),
                    chat_management_module.kick_from_group))
 application.add_handler(
-    MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS & filters.Chat(chat_id=regs.zhenya_group_id),
+    MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS & filters.Chat(chat_id=cfg.TEST_CHANNEL_GROUP_ID),
                    chat_management_module.kick_from_group))
 application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS & filters.StatusUpdate.LEFT_CHAT_MEMBER,
                                        chat_management_module.remove_join_left_message))
 # application.add_handler(MessageHandler(filters.StatusUpdate.LEFT_CHAT_MEMBER,
 #                                        chat_management_module.remove_join_left_message))
-application.add_handler(MessageHandler(filters.Chat(chat_id=regs.zhenya_forum_id) & filters.User(user_id=regs.zhenya_user_id), forward_posts.forward_post))
-application.add_handler(MessageHandler(filters.Chat(chat_id=regs.ezhov_forum_id) & filters.User(user_id=[regs.ezhov_user_id, regs.zdarovezhov_channel_id]), forward_posts.forward_post))
-application.add_handler(MessageHandler(filters.Chat(chat_id=regs.zhenya_forum_id) & filters.User(user_id=regs.ezhov_user_id), forward_posts.forward_post))
-# application.add_handler(MessageHandler(filters.Chat(chat_id=regs.zhenya_channel_id), forward_posts.forward_to_comments))
+application.add_handler(MessageHandler(filters.Chat(chat_id=cfg.TEST_FORUM_ID) & filters.User(user_id=cfg.TEST_STREAMER_USER_ID), forward_posts.forward_post))
+application.add_handler(MessageHandler(filters.Chat(chat_id=cfg.FORUM_ID) & filters.User(user_id=[cfg.STREAMER_USER_ID, cfg.CHANNEL_ID]), forward_posts.forward_post))
+application.add_handler(MessageHandler(filters.Chat(chat_id=cfg.TEST_FORUM_ID) & filters.User(user_id=cfg.STREAMER_USER_ID), forward_posts.forward_post))
+# application.add_handler(MessageHandler(filters.Chat(chat_id=cfg.TEST_CHANNEL_ID), forward_posts.forward_to_comments))
 application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_TITLE,
                                        chat_management_module.schedule_remove_rename_message))
 application.add_handler(MessageHandler(filters.VIDEO & filters.ChatType.PRIVATE,
                                        tiktok_module.got_tiktok_file))
 application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS | filters.StatusUpdate.LEFT_CHAT_MEMBER,
                                        chat_management_module.remove_join_left_message))
-application.add_handler(MessageHandler(filters.Chat(regs.ezhov_forum_id) & filters.ALL,
+application.add_handler(MessageHandler(filters.Chat(cfg.FORUM_ID) & filters.ALL,
                                        channel_points_module.add_points_for_comment))
 application.add_handler(CallbackQueryHandler(channel_points_module.reward_moderation,
-                        pattern=rf'^{cfg_1.APPROVE_REWARD},'))
+                        pattern=rf'^{cfg.APPROVE_REWARD},'))
 application.add_handler(CallbackQueryHandler(channel_points_module.reward_moderation,
-                        pattern=rf'^{cfg_1.DECLINE_REWARD},'))
+                        pattern=rf'^{cfg.DECLINE_REWARD},'))
 application.add_handler(CallbackQueryHandler(chat_management_module.unmute_chatter,
-                        pattern=rf'^{cfg_1.UNBAN_CHATTER},'))
+                        pattern=rf'^{cfg.UNBAN_CHATTER},'))
 # application.add_handler(CommandHandler('file', tiktok_module.get_ticktock_file))
 # application.add_handler(CommandHandler('post', post_hello_message))
 application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), echo))

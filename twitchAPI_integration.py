@@ -6,17 +6,20 @@ import traceback
 
 import requests
 
-import regs
+import cfg
+
 import twitchAPI
 from twitchAPI import EventSub, Twitch
-from cfg_1 import logger
+from logging_settings import logger
 global twitch
 
-
+TWITCH_TOKEN = cfg.config_data['KEYS']['TWITCH_TOKEN']
+TWITCH_CLIENT_ID = cfg.config_data['KEYS']['TWITCH_CLIENT_ID']
+TWITCH_CLIENT_SECRET = cfg.config_data['KEYS']['TWITCH_CLIENT_SECRET']
 def get_user_id_by_login(login):
     url = 'https://api.twitch.tv/helix/users'
-    headers = {'Authorization': f'Bearer {regs.twitch_token}',
-               'Client-Id': f'{regs.twitch_client_id}'}
+    headers = {'Authorization': f'Bearer {TWITCH_TOKEN}',
+               'Client-Id': f'{TWITCH_CLIENT_ID}'}
     params = {'login': f'{login}'}
     req = requests.get(url, headers=headers, params=params)
     print(req.status_code)
@@ -28,8 +31,8 @@ def get_user_id_by_login(login):
 
 def get_user_login_by_id(user_id):
     url = 'https://api.twitch.tv/helix/users'
-    headers = {'Authorization': f'Bearer {regs.twitch_token}',
-               'Client-Id': f'{regs.twitch_client_id}'}
+    headers = {'Authorization': f'Bearer {TWITCH_TOKEN}',
+               'Client-Id': f'{TWITCH_CLIENT_ID}'}
     params = {'id': f'{user_id}'}
     req = requests.get(url, headers=headers, params=params)
     print(req.status_code)
@@ -40,8 +43,8 @@ def get_user_login_by_id(user_id):
 
 
 async def setup_subscribe_webhook(twitch):
-    subscribe_webhook = EventSub(regs.twith_callback_url,
-                                 regs.twitch_client_id,
+    subscribe_webhook = EventSub(cfg.config_data['TWITCH_CALLBACK_URL'],
+                                 TWITCH_CLIENT_ID,
                                  5555,
                                  twitch)
     subscribe_webhook.wait_for_subscription_confirm_timeout = 15
@@ -51,7 +54,7 @@ async def setup_subscribe_webhook(twitch):
 
 
 def setup_twitch():
-    twitch_object = Twitch(regs.twitch_client_id, regs.twitch_client_secret)
+    twitch_object = Twitch(TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET)
     print(f'TWITCH_OBJECT - {twitch_object}')
     return twitch_object
 print('registering twitch instance')
