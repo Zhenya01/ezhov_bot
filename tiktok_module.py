@@ -77,7 +77,7 @@ async def waiting_for_tiktok(update: Update,
         if tiktoks_banned_until < datetime.datetime.now():
             can_send_tiktok = True
             database.unban_user_from_tiktoks(update.effective_user.id)
-    if unapproved_tiktoks_count > 9:
+    if unapproved_tiktoks_count > 19:
         await context.bot.send_message(update.effective_chat.id,
                                        'Вы уже отправили 10 видео, но не одно пока не подтвердили. Пока больше нельзя отправлять видео')
     elif not can_send_tiktok:
@@ -202,7 +202,7 @@ async def got_tiktok(update: Update,
         if tiktoks_banned_until < datetime.datetime.now():
             can_send_tiktok = True
             database.unban_user_from_tiktoks(update.effective_user.id)
-    if unapproved_tiktoks_count > 9:
+    if unapproved_tiktoks_count > 19:
             await context.bot.send_message(update.effective_chat.id,
                                            'Вы уже отправили 10 видео, но не один пока не подтвердили. Пока больше нельзя отправлять тиктоки')
 
@@ -234,7 +234,7 @@ async def got_tiktok(update: Update,
         message_text = 'Я посмотрю, а пока' if not is_approved \
             else 'Тикток добавлен в очередь на отправление'
         unapproved_count = database.count_unapproved_tiktoks(update.effective_user.id)['count']
-        if unapproved_count <= 9:
+        if unapproved_count <= 19:
             message_text += ' можешь отправить еще) /send_tiktok'
         else:
             message_text += ' отдохни) Ты отправил(а) слишком много. Я напишу, когда можно будет отправить ещё'
