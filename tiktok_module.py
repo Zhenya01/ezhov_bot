@@ -30,6 +30,8 @@ from cfg import APPROVE_TIKTOK, REJECT_TIKTOK, \
 
 MAIN_BROADCASTER_ID = cfg.config_data['TWITCH_NOTIFICATIONS']['MAIN_BROADCASTER_ID']
 TEST_BROADCASTER_ID = cfg.config_data['TWITCH_NOTIFICATIONS']['TEST_BROADCASTER_ID']
+
+
 async def start_ticktock_evening(update: Update,
                                  context: ContextTypes.DEFAULT_TYPE):
     if MAIN_BROADCASTER_ID not in context.bot_data:
@@ -48,20 +50,7 @@ async def start_ticktock_evening(update: Update,
                                        reply_markup=InlineKeyboardMarkup(
                                            [[InlineKeyboardButton(
                                                "Отправить тикток", url=url)]]))
-    # await context.bot.send_message(regs.tiktoks_channel_id, text,
-    #                                reply_markup=InlineKeyboardMarkup(
-    #                                    [[InlineKeyboardButton(
-    #                                        "Отправить тикток", url=url)]]))
 
-
-async def test_thread_sending(update: Update,
-                              context: ContextTypes.DEFAULT_TYPE):
-    threads = ['tiktoks', 'comments']
-    text = 'Tест. Бип-боп. Сорян за флуд заранее)'
-    for thread in threads:
-        logger.debug(
-            f'{update.effective_user.name}({update.effective_user.id}) thread_id - {cfg.config_data["CHATS"]["FORUM_THREADS"][thread]}')
-        await context.bot.send_message(cfg.FORUM_ID, text, message_thread_id=cfg.config_data['CHATS']['FORUM_THREADS'][thread])
 
 @update_user_info
 async def waiting_for_tiktok(update: Update,
@@ -90,7 +79,7 @@ async def waiting_for_tiktok(update: Update,
             database.unban_user_from_tiktoks(update.effective_user.id)
     if unapproved_tiktoks_count > 9:
         await context.bot.send_message(update.effective_chat.id,
-                                       'Вы уже отправили 10 видео, но не один пока не подтвердили. Пока больше нельзя отправлять тиктоки')
+                                       'Вы уже отправили 10 видео, но не одно пока не подтвердили. Пока больше нельзя отправлять видео')
     elif not can_send_tiktok:
         time_banned_string = tiktoks_banned_until.strftime("%Y-%m-%d %H:%M:%S")
         await context.bot.send_message(update.effective_chat.id,
@@ -101,6 +90,7 @@ async def waiting_for_tiktok(update: Update,
         await context.bot.send_message(update.effective_chat.id,
                                        'Отправьте сюда видео тиктока. Отправлять можно только по 1 видео. Если отправите много - я приму только первое')
         return ConversationHandler.END
+
 
 @update_user_info
 async def download_youtube_short(update: Update,

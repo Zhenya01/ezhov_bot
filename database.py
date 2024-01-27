@@ -215,7 +215,7 @@ def pick_user_latest_tiktok(user_id):
     #     return result
 
 
-def count_unapproved_tiktoks(user_id):
+def count_unapproved_tiktoks(user_id, is_for_live=False):
     #connection, cursor = open_connection()
     command = '''
     SELECT COUNT(tiktok_id) AS count

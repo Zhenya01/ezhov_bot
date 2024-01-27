@@ -213,7 +213,6 @@ application.add_handler(CommandHandler('loud', twitch_module.loud,
 application.add_handler(CommandHandler('commands', info_messages.commands,
                                        filters=filters.Chat(chat_id=twitch_commands_users_list)))
 application.add_handler(CommandHandler('bugs', bugs_and_improvements))
-application.add_handler(CommandHandler('test_message', tiktok_module.test_thread_sending))
 application.add_handler(CommandHandler('improvements', bugs_and_improvements))
 application.add_handler(CommandHandler('mute', chat_management_module.mute, filters.REPLY))
 
