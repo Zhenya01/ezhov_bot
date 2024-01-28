@@ -554,11 +554,35 @@ async def reward_price_entered(update: Update, context: ContextTypes.DEFAULT_TYP
 @update_user_info
 async def add_points_for_comment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # TODO поменять на prestige level
-    points = int(cfg.BASE_COMMENT_POINTS) + (int(cfg.PRESTIGE_LEVEL_ADDED_MULTIPLIER) * 1)
-    database.add_points(update.effective_user.id, points)
-    # if 'spam_filter_reset_time' not in context.user_data.keys():
-    #     context.user_data['spam_filter_reset_time'] = None
-    # if update.message.sticker is not None:
+    points_to_reward = int(cfg.BASE_COMMENT_POINTS) + (int(cfg.PRESTIGE_LEVEL_ADDED_MULTIPLIER) * 1)
+    if update.message.sticker is not None:
+        for_limit = True
+    elif update.message.text is not None:
+        words_number = len(update.effective_message.text.split(' '))
+        for_limit = words_number == 1
+    else:
+        for_limit = False
+    pprint(update.effective_message)
+    print(f'FOR LIMIT - {for_limit}')
+    if not for_limit:
+        database.add_points(update.effective_user.id, points_to_reward)
+        print('POINTS ADDED')
+    else:
+        if 'last_flood_time' not in context.user_data.keys():
+            print('LAST FLOOD TIME NOT IN DATA')
+            database.add_points(update.effective_user.id, points_to_reward)
+            print('POINTS ADDED')
+            context.user_data['last_flood_time'] = datetime.datetime.now()
+            return
+        last_flood_time = context.user_data['last_flood_time']
+        print(f'LAST FLOOD TIME - {last_flood_time}')
+        time_from_last = datetime.datetime.now() - last_flood_time
+        if time_from_last >= datetime.timedelta(seconds=30):
+            database.add_points(update.effective_user.id, points_to_reward)
+            print('POINTS ADDED')
+            context.user_data['last_flood_time'] = datetime.datetime.now()
+        else:
+            print('POINTS NOT ADDED')
 
 
 @database.update_user_info
@@ -583,8 +607,9 @@ async def points(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['points_management_user_id'] = user["user_id"]
     return USER_POINTS_MENU
 
+
 @update_user_info
-async def points_descision(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def points_decision(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_message.text == CANCEL_BUTTON:
         await context.bot.send_message(update.effective_chat.id,
                                        'Вы вышли из меню управления баллами',
@@ -596,7 +621,7 @@ async def points_descision(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 'Баллы созданы потому что я худший стример. Мало стримлю, не зарабатываю на вас, а наоборот трачу на вас 🤦‍♂️\n'
                 'За баллы канала ты сможешь получать всякие ништяки, смотри в наградах что есть сейчас \n'
                 '<b>Существующие способы набора баллов</b>:\n'
-                '  1 балл за 1 сообщение\n'
+                '  1 балл за 1 сообщение\n' 
                 '  10 баллов за 1 тик-ток\n'
                 '  100 баллов за супертикток\n'
                 '<b>Вычитаются баллы </b>за мут и за покупку награды\n'

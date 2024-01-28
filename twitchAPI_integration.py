@@ -3,19 +3,22 @@ import logging
 import os
 import sys
 import traceback
-
+import asyncio
 import requests
 
 import cfg
 
 import twitchAPI
 from twitchAPI import EventSub, Twitch
+from twitchAPI.twitch import AuthScope, TwitchUser
 from logging_settings import logger
 global twitch
 
 TWITCH_TOKEN = cfg.config_data['KEYS']['TWITCH_TOKEN']
 TWITCH_CLIENT_ID = cfg.config_data['KEYS']['TWITCH_CLIENT_ID']
 TWITCH_CLIENT_SECRET = cfg.config_data['KEYS']['TWITCH_CLIENT_SECRET']
+
+
 def get_user_id_by_login(login):
     url = 'https://api.twitch.tv/helix/users'
     headers = {'Authorization': f'Bearer {TWITCH_TOKEN}',
@@ -43,7 +46,7 @@ def get_user_login_by_id(user_id):
 
 
 async def setup_subscribe_webhook(twitch):
-    subscribe_webhook = EventSub(cfg.config_data['TWITCH_CALLBACK_URL'],
+    subscribe_webhook = EventSub(cfg.config_data['KEYS']['TWITH_CALLBACK_URL'],
                                  TWITCH_CLIENT_ID,
                                  5555,
                                  twitch)
@@ -57,7 +60,14 @@ def setup_twitch():
     twitch_object = Twitch(TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET)
     print(f'TWITCH_OBJECT - {twitch_object}')
     return twitch_object
+
 print('registering twitch instance')
+
+
+# twitch_object_ = setup_twitch()
+# user: TwitchUser = asyncio.run(twitch_object_.get_users(logins=['Zhenya_2001']).__anext__())
+# print(user.id)
+
 
 
 # print(f'webhook url - {webhook.callback_url}')

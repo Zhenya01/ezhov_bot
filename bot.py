@@ -12,6 +12,8 @@ import channel_points_module
 import forward_posts
 import cfg
 
+# import triggers_and_listeners_test
+
 import tiktok_module
 import twitch_module
 import chat_management_module
@@ -70,6 +72,7 @@ async def set_commands(_):
 
 async def functions_to_run_at_the_beginning(_):
     await twitch_module.setup_twitch_objects()
+    await twitch_module.get_user_id_by_name('Zhenya_2001')
     await twitch_module.subscribe_stream_online()
     await twitch_module.subscribe_stream_offline()
     await set_commands(_)
@@ -167,7 +170,7 @@ conv_handler = ConversationHandler(
             USER_POINTS_MENU:
             [
                 MessageHandler(filters.Text([CANCEL_BUTTON, SEE_REWARDS, SEE_POINTS_INFO]),
-                               channel_points_module.points_descision)
+                               channel_points_module.points_decision)
             ],
             SELECT_REWARD_TO_BUY:
             [
@@ -257,6 +260,8 @@ if os != 'Windows':
 else:
     application.job_queue.run_custom(set_commands, job_kwargs={})
     application.job_queue.run_custom(send_reboot_message, job_kwargs={})
+    # application.job_queue.run_custom(twitch_module.setup_twitch_objects, job_kwargs={})
+    # application.job_queue.run_custom(twitch_module.test_get_user_id_by_name, job_kwargs={})
 application.run_polling()
 
 

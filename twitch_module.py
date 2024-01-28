@@ -16,11 +16,12 @@ import zhenya_test
 from cfg import application
 from logging_settings import logger
 
-twitch: twitchAPI.twitch = None
-webhook: twitchAPI.eventsub = None
+twitch: twitchAPI.Twitch = None
+webhook: twitchAPI.EventSub = None
 
 MAIN_BROADCASTER_ID = cfg.config_data['TWITCH_NOTIFICATIONS']['MAIN_BROADCASTER_ID']
 TEST_BROADCASTER_ID = cfg.config_data['TWITCH_NOTIFICATIONS']['TEST_BROADCASTER_ID']
+
 
 async def setup_twitch_objects():
     global twitch, webhook
@@ -48,6 +49,16 @@ async def subscribe_stream_offline():
     await webhook.listen_stream_offline(
         TEST_BROADCASTER_ID,
         callback=zhenya_test.post_stream_offline_notification)
+
+
+async def test_get_user_id_by_name(_):
+    print('running names')
+    await get_user_id_by_name('Zhenya_2001')
+
+
+async def get_user_id_by_name(username):
+    user = await twitch.get_users(logins=[username]).__anext__()
+    print(f'user - {user}')
 
 
 async def post_stream_live_notification(data):
