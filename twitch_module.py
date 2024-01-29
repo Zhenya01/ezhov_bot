@@ -35,32 +35,33 @@ async def setup_twitch_objects():
 
 
 async def subscribe_stream_online():
-    await webhook.listen_stream_online(
+    global app_webhook
+    await app_webhook.listen_stream_online(
         MAIN_BROADCASTER_ID,
         callback=post_stream_live_notification)
-    await webhook.listen_stream_online(
+    await app_webhook.listen_stream_online(
         TEST_BROADCASTER_ID,
         callback=zhenya_test.post_stream_live_notification)
 
 
 async def subscribe_stream_offline():
-    global webhook
-    await webhook.listen_stream_offline(
+    global app_webhook
+    await app_webhook.listen_stream_offline(
         MAIN_BROADCASTER_ID,
         callback=post_stream_offline_notification)
-    await webhook.listen_stream_offline(
+    await app_webhook.listen_stream_offline(
         TEST_BROADCASTER_ID,
         callback=zhenya_test.post_stream_offline_notification)
 
 
 async def subscribe_reward_redemption():
-    global webhook
-    await webhook.listen_channel_points_custom_reward_redemption_add(MAIN_BROADCASTER_ID,
+    global app_webhook
+    await app_webhook.listen_channel_points_custom_reward_redemption_add(MAIN_BROADCASTER_ID,
                                                                      add_points_from_twitch_reward)
 
 
 async def get_user_id_by_name(username):
-    user = await twitch.get_users(logins=[username]).__anext__()
+    user = await app_twitch.get_users(logins=[username]).__anext__()
     print(f'user - {user}')
 
 
