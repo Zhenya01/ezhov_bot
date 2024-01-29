@@ -56,7 +56,7 @@ async def subscribe_stream_offline():
 
 
 async def subscribe_reward_redemption():
-    global app_webhook
+    global app_webhook, app_twitch
     await app_twitch.authenticate_app([AuthScope.CHANNEL_READ_REDEMPTIONS])
     await app_webhook.listen_channel_points_custom_reward_redemption_add(MAIN_BROADCASTER_ID,
                                                                          add_points_from_twitch_reward)
