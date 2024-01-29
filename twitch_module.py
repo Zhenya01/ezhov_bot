@@ -29,7 +29,7 @@ TEST_BROADCASTER_ID = cfg.config_data['TWITCH_NOTIFICATIONS']['TEST_BROADCASTER_
 async def setup_twitch_objects():
     global app_twitch, app_webhook
     twitch = twitchAPI_integration.setup_twitch()
-    await twitch.authenticate_app([])
+    await app_twitch.authenticate_app([])
     print('setting up webhook')
     app_webhook = await twitchAPI_integration.setup_subscribe_webhook(twitch)
 
