@@ -51,11 +51,6 @@ async def subscribe_stream_offline():
         callback=zhenya_test.post_stream_offline_notification)
 
 
-async def test_get_user_id_by_name(_):
-    print('running names')
-    await get_user_id_by_name('Zhenya_2001')
-
-
 async def get_user_id_by_name(username):
     user = await twitch.get_users(logins=[username]).__anext__()
     print(f'user - {user}')

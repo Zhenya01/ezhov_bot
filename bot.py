@@ -72,7 +72,6 @@ async def set_commands(_):
 
 async def functions_to_run_at_the_beginning(_):
     await twitch_module.setup_twitch_objects()
-    await twitch_module.get_user_id_by_name('Zhenya_2001')
     await twitch_module.subscribe_stream_online()
     await twitch_module.subscribe_stream_offline()
     await set_commands(_)
@@ -260,8 +259,7 @@ if os != 'Windows':
 else:
     application.job_queue.run_custom(set_commands, job_kwargs={})
     application.job_queue.run_custom(send_reboot_message, job_kwargs={})
-    # application.job_queue.run_custom(twitch_module.setup_twitch_objects, job_kwargs={})
-    # application.job_queue.run_custom(twitch_module.test_get_user_id_by_name, job_kwargs={})
+    application.job_queue.run_custom(twitch_module.setup_twitch_objects, job_kwargs={})
 application.run_polling()
 
 
