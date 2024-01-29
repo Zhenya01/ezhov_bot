@@ -35,7 +35,6 @@ async def setup_twitch_objects():
 
 
 async def subscribe_stream_online():
-    print(webhook)
     await webhook.listen_stream_online(
         MAIN_BROADCASTER_ID,
         callback=post_stream_live_notification)
