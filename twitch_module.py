@@ -2,6 +2,9 @@ import asyncio
 import random
 
 import twitchAPI
+from twitchAPI.twitch import Twitch
+from twitchAPI.eventsub.webhook import EventSubWebhook
+from twitchAPI.object import eventsub as eventsub_object
 from telegram import Update
 from telegram.ext import ContextTypes
 from telethon import TelegramClient, functions
@@ -16,8 +19,8 @@ import zhenya_test
 from cfg import application
 from logging_settings import logger
 
-twitch: twitchAPI.Twitch = None
-webhook: twitchAPI.EventSub = None
+twitch: Twitch
+webhook: EventSubWebhook
 
 MAIN_BROADCASTER_ID = cfg.config_data['TWITCH_NOTIFICATIONS']['MAIN_BROADCASTER_ID']
 TEST_BROADCASTER_ID = cfg.config_data['TWITCH_NOTIFICATIONS']['TEST_BROADCASTER_ID']
@@ -51,10 +54,22 @@ async def subscribe_stream_offline():
         callback=zhenya_test.post_stream_offline_notification)
 
 
+async def subscribe_reward_redemption():
+    global webhook
+    await webhook.listen_channel_points_custom_reward_redemption_add(MAIN_BROADCASTER_ID,
+                                                                     add_points_from_twitch_reward)
+
+
 async def get_user_id_by_name(username):
     user = await twitch.get_users(logins=[username]).__anext__()
     print(f'user - {user}')
 
+
+async def add_points_from_twitch_reward(data: eventsub_object.ChannelPointsCustomRewardRedemptionAddEvent):
+    logger.info('User bought twitch reward for tg_points')
+    application.bot.send_message(cfg.TEST_STREAMER_USER_ID,
+                                 'Куплена награда')
+    logger.info(f'CHANNEL REWARD DATA - {data}')
 
 async def post_stream_live_notification(data):
     logger.info('Streamer is online. Changing information')

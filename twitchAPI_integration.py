@@ -9,10 +9,11 @@ import requests
 import cfg
 
 import twitchAPI
-from twitchAPI import EventSub, Twitch
+from twitchAPI.eventsub.webhook import EventSubWebhook
+from twitchAPI.twitch import Twitch
 from twitchAPI.twitch import AuthScope, TwitchUser
 from logging_settings import logger
-global twitch
+# global twitch
 
 TWITCH_TOKEN = cfg.config_data['KEYS']['TWITCH_TOKEN']
 TWITCH_CLIENT_ID = cfg.config_data['KEYS']['TWITCH_CLIENT_ID']
@@ -46,10 +47,9 @@ def get_user_login_by_id(user_id):
 
 
 async def setup_subscribe_webhook(twitch):
-    subscribe_webhook = EventSub(cfg.config_data['KEYS']['TWITH_CALLBACK_URL'],
-                                 TWITCH_CLIENT_ID,
-                                 5555,
-                                 twitch)
+    subscribe_webhook = EventSubWebhook(cfg.config_data['KEYS']['TWITH_CALLBACK_URL'],
+                                        5555,
+                                        twitch)
     subscribe_webhook.wait_for_subscription_confirm_timeout = 15
     await subscribe_webhook.unsubscribe_all()
     subscribe_webhook.start()
@@ -60,6 +60,7 @@ def setup_twitch():
     twitch_object = Twitch(TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET)
     print(f'TWITCH_OBJECT - {twitch_object}')
     return twitch_object
+
 
 print('registering twitch instance')
 
