@@ -3,7 +3,7 @@ import random
 
 import twitchAPI
 from twitchAPI.twitch import Twitch
-from twitchAPI.eventsub.webhook import EventSubWebhook
+from twitchAPI.eventsub import webhook as webhook_
 from twitchAPI.object import eventsub as eventsub_object
 from telegram import Update
 from telegram.ext import ContextTypes
@@ -19,19 +19,19 @@ import zhenya_test
 from cfg import application
 from logging_settings import logger
 
-twitch: Twitch
-webhook: EventSubWebhook
+app_twitch: Twitch
+app_webhook: webhook_.EventSubWebhook
 
 MAIN_BROADCASTER_ID = cfg.config_data['TWITCH_NOTIFICATIONS']['MAIN_BROADCASTER_ID']
 TEST_BROADCASTER_ID = cfg.config_data['TWITCH_NOTIFICATIONS']['TEST_BROADCASTER_ID']
 
 
-async def setup_twitch_objects():
-    global twitch, webhook
+async def setup_twitch_objects(_):
+    global app_twitch, app_webhook
     twitch = twitchAPI_integration.setup_twitch()
     await twitch.authenticate_app([])
     print('setting up webhook')
-    webhook = await twitchAPI_integration.setup_subscribe_webhook(twitch)
+    app_webhook = await twitchAPI_integration.setup_subscribe_webhook(twitch)
 
 
 async def subscribe_stream_online():
