@@ -5,6 +5,7 @@ import twitchAPI
 from twitchAPI.twitch import Twitch
 from twitchAPI.eventsub import webhook as webhook_
 from twitchAPI.object import eventsub as eventsub_object
+from twitchAPI.oauth import AuthScope
 from telegram import Update
 from telegram.ext import ContextTypes
 from telethon import TelegramClient, functions
@@ -56,8 +57,9 @@ async def subscribe_stream_offline():
 
 async def subscribe_reward_redemption():
     global app_webhook
+    await app_twitch.authenticate_app([AuthScope.CHANNEL_READ_REDEMPTIONS])
     await app_webhook.listen_channel_points_custom_reward_redemption_add(MAIN_BROADCASTER_ID,
-                                                                     add_points_from_twitch_reward)
+                                                                         add_points_from_twitch_reward)
 
 
 async def get_user_id_by_name(username):
