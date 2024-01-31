@@ -359,7 +359,7 @@ def add_points(user_id, points):
     SET tg_points = tg_points + %s
     WHERE user_id = %s RETURNING tg_points'''
     cursor.execute(command, (points, user_id))
-    return cursor.fetchone()['']
+    return cursor.fetchone()['tg_points']
     #connection_pool.putconn(connection)
 
 
