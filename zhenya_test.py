@@ -65,8 +65,8 @@ async def rename_channel(live: bool):
                 channel='ezhov_test',
                 title=title)
                 )
-    except:
-        pass
+    except Exception as e:
+        raise e
     await asyncio.sleep(10)
     title = '🔴 NeEzhovForum' if live else 'NeEzhovForum'
     try:
@@ -75,5 +75,5 @@ async def rename_channel(live: bool):
                 channel='ezhov_test_chat',
                 title=title)
             )
-    except:
-        pass
+    except Exception as e:
+        raise e
