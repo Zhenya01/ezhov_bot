@@ -73,6 +73,7 @@ async def add_points_from_twitch_reward(data: eventsub_object.ChannelPointsCusto
                                  'Куплена награда')
     logger.info(f'CHANNEL REWARD DATA - {data}')
 
+
 async def post_stream_live_notification(data):
     logger.info('Streamer is online. Changing information')
     logger.debug(f'Twitch data - {data}')
@@ -98,6 +99,7 @@ async def post_stream_live_notification(data):
     else:
         logger.info('Loudness is set to "silent". Setting loudness to "loud"')
         application.bot_data['silent'] = False
+    logger.info('requesting channel rename')
     await rename_channel(live=True)
 
 
@@ -106,6 +108,7 @@ async def post_stream_offline_notification(data):
 
 
 async def rename_channel(live: bool):
+    logger.info('Renaming channel')
     telegram_app_api_id = cfg.config_data['KEYS']['TELEGRAM_APP_API_ID']
     telegram_app_api_hash = cfg.config_data['KEYS']['TELEGRAM_APP_API_HASH']
     title = '🔴 zdarovezhov камунити' if live else 'zdarovezhov камунити'
@@ -115,8 +118,9 @@ async def rename_channel(live: bool):
                 channel='zdarovezhov_cummunity',
                 title=title)
                 )
-    except:
-        pass
+    except Exception as e:
+        raise e
+        # pass
     await asyncio.sleep(5)
     title = '🔴 zdarovezhov' if live else 'zdarovezhov'
     try:
@@ -125,8 +129,9 @@ async def rename_channel(live: bool):
                 channel='zdarovezhov',
                 title=title)
             )
-    except:
-        pass
+    except Exception as e:
+        raise e
+        # pass
 
 ADMINS_LIST = cfg.config_data['CHATS']['ADMINS_LIST']
 
