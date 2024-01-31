@@ -44,14 +44,17 @@ async def post_stream_live_notification(data):
     else:
         info_messages.info('Loudness was set to "silent". Setting loudness to "loud"')
         application.bot_data['silent'] = False
+    logger.info('Requesting to rename channel')
     await rename_channel(live=True)
 
 
 async def post_stream_offline_notification(data):
+    logger.info('Requesting to rename channel')
     await rename_channel(live=False)
 
 
 async def rename_channel(live: bool):
+    logger.info('Renaming channel')
     telegram_app_api_id = test_config_data['KEYS']['TELEGRAM_APP_API_ID']
     telegram_app_api_hash = test_config_data['KEYS']['TELEGRAM_APP_API_HASH']
     title = '🔴 zdarovNeEzhov' if live else 'zdarovNeEzhov'
