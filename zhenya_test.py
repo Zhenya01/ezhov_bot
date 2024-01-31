@@ -72,7 +72,7 @@ async def rename_channel(live: bool):
     try:
         async with TelegramClient('ezhovApp', telegram_app_api_id, telegram_app_api_hash) as client:
             await client(functions.channels.EditTitleRequest(
-                channel='ezhov_test_chat',
+                channel='ngfgbb',
                 title=title)
             )
     except Exception as e:
