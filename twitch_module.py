@@ -100,6 +100,7 @@ async def post_stream_live_notification(data):
         logger.info('Loudness is set to "silent". Setting loudness to "loud"')
         application.bot_data['silent'] = False
     logger.info('requesting channel rename')
+    await asyncio.sleep(10)
     await rename_channel(live=True)
 
 
