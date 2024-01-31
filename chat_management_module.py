@@ -15,7 +15,7 @@ CHATS = cfg.config_data['CHATS']
 
 
 async def mute(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    admins_list = cfg.config_data['CHATS']['ADMINS_LIST'] + cfg.config_data['MODERS_LIST']
+    admins_list = cfg.config_data['CHATS']['ADMINS_LIST'] + cfg.config_data['CHATS']['MODERATORS_LIST']
     print('STARTING MUTE. CHECKING ADMINS')
     if update.message.from_user.id in admins_list:
         print('IS_ADMIN. MUTING')
