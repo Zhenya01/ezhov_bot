@@ -68,7 +68,8 @@ async def reply_to_message(context: ContextTypes.DEFAULT_TYPE):
                                                f'<a href = "https://t.me/zdarovezhov_cummunity">👉 Всё наше каммунити тут!👈</a>\n'
                                                f'Сейчас ты в канале с уведомлениями, здесь мы особо не общаемся, он создан для удобства получения всех постов',
                                                reply_to_message_id=message_id,
-                                               parse_mode=ParseMode.HTML)
+                                               parse_mode=ParseMode.HTML,
+                                               disable_notification=True)
 
 
 # async def forward_to_comments(update: Update, context: ContextTypes.DEFAULT_TYPE):

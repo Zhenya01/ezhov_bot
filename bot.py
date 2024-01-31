@@ -197,7 +197,6 @@ print(f'os - {os}')
 twitch_commands_users_list = cfg.config_data['TWITCH_NOTIFICATIONS']['TWITCH_COMMANDS_USERS_LIST']
 application.add_handler(conv_handler)
 application.add_handler(CommandHandler('start', start))
-application.add_handler(MessageHandler(filters.Chat(chat_id=cfg.TEST_CHANNEL_GROUP_ID) and filters.User(user_id=777000), forward_posts.comment_under_the_post))
 application.add_handler(MessageHandler(filters.Chat(chat_id=cfg.CHANNEL_GROUP_ID) and filters.User(user_id=777000), forward_posts.comment_under_the_post))
 application.add_handler(CommandHandler('start_tiktoks', tiktok_module.start_ticktock_evening,
                                        filters=filters.Chat(chat_id=twitch_commands_users_list)))
