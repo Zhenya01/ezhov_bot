@@ -155,7 +155,6 @@ async def show_rewards(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif reason == str(VIEW):
         return SELECT_REWARD_TO_BUY
 
-@update_user_info
 async def generate_reward_text(reward: Reward, is_extended=False):
     keyboard = [
         [InlineKeyboardButton('❌ Отменить', callback_data='cancel')],
@@ -558,8 +557,11 @@ async def add_points_for_comment(update: Update, context: ContextTypes.DEFAULT_T
     if update.message.sticker is not None:
         for_limit = True
     elif update.message.text is not None:
-        words_number = len(update.effective_message.text.split(' '))
-        for_limit = words_number == 1
+        symbols_number = len(update.effective_message.text.strip().split(''))
+        if symbols_number >= 10:
+            database.add_points(update.effective_user.id, points_to_reward)
+            print('POINTS ADDED')
+            return
     else:
         for_limit = False
     pprint(update.effective_message)

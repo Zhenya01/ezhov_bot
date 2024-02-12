@@ -175,35 +175,35 @@ async def get_users():
 
 
 # Tiktoks
-def add_tiktok(message_id, sender_id, file_id, is_approved, in_chat_message_id):
+def add_tiktok(message_id, sender_id, file_id, is_approved, in_chat_message_id, is_for_live):
     #connection, cursor = open_connection()
     command = '''
     INSERT INTO ezhov_bot.tiktoks 
-    (message_id, sender_user_id, file_id, is_approved, in_chat_message_id) 
-    VALUES (%s, %s, %s, %s, %s);'''
-    cursor.execute(command, (message_id, sender_id, file_id, is_approved, in_chat_message_id))
+    (message_id, sender_user_id, file_id, is_approved, in_chat_message_id, is_for_live) 
+    VALUES (%s, %s, %s, %s, %s, %s);'''
+    cursor.execute(command, (message_id, sender_id, file_id, is_approved, in_chat_message_id, is_for_live))
     #connection_pool.putconn(connection)
 
 
-def find_tiktok(tiktol_id):
+def find_tiktok(tiktok_id):
     #connection, cursor = open_connection()
     command = '''
         SELECT * FROM ezhov_bot.tiktoks
         WHERE tiktok_id = %s'''
-    cursor.execute(command, (tiktol_id,))
+    cursor.execute(command, (tiktok_id,))
     result = cursor.fetchone()
     #connection_pool.putconn(connection)
     return result
 
 
-def pick_user_latest_tiktok(user_id):
+def pick_user_latest_tiktok(user_id, is_for_live):
     #connection, cursor = open_connection()
     command = '''
     SELECT * FROM ezhov_bot.tiktoks
-    WHERE sender_user_id = '%s' AND is_sent = False
+    WHERE sender_user_id = '%s' AND is_sent = False AND is_for_live = %s
     ORDER BY time_sent DESC
     LIMIT 1'''
-    cursor.execute(command, (user_id,))
+    cursor.execute(command, (user_id, is_for_live))
     result = cursor.fetchone()
     #connection_pool.putconn(connection)
     return result
@@ -220,20 +220,20 @@ def count_unapproved_tiktoks(user_id, is_for_live=False):
     command = '''
     SELECT COUNT(tiktok_id) AS count
     FROM ezhov_bot.tiktoks
-    WHERE sender_user_id = '%s' AND is_rejected = False AND is_approved = False'''
-    cursor.execute(command, (user_id,))
+    WHERE sender_user_id = '%s' AND is_rejected = False AND is_approved = False AND is_for_live = %s'''
+    cursor.execute(command, (user_id, is_for_live))
     count = cursor.fetchone()
     #connection_pool.putconn(connection)
     return count
 
 
-def count_unsent_tiktoks():
+def count_unsent_tiktoks(is_for_live=False):
     #connection, cursor = open_connection()
     command = '''
         SELECT COUNT(tiktok_id) AS count
         FROM ezhov_bot.tiktoks
-        WHERE is_approved = True AND is_sent = False'''
-    cursor.execute(command)
+        WHERE is_approved = True AND is_sent = False AND is_for_live = %s'''
+    cursor.execute(command, (is_for_live,))
     count = cursor.fetchone()
     #connection_pool.putconn(connection)
     return count
@@ -622,7 +622,33 @@ async def reject_user_reward(ur_id):
     return
 
 
+# ==========================================VIDEOS======================================================================
+
+async def add_video(tiktok_id, mark_emoji):
+    # connection, cursor = open_connection()
+    command = '''INSERT INTO ezhov_bot.videos 
+                 (tiktok_id, mark_emoji)
+                 VALUES (%s, %s)'''
+    cursor.execute(command, (tiktok_id, mark_emoji))
+    # connection_pool.putconn(connection)
+    return
 
 
+async def mark_video(video_id, mark_emoji):
+    # connection, cursor = open_connection()
+    command = '''
+        UPDATE ezhov_bot.videos
+        SET mark_emoji = %s
+        WHERE video_id = %s'''
+    cursor.execute(command, (mark_emoji, video_id))
+    # connection_pool.putconn(connection)
 
 
+async def publish_video(video_id):
+    # connection, cursor = open_connection()
+    command = '''
+        UPDATE ezhov_bot.videos
+        SET is_published = True
+        WHERE video_id = %s'''
+    cursor.execute(command, (video_id,))
+    # connection_pool.putconn(connection)

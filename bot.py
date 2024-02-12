@@ -217,7 +217,6 @@ application.add_handler(CommandHandler('commands', info_messages.commands,
 application.add_handler(CommandHandler('bugs', bugs_and_improvements))
 application.add_handler(CommandHandler('improvements', bugs_and_improvements))
 application.add_handler(CommandHandler('mute', chat_management_module.mute, filters.REPLY))
-
 application.add_handler(CommandHandler('info', info_messages.info))
 application.add_handler(CommandHandler('publish', tiktok_module.publish_ticktocks))
 # CommandHandler("send_tiktok", tiktok_module.waiting_for_tiktok, filters=filters.ChatType.PRIVATE),

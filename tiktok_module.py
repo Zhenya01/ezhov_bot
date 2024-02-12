@@ -79,7 +79,7 @@ async def waiting_for_tiktok(update: Update,
             database.unban_user_from_tiktoks(update.effective_user.id)
     if unapproved_tiktoks_count > 19:
         await context.bot.send_message(update.effective_chat.id,
-                                       'Вы уже отправили 10 видео, но не одно пока не подтвердили. Пока больше нельзя отправлять видео')
+                                       'Вы уже отправили 20 видео, но не одно пока не подтвердили. Пока больше нельзя отправлять видео')
     elif not can_send_tiktok:
         time_banned_string = tiktoks_banned_until.strftime("%Y-%m-%d %H:%M:%S")
         await context.bot.send_message(update.effective_chat.id,
@@ -204,7 +204,7 @@ async def got_tiktok(update: Update,
             database.unban_user_from_tiktoks(update.effective_user.id)
     if unapproved_tiktoks_count > 19:
             await context.bot.send_message(update.effective_chat.id,
-                                           'Вы уже отправили 10 видео, но не один пока не подтвердили. Пока больше нельзя отправлять тиктоки')
+                                           'Вы уже отправили 20 видео, но не одно пока не подтвердили. Пока больше нельзя отправлять тиктоки')
 
     elif not can_send_tiktok:
         time_banned_string = tiktoks_banned_until.strftime("%Y-%m-%d %H:%M:%S")
