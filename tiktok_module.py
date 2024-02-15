@@ -230,7 +230,8 @@ async def got_tiktok(update: Update,
         is_approved = update.effective_user.id == cfg.STREAMER_USER_ID
         database.add_tiktok(forwarded_message_id, update.effective_user.id,
                             file_id,
-                            is_approved, update.effective_message.id)
+                            is_approved, update.effective_message.id,
+                            is_for_live=False)
         message_text = 'Я посмотрю, а пока' if not is_approved \
             else 'Тикток добавлен в очередь на отправление'
         unapproved_count = database.count_unapproved_tiktoks(update.effective_user.id)['count']
