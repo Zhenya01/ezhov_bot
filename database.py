@@ -217,6 +217,7 @@ def pick_user_latest_tiktok(user_id, is_for_live):
 
 def count_unapproved_tiktoks(user_id, is_for_live=False):
     #connection, cursor = open_connection()
+    is_for_live_ = 'True' if is_for_live else 'False'
     command = '''
     SELECT COUNT(tiktok_id) AS count
     FROM ezhov_bot.tiktoks

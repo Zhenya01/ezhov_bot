@@ -557,7 +557,7 @@ async def add_points_for_comment(update: Update, context: ContextTypes.DEFAULT_T
     if update.message.sticker is not None:
         for_limit = True
     elif update.message.text is not None:
-        symbols_number = len(update.effective_message.text.strip().split(''))
+        symbols_number = len(update.effective_message.text.strip().split(' '))
         if symbols_number >= 10:
             database.add_points(update.effective_user.id, points_to_reward)
             print('POINTS ADDED')
