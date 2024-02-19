@@ -1,10 +1,11 @@
+import pprint
+
 from telethon import TelegramClient, events
 
 from pytgcalls import GroupCallFactory
 
 import cfg
-
-
+pprint.pp(cfg.config_data)
 # app = TelegramClient('EzhovCalls', regs.ezhov_audio_api_id, regs.ezhov_audio_api_hash).start()
 app = TelegramClient('EzhovCalls', cfg.config_data['EZHOV_AUDIO_API_ID'], cfg.config_data['EZHOV_AUDIO_API_HASH']).start()
 
