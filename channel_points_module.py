@@ -553,6 +553,7 @@ async def reward_price_entered(update: Update, context: ContextTypes.DEFAULT_TYP
 @update_user_info
 async def add_points_for_comment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # TODO поменять на prestige level
+    for_limit = False
     points_to_reward = int(cfg.BASE_COMMENT_POINTS) + (int(cfg.PRESTIGE_LEVEL_ADDED_MULTIPLIER) * 1)
     if update.message.sticker is not None:
         for_limit = True
@@ -565,7 +566,6 @@ async def add_points_for_comment(update: Update, context: ContextTypes.DEFAULT_T
     else:
         for_limit = False
     pprint(update.effective_message)
-    print(f'FOR LIMIT - {for_limit}')
     if not for_limit:
         database.add_points(update.effective_user.id, points_to_reward)
         print('POINTS ADDED')
