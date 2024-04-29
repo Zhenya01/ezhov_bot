@@ -33,6 +33,31 @@ async def forward_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
             context.bot_data['post_message_text'] = msg.text
 
 
+async def forward_post_from_channel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    bot_me = await context.bot.get_me()
+    first_name = bot_me.first_name
+    print('bot_me', bot_me, first_name)
+    if update.channel_post.author_signature != first_name:
+        print('Forwarding post from channel')
+        threads = cfg.config_data['CHATS']['FORUM_THREADS']
+        # if thread_id in [threads['posts'], threads['tiktoks'], threads['ezhov_news'],
+        #                  threads['frontend_vlog'], threads['zhizhov']]:
+        logger.debug('forwarding post to comments')
+        await context.bot.forward_message(cfg.FORUM_ID,
+                                          update.effective_chat.id,
+                                          update.effective_message.message_id,
+                                          message_thread_id=threads['posts'])
+
+        logger.debug('forwarding post to posts')
+        await asyncio.sleep(3)
+        await context.bot.forward_message(cfg.FORUM_ID,
+                                          update.effective_chat.id,
+                                          update.effective_message.message_id)
+        await asyncio.sleep(3)
+        context.bot_data['searching_for_post'] = True
+        context.bot_data['post_message_text'] = update.effective_message.text
+
+
 async def comment_under_the_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if 'searching_for_post' not in context.bot_data.keys():
         searching_for_post = False
@@ -54,7 +79,7 @@ async def reply_to_message(context: ContextTypes.DEFAULT_TYPE):
     group_id = context.job.data['group_id']
     await context.bot.send_message(group_id,
                                    f'<a href = "https://t.me/zdarovezhov_cummunity">👉 Всё наше каммунити тут!👈</a>\n'
-                                   f'Сейчас ты в канале с уведомлениями, здесь мы особо не общаемся, он создан для удобства получения всех постов',
+                                   f'Переходи в камунити если хочешь больше общения)',
                                    reply_to_message_id=message_id,
                                    parse_mode=ParseMode.HTML,
                                    disable_notification=True)

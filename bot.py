@@ -21,7 +21,7 @@ from logging_settings import logger
 from cfg import application
 from database import update_user_info
 from cfg import WAITING_FOR_TIKTOK_DESISION
-from cfg import TIKTOK_APPROVAL_STATES
+from cfg import TIKTOK_APPROVAL_STATES, VIDEO_EVENING_APPROVAL_STATES
 from cfg import SEND_TIKTOK_DEEPLINK
 from cfg import SELECT_USER, ADD_OR_SUBTRACT_POINTS, ADD_POINTS, SUBTRACT_POINTS, ENTER_POINTS_MANAGEMENT
 from cfg import SELECT_REWARD_TO_EDIT, PICK_ACTION, EDIT_REWARD, ADDING_REWARD, CHANGE_NAME, CHANGE_DESCRIPTION, CHANGE_PRICE, REMOVE_REWARD, BACK_TO_REWARDS, BUY_REWARD
@@ -98,7 +98,9 @@ conv_handler = ConversationHandler(
                       CommandHandler('add_reward', channel_points_module.start_adding_reward,
                                      filters=filters.User(user_id=cfg.TEST_STREAMER_USER_ID) & filters.ChatType.PRIVATE),
                       CommandHandler('points', channel_points_module.points,
-                                     filters=filters.ChatType.PRIVATE)
+                                     filters=filters.ChatType.PRIVATE),
+                      CallbackQueryHandler(tiktok_module.video_approval_callback_handler,
+                                           pattern=rf'^{VIDEO_EVENING_APPROVAL_STATES}')
         ],
 
         states={
@@ -198,7 +200,9 @@ twitch_commands_users_list = cfg.config_data['TWITCH_NOTIFICATIONS']['TWITCH_COM
 application.add_handler(conv_handler)
 application.add_handler(CommandHandler('start', start))
 application.add_handler(MessageHandler(filters.Chat(chat_id=cfg.CHANNEL_GROUP_ID) and filters.User(user_id=777000), forward_posts.comment_under_the_post))
-application.add_handler(CommandHandler('start_tiktoks', tiktok_module.start_ticktock_evening,
+application.add_handler(CommandHandler('start_tiktoks', tiktok_module.start_tiktok_evening,
+                                       filters=filters.Chat(chat_id=twitch_commands_users_list)))
+application.add_handler(CommandHandler('start_video', tiktok_module.start_video_evening,
                                        filters=filters.Chat(chat_id=twitch_commands_users_list)))
 application.add_handler(CommandHandler('add', twitch_module.add_phrase,
                                        filters=filters.Chat(chat_id=twitch_commands_users_list)))
@@ -231,9 +235,13 @@ application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS & f
                                        chat_management_module.remove_join_left_message))
 # application.add_handler(MessageHandler(filters.StatusUpdate.LEFT_CHAT_MEMBER,
 #                                        chat_management_module.remove_join_left_message))
-application.add_handler(MessageHandler(filters.Chat(chat_id=cfg.TEST_FORUM_ID) & filters.User(user_id=cfg.TEST_STREAMER_USER_ID), forward_posts.forward_post))
-application.add_handler(MessageHandler(filters.Chat(chat_id=cfg.FORUM_ID) & filters.User(user_id=[cfg.STREAMER_USER_ID, cfg.CHANNEL_ID]), forward_posts.forward_post))
-application.add_handler(MessageHandler(filters.Chat(chat_id=cfg.TEST_FORUM_ID) & filters.User(user_id=cfg.STREAMER_USER_ID), forward_posts.forward_post))
+# application.add_handler(MessageHandler(filters.Chat(chat_id=cfg.TEST_FORUM_ID) & filters.User(user_id=cfg.TEST_STREAMER_USER_ID), forward_posts.forward_post))
+# application.add_handler(MessageHandler(filters.Chat(chat_id=cfg.FORUM_ID) & filters.User(user_id=[cfg.STREAMER_USER_ID, cfg.CHANNEL_ID]), forward_posts.forward_post))
+# application.add_handler(MessageHandler(filters.Chat(chat_id=cfg.TEST_FORUM_ID) & filters.User(user_id=cfg.STREAMER_USER_ID), forward_posts.forward_post))
+
+application.add_handler(MessageHandler(filters.Chat(chat_id=cfg.TEST_CHANNEL_ID), forward_posts.forward_post_from_channel))
+application.add_handler(MessageHandler(filters.Chat(chat_id=cfg.CHANNEL_ID), forward_posts.forward_post_from_channel))
+
 # application.add_handler(MessageHandler(filters.Chat(chat_id=cfg.TEST_CHANNEL_ID), forward_posts.forward_to_comments))
 application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_TITLE,
                                        chat_management_module.schedule_remove_rename_message))
@@ -251,7 +259,7 @@ application.add_handler(CallbackQueryHandler(chat_management_module.unmute_chatt
                         pattern=rf'^{cfg.UNBAN_CHATTER},'))
 # application.add_handler(CommandHandler('file', tiktok_module.get_ticktock_file))
 # application.add_handler(CommandHandler('post', post_hello_message))
-application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), echo))
+application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND) & ~filters.Chat(chat_id=cfg.TEST_CHANNEL_ID) & ~filters.Chat(chat_id=cfg.CHANNEL_ID), echo))
 job_queue: JobQueue = application.job_queue
 if os != 'Windows':
     application.job_queue.run_custom(functions_to_run_at_the_beginning, job_kwargs={})

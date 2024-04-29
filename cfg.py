@@ -34,6 +34,10 @@ APPROVE_REWARD, DECLINE_REWARD = (int(f'70{number}') for number in range(1, 2 + 
 UNBAN_CHATTER = '801'
 ADD_REWARD_NAME, ADD_REWARD_DESCRIPTION, ADD_REWARD_PRICE = \
     (int(f'90{number}') for number in range(1, 3 + 1))
+VIDEO_EVENING_APPROVAL_STATES = '10'
+APPROVE_VIDEO, REJECT_VIDEO, BAN_VIDEO_SENDER, SUPER_APPROVE_VIDEO, STOP_VIDEO_EVENING = \
+    (int(f'100{number}') for number in range(1, 5 + 1))
+VIDEO_EVENING_MARKING_STATES = '11'
 # Rewards vars
 (CHANGE_NAME, CHANGE_DESCRIPTION, CHANGE_PRICE, CHANGE_NUMBER_LEFT, CHANGE_PERSON_TOTAL_LIMIT,
  CHANGE_PERSON_COOLDOWN, CHANGE_TOTAL_COOLDOWN) = ('Изменить название', 'Изменить описание', 'Изменить цену',
@@ -146,7 +150,10 @@ def generate_tiktok_senders_string(names):
     return string
 
 
-
+print(f'Test channel id {TEST_CHANNEL_ID}\n'
+      f'Test streamer user id {TEST_STREAMER_USER_ID}\n'
+      f'Channel id {CHANNEL_ID}\n'
+      f'Stream user id {STREAMER_USER_ID}\n')
 
 
 

@@ -140,26 +140,27 @@ async def update_user(user_id, nickname='', place_of_living='', bio='',
 #         return await function(*args, **kwargs)
 #     return wrapper
 
+
 def update_user_info(function):
     async def wrapper(*args, **kwargs):
         print(f'decorated function - {function.__name__}')
         update: telegram.Update = args[0]
         context: telegram.ext.ContextTypes.DEFAULT_TYPE = args[1]
-        user_id = update.effective_user.id
-        try:
-            await add_user(user_id, update.effective_user.full_name)
-        except:
-            pass
-        user_info = await get_user_info(user_id)
-        if user_info is None:
-            await add_user(user_id, update.effective_user.full_name)
-        else:
-            if user_info['full_name'] != update.effective_user.full_name:
-                await update_user(user_id, full_name=update.effective_user.full_name)
-            context.user_data['user_info'] = user_info
-        return await function(*args, **kwargs)
+        if update.effective_user is not None:
+            user_id = update.effective_user.id
+            try:
+                await add_user(user_id, update.effective_user.full_name)
+            except:
+                pass
+            user_info = await get_user_info(user_id)
+            if user_info is None:
+                await add_user(user_id, update.effective_user.full_name)
+            else:
+                if user_info['full_name'] != update.effective_user.full_name:
+                    await update_user(user_id, full_name=update.effective_user.full_name)
+                context.user_data['user_info'] = user_info
+            return await function(*args, **kwargs)
     return wrapper
-
 
 
 async def get_users():
@@ -180,8 +181,11 @@ def add_tiktok(message_id, sender_id, file_id, is_approved, in_chat_message_id, 
     command = '''
     INSERT INTO ezhov_bot.tiktoks 
     (message_id, sender_user_id, file_id, is_approved, in_chat_message_id, is_for_live) 
-    VALUES (%s, %s, %s, %s, %s, %s);'''
+    VALUES (%s, %s, %s, %s, %s, %s)
+    RETURNING *;'''
     cursor.execute(command, (message_id, sender_id, file_id, is_approved, in_chat_message_id, is_for_live))
+    result = cursor.fetchone()
+    return result
     #connection_pool.putconn(connection)
 
 

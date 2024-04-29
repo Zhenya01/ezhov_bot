@@ -121,6 +121,7 @@ async def kick_from_group(update: Update, context: ContextTypes.DEFAULT_TYPE):
                                                data={'user_to_kick': update.message.from_user.id,
                                                      'chat_to_kick_from': update.message.chat.id,
                                                      'message_to_delete': message_id})
+        context.bot.delete_message()
 
 
 async def kick_after_wait(context: ContextTypes.DEFAULT_TYPE):
