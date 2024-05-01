@@ -248,7 +248,7 @@ def select_tiktok_to_approve():
     #connection, cursor = open_connection()
     command = '''
     SELECT * FROM ezhov_bot.tiktoks
-    WHERE is_approved = False AND is_rejected = False AND is_sent = False
+    WHERE is_approved = False AND is_rejected = False AND is_sent = False AND is_for_live = False
     ORDER BY tiktok_id
     LIMIT 1'''
     cursor.execute(command)
@@ -260,6 +260,20 @@ def select_tiktok_to_approve():
         return tiktok
 
 
+def select_video_to_rate():
+    #connection, cursor = open_connection()
+    command = '''
+    SELECT * FROM ezhov_bot.tiktoks
+    WHERE is_approved = False AND is_rejected = False AND is_sent = False AND is_for_live = True
+    ORDER BY tiktok_id
+    LIMIT 1'''
+    cursor.execute(command)
+    tiktok = cursor.fetchone()
+    #connection_pool.putconn(connection)
+    if not tiktok:
+        return None
+    else:
+        return tiktok
 def approve_tiktok(tiktok_id):
     #connection, cursor = open_connection()
     command = '''
