@@ -84,7 +84,8 @@ conv_handler = ConversationHandler(
                       CommandHandler("send_tiktok", tiktok_module.waiting_for_tiktok, filters=filters.ChatType.PRIVATE),
                       CommandHandler("start", tiktok_module.waiting_for_tiktok,
                                      filters=filters.Regex(rf'{SEND_TIKTOK_DEEPLINK}') & filters.ChatType.PRIVATE),
-                      CommandHandler('start_approval', tiktok_module.show_tiktok_to_approve),
+                      CommandHandler('start_tiktoks_approval', tiktok_module.show_tiktok_to_approve),
+                      CommandHandler('start_video_rating', tiktok_module.show_video_to_approve),
                       CommandHandler('pm', channel_points_module.points_manual_management,
                                      filters=filters.User(user_id=cfg.STREAMER_USER_ID) & filters.ChatType.PRIVATE),
                       CommandHandler('pm', channel_points_module.points_manual_management,
@@ -115,6 +116,11 @@ conv_handler = ConversationHandler(
             [
                 CallbackQueryHandler(tiktok_module.tiktok_approval_callback_handler,
                                      pattern=rf'^{TIKTOK_APPROVAL_STATES}')
+            ],
+            cfg.WAITING_FOR_VIDEO_MARK:
+            [
+                CallbackQueryHandler(tiktok_module.video_rating_callback_handler,
+                                     pattern=rf'^{cfg.VIDEO_EVENING_MARKING_STATES}')
             ],
             SELECT_USER:
             [
@@ -222,7 +228,10 @@ application.add_handler(CommandHandler('bugs', bugs_and_improvements))
 application.add_handler(CommandHandler('improvements', bugs_and_improvements))
 application.add_handler(CommandHandler('mute', chat_management_module.mute, filters.REPLY))
 application.add_handler(CommandHandler('info', info_messages.info))
-application.add_handler(CommandHandler('publish', tiktok_module.publish_ticktocks))
+application.add_handler(CommandHandler('publish_tiktoks', tiktok_module.publish_tiktoks,
+                                       filters=filters.Chat(chat_id=cfg.CHATS['ADMINS_LIST'])))
+application.add_handler(CommandHandler('publish_video_evening', tiktok_module.publish_video_evening_results,
+                                       filters=filters.Chat(chat_id=cfg.CHATS['ADMINS_LIST'])))
 # CommandHandler("send_tiktok", tiktok_module.waiting_for_tiktok, filters=filters.ChatType.PRIVATE),
 # CommandHandler("start", tiktok_module.waiting_for_tiktok, filters=filters.Regex(rf'{SEND_TIKTOK_DEEPLINK}') & filters.ChatType.PRIVATE),
 application.add_handler(

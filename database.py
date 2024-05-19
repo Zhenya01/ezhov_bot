@@ -175,7 +175,8 @@ async def get_users():
     return result
 
 
-# Tiktoks
+# ===================================================== TIKTOKS ========================================================
+
 def add_tiktok(message_id, sender_id, file_id, is_approved, in_chat_message_id, is_for_live):
     #connection, cursor = open_connection()
     command = '''
@@ -248,7 +249,7 @@ def select_tiktok_to_approve():
     #connection, cursor = open_connection()
     command = '''
     SELECT * FROM ezhov_bot.tiktoks
-    WHERE is_approved = False AND is_rejected = False AND is_sent = False AND is_for_live = False
+    WHERE is_approved = False AND is_rejected = False AND is_sent = False AND is_for_live = FALSE
     ORDER BY tiktok_id
     LIMIT 1'''
     cursor.execute(command)
@@ -260,20 +261,6 @@ def select_tiktok_to_approve():
         return tiktok
 
 
-def select_video_to_rate():
-    #connection, cursor = open_connection()
-    command = '''
-    SELECT * FROM ezhov_bot.tiktoks
-    WHERE is_approved = False AND is_rejected = False AND is_sent = False AND is_for_live = True
-    ORDER BY tiktok_id
-    LIMIT 1'''
-    cursor.execute(command)
-    tiktok = cursor.fetchone()
-    #connection_pool.putconn(connection)
-    if not tiktok:
-        return None
-    else:
-        return tiktok
 def approve_tiktok(tiktok_id):
     #connection, cursor = open_connection()
     command = '''
@@ -288,7 +275,7 @@ def reject_tiktok(tiktok_id):
     #connection, cursor = open_connection()
     command = '''
         UPDATE ezhov_bot.tiktoks
-        SET is_rejected = True
+        SET is_rejected = True AND is_approved = False
         WHERE tiktok_id = %s'''
     cursor.execute(command, (tiktok_id,))
     #connection_pool.putconn(connection)
@@ -357,7 +344,58 @@ def delete_in_chat_message(message_id, chat_id):
     cursor.execute(command, (message_id, chat_id))
     #connection_pool.putconn(connection)
 
-# Баллы тг
+
+# ==========================================VIDEOS======================================================================
+
+def select_video_to_rate():
+    # connection, cursor = open_connection()
+    command = '''
+    SELECT * FROM ezhov_bot.tiktoks
+    WHERE is_approved = True AND live_mark is NULL AND is_for_live = True
+    ORDER BY tiktok_id
+    LIMIT 1'''
+    cursor.execute(command)
+    tiktok = cursor.fetchone()
+    # connection_pool.putconn(connection)
+    if not tiktok:
+        return None
+    else:
+        return tiktok
+
+
+def mark_video(tiktok_id, mark_emoji):
+    # connection, cursor = open_connection()
+    command = '''
+        UPDATE ezhov_bot.tiktoks
+        SET live_mark = %s
+        WHERE tiktok_id = %s'''
+    cursor.execute(command, (mark_emoji, tiktok_id))
+    # connection_pool.putconn(connection)
+
+
+def select_videos_to_publish():
+    command = '''
+        SELECT * FROM ezhov_bot.tiktoks
+        WHERE is_approved = True AND is_sent = False AND is_for_live = True AND (live_mark = '🔥' OR live_mark = '👍')'''
+    cursor.execute(command)
+    videos = cursor.fetchall()
+    if not videos:
+        return None
+    else:
+        return videos
+
+
+def publish_videos(video_ids):
+    print(video_ids)
+    command = '''
+    UPDATE ezhov_bot.tiktoks
+    SET is_sent = True
+    WHERE tiktok_id = %s'''
+    cursor.executemany(command, video_ids)
+    return
+
+# ================================================= TG POINTS ==========================================================
+
 def add_points(user_id, points):
     #connection, cursor = open_connection()
     user_id = str(user_id)
@@ -385,6 +423,7 @@ def add_points(user_id, points):
 def subtract_points(user_id, points):
     #connection, cursor = open_connection()
     user_id = str(user_id)
+    logging_settings.logger.debug(f'Пользователь {user_id}. Вычитаем {points} баллов')
     command = '''
         SELECT * FROM ezhov_bot.tg_points
         WHERE user_id = %s'''
@@ -410,7 +449,7 @@ def subtract_points(user_id, points):
     #connection_pool.putconn(connection)
 
 
-# Point rewards
+# ================================================ POINT REWARDS =======================================================
 async def get_rewards():
     #connection, cursor = open_connection()
     command = '''
@@ -640,34 +679,3 @@ async def reject_user_reward(ur_id):
     #connection_pool.putconn(connection)
     return
 
-
-# ==========================================VIDEOS======================================================================
-
-async def add_video(tiktok_id, mark_emoji):
-    # connection, cursor = open_connection()
-    command = '''INSERT INTO ezhov_bot.videos 
-                 (tiktok_id, mark_emoji)
-                 VALUES (%s, %s)'''
-    cursor.execute(command, (tiktok_id, mark_emoji))
-    # connection_pool.putconn(connection)
-    return
-
-
-async def mark_video(video_id, mark_emoji):
-    # connection, cursor = open_connection()
-    command = '''
-        UPDATE ezhov_bot.videos
-        SET mark_emoji = %s
-        WHERE video_id = %s'''
-    cursor.execute(command, (mark_emoji, video_id))
-    # connection_pool.putconn(connection)
-
-
-async def publish_video(video_id):
-    # connection, cursor = open_connection()
-    command = '''
-        UPDATE ezhov_bot.videos
-        SET is_published = True
-        WHERE video_id = %s'''
-    cursor.execute(command, (video_id,))
-    # connection_pool.putconn(connection)

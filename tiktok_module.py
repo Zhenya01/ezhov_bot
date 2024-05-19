@@ -12,13 +12,14 @@ import telegram.error
 import urllib3
 from pytube import YouTube
 from pytube import exceptions as pytube_exceptions
-from telegram import Update, InputMediaVideo, InlineKeyboardMarkup, \
+from telegram import Update, InputMediaVideo, InputMediaPhoto, InlineKeyboardMarkup, \
     InlineKeyboardButton, ReplyKeyboardRemove
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes, ConversationHandler
 from telegram.helpers import create_deep_linked_url
 
 import cfg
+import channel_points_module
 import database
 import cfg
 
@@ -295,8 +296,8 @@ async def cancel_waiting_for_tiktok(update: Update,
 
 
 @update_user_info
-async def publish_ticktocks(update: Update,
-                            context: ContextTypes.DEFAULT_TYPE):
+async def publish_tiktoks(update: Update,
+                          context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id in [cfg.STREAMER_USER_ID, cfg.TEST_STREAMER_USER_ID]:
     # if update.effective_user.id == cfg.TEST_STREAMER_USER_ID:
         media = []
@@ -358,6 +359,23 @@ async def show_tiktok_to_approve(update: Update,
         return WAITING_FOR_TIKTOK_DESISION
 
 
+@update_user_info
+async def show_video_to_approve(update: Update,
+                                context: ContextTypes.DEFAULT_TYPE):
+    # if update.effective_user.id == cfg.TEST_STREAMER_USER_ID:
+    if update.effective_user.id in [cfg.STREAMER_USER_ID, cfg.TEST_STREAMER_USER_ID]:
+        print('Tiktok approval started')
+        tiktok = database.select_video_to_rate()
+        print(tiktok)
+        if tiktok is None:
+            await context.bot.send_message(update.effective_chat.id,
+                                           'Еще нет видео для вечерка')
+            return ConversationHandler.END
+        print('Sending tiktok info')
+        await send_tiktok_for_live(update, context, tiktok, first_time=True)
+        return cfg.WAITING_FOR_VIDEO_MARK
+
+
 async def send_tiktok_info(update, context, tiktok, first_time):
     if update.effective_user.id in [cfg.STREAMER_USER_ID, cfg.TEST_STREAMER_USER_ID]:
         print('Sending tiktok started')
@@ -413,6 +431,7 @@ async def send_tiktok_info(update, context, tiktok, first_time):
                     video=tiktok['file_id'],
                     caption=caption,
                     reply_markup=reply_markup)
+        return cfg.WAITING_FOR_VIDEO_MARK
 
 
 async def send_video_for_moderation(update, context, video_info):
@@ -456,7 +475,7 @@ async def send_tiktok_for_live(update, context, tiktok, first_time):
                 ],
                 [
                     InlineKeyboardButton("Забанить отправителя",
-                                         callback_data=f'{cfg.BAN_VIDEO_SENDER}_{tiktok["tiktok_id"]}_|')
+                                         callback_data=f'{cfg.BAN_VIDEO_SENDER_ON_MARKING}_{tiktok["tiktok_id"]}_|')
                 ],
                 [
                     InlineKeyboardButton("Закончить отбор", callback_data=f'{cfg.STOP_VIDEO_EVENING}_|')
@@ -490,6 +509,8 @@ async def send_tiktok_for_live(update, context, tiktok, first_time):
                     video=tiktok['file_id'],
                     caption=caption,
                     reply_markup=reply_markup)
+
+        return cfg.WAITING_FOR_VIDEO_MARK
 
 
 @update_user_info
@@ -568,7 +589,7 @@ async def tiktok_approval_callback_handler(update: Update,
                                            'Хорошо. Отбор тиктоков завершён')
             return ConversationHandler.END
         else:
-            print("ШО БЛИН")
+            logger.debug("ШО БЛИН")
 
 
 @update_user_info
@@ -594,10 +615,10 @@ async def video_approval_callback_handler(update: Update,
             if is_approved:
                 database.approve_tiktok(tiktok_id)
                 if action == str(cfg.APPROVE_VIDEO):
-                    message_text = 'Поздравляю! Модеры пропустили видос на стрим. Ждём реакции! А пока можешь скинуть ещё'
+                    message_text = 'Намана, посмотрим на стриме 🔥 А пока можешь скинуть ещё'
                     additional_caption = f'Подтверждено модератором {update.effective_user.name}'
                 else:
-                    message_text = 'Ух ты! Круто! Один из модеров потратил свой единственный шанс за стрим и выбрал твой видос!'
+                    message_text = 'Ты стал любимчиком модератора 🥰'
                     additional_caption = f'Избрано модератором {update.effective_user.name}'
                     # points = int(cfg.BASE_FIRE_TIKTOK_PRAISE)
                     # database.add_points(sender_user_id, points)  # TODO начисление баллов за выбор модера
@@ -611,14 +632,18 @@ async def video_approval_callback_handler(update: Update,
                     ban_end_string = ban_end_time.strftime("%Y-%m-%d %H:%M:%S")
                     database.ban_user_from_tiktoks(sender_user_id,
                                                    ban_end_time)
-                    message_text = f'Что это? Фу бл! Ты в БАНЕ! Сиди жди разбана до {ban_end_string}'
+                    message_text = f'🖕Ёбик ты в бане до {ban_end_string}'
                     additional_caption = f'Пользователь забанен на 1ч. (до {ban_end_string}) модератором {update.effective_user.name}'
                 else:
-                    message_text = 'Модеры не пропустили твой видос на стрим. Увы. Скинь что-нибудь менее банное'
-                    additional_caption = f'Отклонено модератором {update.effective_user.name}'
+                    if str(update.effective_user.id) != str(sender_user_id):
+                        message_text = 'Такое нельзя на стриме смотреть,  если продолжишь такое кидать тебя забанят 😡'
+                        additional_caption = f'Отклонено модератором {update.effective_user.name}'
+                    else:
+                        await update.callback_query.answer('Нельзя выбирать своё собственное видео')
+                        return
             caption = update.effective_message.caption + '\n' + additional_caption
             await update.effective_message.edit_caption(caption,
-                                              reply_markup=None)
+                                                        reply_markup=None)
             try:
                 await context.bot.send_message(sender_user_id,
                                                message_text,
@@ -638,81 +663,84 @@ async def video_approval_callback_handler(update: Update,
 
 @update_user_info
 async def video_rating_callback_handler(update: Update,
-                                        context: ContextTypes.DEFAULT_TYPE):   # TODO изменить под оценку видео
+                                        context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id in [cfg.STREAMER_USER_ID, cfg.TEST_STREAMER_USER_ID]:
         print('STARTING TO DEFINE VIDEO RATING ACTION')
         chat_id = update.effective_chat.id
         panel_message_id = update.effective_message.message_id
         data = update.callback_query.data.split('_')
-        action = data[0]
-        if action == str(APPROVE_TIKTOK) \
-                or action == str(REJECT_TIKTOK) \
-                or action == str(BAN_TIKTOK_SENDER) \
-                or action == str(SUPER_APPROVE_TIKTOK):
+        action = int(data[0])
+        pprint.pprint(action)
+        pprint.pprint(cfg.SEARCH_NEW_VIDEOS)
+        if action == int(cfg.VIDEO_EVENING_MARKING_STATES):
             tiktok_id = int(data[1])
             tiktok = database.find_tiktok(tiktok_id)
-            if tiktok is None:
+            sender_user_id = tiktok['sender_user_id']
+            print(f'sender_user_id - {sender_user_id}')
+            # TODO Проверка на None
+            mark_emoji = data[2]
+            match mark_emoji:
+                case '🔥':
+                    database.add_points(sender_user_id, 100)
+                case '👍':
+                    database.add_points(sender_user_id, 10)
+                case '😐':
+                    database.add_points(sender_user_id, 5)
+                case '👎':
+                    pass
+                case '🤮':
+                    database.subtract_points(sender_user_id, 10)
+                case _:
+                    pass
+            database.mark_video(tiktok_id, mark_emoji)
+        elif action == cfg.BAN_VIDEO_SENDER_ON_MARKING:
+            video_id = int(data[1])
+            video = database.find_tiktok(video_id)
+            if video is None:
                 await context.bot.send_message(chat_id,
                                                'Что-то пошло не так с предыдущим тиктоком. Скипаем')
             else:
-                sender_user_id = tiktok['sender_user_id']
-                is_approved = action in [str(APPROVE_TIKTOK), str(SUPER_APPROVE_TIKTOK)]
-                is_banned = action == str(BAN_TIKTOK_SENDER)
-                if is_approved:
-                    database.approve_tiktok(tiktok_id)
-                    if action == str(APPROVE_TIKTOK):
-                        message_text = 'ВАААААУ, тик-ток шикарен, СПО СИ БО! Начислил тебе 10 баллов. Скинь ещё: /send_tiktok'
-                        points = int(cfg.BASE_ACCEPTED_TIKTOK_PRAISE)
-                        database.add_points(sender_user_id, points)
-                        logger.debug(
-                            f'Пользователь {update.effective_user.id} получил {points} б.')
-                    else:
-                        message_text = 'ЕЕЕБАТЬ ЭТО РАЗЪЕБ реально ВАУ! Начислил тебе 100 баллов. Скинь ещё: /send_tiktok'
-                        points = int(cfg.BASE_FIRE_TIKTOK_PRAISE)
-                        database.add_points(sender_user_id, points)
-                        logger.debug(
-                            f'Пользователь {update.effective_user.id} получил {points} б.')
-                else:
-                    database.reject_tiktok(tiktok_id)
-                    if is_banned:
-                        ban_end_time = datetime.datetime.now() + datetime.timedelta(
-                            hours=1)
-                        ban_end_string = ban_end_time.strftime("%Y-%m-%d %H:%M:%S")
-                        database.ban_user_from_tiktoks(sender_user_id,
-                                                       ban_end_time)
-                        message_text = f'Что это? Фу бл! Ты в БАНЕ! Сиди жди разбана до {ban_end_string}'
-                    else:
-                        message_text = 'Не, ты можешь лучше, кидай другое видео) /send_tiktok'
-                try:
-                    await context.bot.send_message(sender_user_id,
-                                                   message_text,
-                                                   reply_to_message_id=tiktok[
-                                                       'in_chat_message_id'],
-                                                   allow_sending_without_reply=False)
-                except:
-                    sender_message = await context.bot.forward_message(
-                        sender_user_id,
-                        cfg.TIKTOK_FILES_GROUP_ID,
-                        tiktok['message_id'])
-                    sender_message_id = sender_message.message_id
-                    await context.bot.send_message(sender_user_id,
-                                                   message_text,
-                                                   reply_to_message_id=sender_message_id)
-            next_tiktok = database.select_tiktok_to_approve()
-            if next_tiktok is not None:
-                await next_tiktok_to_approve(update, context, next_tiktok)
-            else:
-                await context.bot.delete_message(chat_id, panel_message_id)
-                await context.bot.send_message(chat_id,
-                                               'Тиктоки на одобрение закончились')
-                return ConversationHandler.END
-        elif action == str(STOP_TIKTOKS_APPROVAL):
+                sender_user_id = video['sender_user_id']
+                in_chat_message_id = video['in_chat_message_id']
+                database.reject_tiktok(video_id)
+                ban_end_time = datetime.datetime.now() + datetime.timedelta(
+                    hours=1)
+                ban_end_string = ban_end_time.strftime("%Y-%m-%d %H:%M:%S")
+                database.ban_user_from_tiktoks(sender_user_id,
+                                               ban_end_time)
+                message_text = f'Что это? Фу бл! Ты в БАНЕ! Сиди жди разбана до {ban_end_string}'
+                await context.bot.send_message(sender_user_id,
+                                               message_text,
+                                               reply_to_message_id=in_chat_message_id)
+        elif action == cfg.STOP_VIDEO_EVENING:
             await context.bot.delete_message(chat_id, panel_message_id)
             await context.bot.send_message(chat_id,
-                                           'Хорошо. Отбор тиктоков завершён')
+                                           'Видео-вечерок завершён. Пост с итогами будет скоро на канале')
+            await publish_video_evening_results(update, context)
             return ConversationHandler.END
+        elif action == cfg.SEARCH_NEW_VIDEOS:
+            pass
         else:
-            print("ШО БЛИН")
+            logger.debug("ШТА")
+        if action in [int(cfg.VIDEO_EVENING_MARKING_STATES), cfg.BAN_VIDEO_SENDER_ON_MARKING, cfg.SEARCH_NEW_VIDEOS]:
+            new_video = database.select_video_to_rate()
+            if new_video is not None:
+                await next_video_to_rate(update, context, new_video)
+            else:
+                if update.effective_message.caption == 'Видео подписчиков закончились 😓 Поискать видео ещё раз или завершить видеовечерок?':
+                    new_caption = 'Видео подписчиков закончились 😢 Поискать видео ещё раз или завершить видеовечерок?'
+                else:
+                    new_caption = 'Видео подписчиков закончились 😓 Поискать видео ещё раз или завершить видеовечерок?'
+                await update.effective_message.edit_media(InputMediaVideo(open('pedro.mp4', 'rb'),
+                                                                          new_caption),
+                                                          reply_markup=InlineKeyboardMarkup(
+                                                              [
+                                                                  [InlineKeyboardButton('Поискать ещё',
+                                                                                      callback_data=f'{cfg.SEARCH_NEW_VIDEOS}'),],
+                                                                  [InlineKeyboardButton('Завершить',
+                                                                                      callback_data=f'{cfg.STOP_VIDEO_EVENING}')],
+                                                              ]))
+
 
 
 @update_user_info
@@ -727,13 +755,39 @@ async def next_tiktok_to_approve(update: Update,
 async def next_video_to_rate(update: Update,
                              context: ContextTypes.DEFAULT_TYPE,
                              next_video):
-    if update.effective_user.id == cfg.STREAMER_USER_ID:
-        await send_tiktok_info(update, context, next_video, first_time=False)
+    if update.effective_user.id in [cfg.STREAMER_USER_ID, cfg.TEST_STREAMER_USER_ID]:
+        await send_tiktok_for_live(update, context, next_video, first_time=False)
 
 
+async def publish_video_evening_results(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    videos = database.select_videos_to_publish()
+    if videos is None:
+        await update.effective_message.reply_text('Сегодня не одно видео не получило нормальную оценку 😓')
+        return
+    published_videos = []
+    media = []
+    videos_string = '<b>Результаты сегодняшнего видеовечерка:</b>'
+    videos_count = 0
+    print(videos)
+    for video in videos:
+        if video['live_mark'] in ['👍', '🔥']:
+            videos_count += 1
+            print(dict(video))
+            published_videos.append((str(video['tiktok_id']),))
+            media.append(InputMediaVideo(video['file_id']))
+            sender = await database.get_user_info(video['sender_user_id'])
+            videos_string = videos_string + f'\n{videos_count} видос отправил {sender["full_name"]} {("(" + sender["nickname"] + ")") if sender["nickname"] is not None else "" ""}. Оценка - {video["live_mark"]}'
+    database.publish_videos(published_videos)
+    threads = ['tiktoks', 'comments']
+    for thread in threads:
+        await context.bot.send_media_group(cfg.FORUM_ID,
+                                           media=media, caption=videos_string, parse_mode=ParseMode.HTML,
+                                           message_thread_id=cfg.config_data['CHATS']['FORUM_THREADS'][thread])
+        time.sleep(5)
+    await context.bot.send_media_group(cfg.CHANNEL_ID,
+                                       media=media, parse_mode=ParseMode.HTML, caption=videos_string)
 
 
-# TODO Видеовечерок
 # TODO "Выбор модераторов"
 # TODO Опрос после публикации поста. Перед публикацией спросить описание к опросу
 # TODO Спрашивать что написать в посте с тикток вечерком перед публикацией
