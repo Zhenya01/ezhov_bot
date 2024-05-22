@@ -452,9 +452,11 @@ async def send_video_for_moderation(update, context, video_info):
     print(reply_markup)
     caption = f"Отправил - {sender_name}"
     chat_id = CHATS["MODERATION_GROUP"]
+    topic_id = CHATS["MODERATION_GROUP_THREADS"]['video_moderation']
     await context.bot.send_video(chat_id,
                                  video=video_info['file_id'],
                                  caption=caption,
+                                 message_thread_id=topic_id,
                                  reply_markup=reply_markup
                                  )
 
@@ -595,70 +597,70 @@ async def tiktok_approval_callback_handler(update: Update,
 @update_user_info
 async def video_approval_callback_handler(update: Update,
                                            context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id in (cfg.config_data['CHATS']['ADMINS_LIST'] + cfg.config_data['CHATS']['TIKTOK_MODERATORS_LIST']):
-        print('STARTING TO DEFINE VIDEO ACTION')
-        chat_id = update.effective_chat.id
-        data = update.callback_query.data.split('_')
-        action = data[0]
-        print(f'action - {action}')
+    # if update.effective_user.id in (cfg.config_data['CHATS']['ADMINS_LIST'] + cfg.config_data['CHATS']['TIKTOK_MODERATORS_LIST']):
+    print('STARTING TO DEFINE VIDEO ACTION')
+    chat_id = update.effective_chat.id
+    data = update.callback_query.data.split('_')
+    action = data[0]
+    print(f'action - {action}')
 
-        tiktok_id = int(data[1])
-        tiktok = database.find_tiktok(tiktok_id)
-        if tiktok is None:
-            await context.bot.send_message(chat_id,
-                                           'Что-то пошло не так с тиктоком. Скипаем')
-        else:
-            sender_user_id = tiktok['sender_user_id']
-            is_approved = action in [str(cfg.APPROVE_VIDEO), str(cfg.SUPER_APPROVE_VIDEO)]
-            is_banned = action == str(cfg.BAN_VIDEO_SENDER)
-            print(f'is_banned - {is_banned}')
-            if is_approved:
-                database.approve_tiktok(tiktok_id)
-                if action == str(cfg.APPROVE_VIDEO):
-                    message_text = 'Намана, посмотрим на стриме 🔥 А пока можешь скинуть ещё'
-                    additional_caption = f'Подтверждено модератором {update.effective_user.name}'
-                else:
+    tiktok_id = int(data[1])
+    tiktok = database.find_tiktok(tiktok_id)
+    if tiktok is None:
+        await context.bot.send_message(chat_id,
+                                       'Что-то пошло не так с тиктоком. Скипаем')
+    else:
+        sender_user_id = tiktok['sender_user_id']
+        is_approved = action in [str(cfg.APPROVE_VIDEO), str(cfg.SUPER_APPROVE_VIDEO)]
+        is_banned = action == str(cfg.BAN_VIDEO_SENDER)
+        print(f'is_banned - {is_banned}')
+        if is_approved:
+            database.approve_tiktok(tiktok_id)
+            if action == str(cfg.APPROVE_VIDEO):
+                message_text = 'Намана, посмотрим на стриме 🔥 А пока можешь скинуть ещё'
+                additional_caption = f'Подтверждено модератором {update.effective_user.name}'
+            else:
+                if str(update.effective_user.id) != str(sender_user_id):
                     message_text = 'Ты стал любимчиком модератора 🥰'
                     additional_caption = f'Избрано модератором {update.effective_user.name}'
-                    # points = int(cfg.BASE_FIRE_TIKTOK_PRAISE)
-                    # database.add_points(sender_user_id, points)  # TODO начисление баллов за выбор модера
-                    # logger.debug(
-                    #     f'Пользователь {update.effective_user.id} получил {points} б.')
-            else:
-                database.reject_tiktok(tiktok_id)
-                if is_banned:
-                    ban_end_time = datetime.datetime.now() + datetime.timedelta(
-                        hours=1)
-                    ban_end_string = ban_end_time.strftime("%Y-%m-%d %H:%M:%S")
-                    database.ban_user_from_tiktoks(sender_user_id,
-                                                   ban_end_time)
-                    message_text = f'🖕Ёбик ты в бане до {ban_end_string}'
-                    additional_caption = f'Пользователь забанен на 1ч. (до {ban_end_string}) модератором {update.effective_user.name}'
                 else:
-                    if str(update.effective_user.id) != str(sender_user_id):
-                        message_text = 'Такое нельзя на стриме смотреть,  если продолжишь такое кидать тебя забанят 😡'
-                        additional_caption = f'Отклонено модератором {update.effective_user.name}'
-                    else:
-                        await update.callback_query.answer('Нельзя выбирать своё собственное видео')
-                        return
-            caption = update.effective_message.caption + '\n' + additional_caption
-            await update.effective_message.edit_caption(caption,
-                                                        reply_markup=None)
-            try:
-                await context.bot.send_message(sender_user_id,
-                                               message_text,
-                                               reply_to_message_id=tiktok[
-                                                   'in_chat_message_id'],
-                                               allow_sending_without_reply=False)
-            except:
-                sender_message = await context.bot.forward_message(
-                    sender_user_id,
-                    cfg.TIKTOK_FILES_GROUP_ID,
-                    tiktok['message_id'])
-                sender_message_id = sender_message.message_id
-                await context.bot.send_message(sender_user_id,
-                                               message_text,
-                                               reply_to_message_id=sender_message_id)
+                    await update.callback_query.answer('Нельзя выбирать своё собственное видео')
+                    return
+                # points = int(cfg.BASE_FIRE_TIKTOK_PRAISE)
+                # database.add_points(sender_user_id, points)  # TODO начисление баллов за выбор модера
+                # logger.debug(
+                #     f'Пользователь {update.effective_user.id} получил {points} б.')
+        else:
+            database.reject_tiktok(tiktok_id)
+            if is_banned:
+                ban_end_time = datetime.datetime.now() + datetime.timedelta(
+                    hours=1)
+                ban_end_string = ban_end_time.strftime("%Y-%m-%d %H:%M:%S")
+                database.ban_user_from_tiktoks(sender_user_id,
+                                               ban_end_time)
+                message_text = f'🖕Ёбик ты в бане до {ban_end_string}'
+                additional_caption = f'Пользователь забанен на 1ч. (до {ban_end_string}) модератором {update.effective_user.name}'
+            else:
+                message_text = 'Такое нельзя на стриме смотреть,  если продолжишь такое кидать тебя забанят 😡'
+                additional_caption = f'Отклонено модератором {update.effective_user.name}'
+        caption = update.effective_message.caption + '\n' + additional_caption
+        await update.effective_message.edit_caption(caption,
+                                                    reply_markup=None)
+        try:
+            await context.bot.send_message(sender_user_id,
+                                           message_text,
+                                           reply_to_message_id=tiktok[
+                                               'in_chat_message_id'],
+                                           allow_sending_without_reply=False)
+        except:
+            sender_message = await context.bot.forward_message(
+                sender_user_id,
+                cfg.TIKTOK_FILES_GROUP_ID,
+                tiktok['message_id'])
+            sender_message_id = sender_message.message_id
+            await context.bot.send_message(sender_user_id,
+                                           message_text,
+                                           reply_to_message_id=sender_message_id)
 
 
 @update_user_info

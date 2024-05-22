@@ -31,7 +31,10 @@ async def mute(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.restrict_chat_member(update.effective_chat.id, mute_id,
                                                permissions, until_date)
         muted_message_id = update.message.reply_to_message.message_id
-        await context.bot.delete_message(update.effective_chat.id, muted_message_id)
+        try:
+            await context.bot.delete_message(update.effective_chat.id, muted_message_id)
+        except:
+            pass
         muter_message_id = update.message.message_id
         await context.bot.delete_message(update.effective_chat.id, muter_message_id)
         await send_muted_message(update, context, duration)
@@ -58,6 +61,7 @@ async def send_muted_message(update: Update, context: ContextTypes.DEFAULT_TYPE,
     print(text)
     message = await context.bot.send_message(update.effective_chat.id, text, parse_mode=ParseMode.HTML)
     moderation_group = CHATS['MODERATION_GROUP']
+    topic = CHATS['MODERATION_GROUP_THREADS']['mute_moderation']
     until_time = datetime.datetime.now(tz=pytz.timezone("Europe/Moscow")) + datetime.timedelta(minutes=duration)
     print(f'USER_INFO{cfg.UNBAN_CHATTER},{update.effective_chat.id},{muted_id}')
     muted_mod_text = f'<b>Мут участника:</b>\n' \
@@ -66,6 +70,7 @@ async def send_muted_message(update: Update, context: ContextTypes.DEFAULT_TYPE,
     await context.bot.send_message(
         moderation_group,
         muted_mod_text,
+        message_thread_id=topic,
         parse_mode=ParseMode.HTML,
         reply_markup=InlineKeyboardMarkup(
             [

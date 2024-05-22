@@ -750,6 +750,7 @@ async def reward_decision(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reward.update_in_db()
         threads = CHATS['FORUM_THREADS']
         group_id = CHATS['FORUM_GROUP']
+        moderation_threads = CHATS['MODERATION_GROUP_THREADS']
         await context.bot.send_message(group_id,
                                        f'Ура! {name} приобрёл награду "{reward.name}"',
                                        message_thread_id=threads['comments'],
@@ -759,6 +760,7 @@ async def reward_decision(update: Update, context: ContextTypes.DEFAULT_TYPE):
                                        f'<b>Пользователь:</b> {name}\n'
                                        f'<b>Награда:</b> {reward.name}\n'
                                        f'<b>Цена:</b> {points} {word}',
+                                       reply_to_message_id=moderation_threads['rewards_moderation'],
                                        parse_mode=ParseMode.HTML,
                                        reply_markup=InlineKeyboardMarkup(
                                            [[InlineKeyboardButton('Принять',
