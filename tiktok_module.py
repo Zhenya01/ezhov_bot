@@ -733,7 +733,7 @@ async def video_rating_callback_handler(update: Update,
                     new_caption = 'Видео подписчиков закончились 😢 Поискать видео ещё раз или завершить видеовечерок?'
                 else:
                     new_caption = 'Видео подписчиков закончились 😓 Поискать видео ещё раз или завершить видеовечерок?'
-                await update.effective_message.edit_media(InputMediaVideo(open('pedro.mp4', 'rb'),
+                await update.effective_message.edit_media(InputMediaVideo(open('media/pedro.mp4', 'rb'),
                                                                           new_caption),
                                                           reply_markup=InlineKeyboardMarkup(
                                                               [

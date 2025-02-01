@@ -114,7 +114,7 @@ async def kick_from_group(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print('KICK_FROM_GROUP_START')
     if update.effective_user.id not in cfg.config_data['GROUP_LIST']:
         await remove_join_left_message(update, context)
-        message = await update.message.reply_photo(open('uhodi.png', 'rb'),
+        message = await update.message.reply_photo(open('media/uhodi.png', 'rb'),
                                                     'Этот чат не чат, тут Eжов за сообщениями в группе следит')
         message_id = message.message_id
         # message_id = await update.message.reply_text('Этот чат не чат, тут ежов за сообщениями в группе следит').message_id

@@ -370,7 +370,7 @@ async def reward_callback_handler(update: Update, context: ContextTypes.DEFAULT_
         group_id = CHATS['FORUM_GROUP']
         unupdated_reward = await database.get_reward_info(reward.reward_id)
         if reward.number_left > unupdated_reward.number_left:
-            await context.bot.send_message(group_id, f'Добавилось количество награды "{reward.name}". Бегом покупать!!')
+            await context.bot.send_message(group_id, f'Пополнили награду "{reward.name}". Бегом покупать!!')
         text, markup = await generate_reward_text(reward)
         reward.update_in_db()
         await update.callback_query.message.edit_text('\n'.join(text.split('\n')[:-1]) + '\n\n<i>Изменения сохранены</i>',
@@ -555,9 +555,9 @@ async def add_points_for_comment(update: Update, context: ContextTypes.DEFAULT_T
     # TODO поменять на prestige level
     for_limit = False
     points_to_reward = int(cfg.BASE_COMMENT_POINTS) + (int(cfg.PRESTIGE_LEVEL_ADDED_MULTIPLIER) * 1)
-    if update.message.sticker is not None:
+    if update.effective_message.sticker is not None:
         for_limit = True
-    elif update.message.text is not None:
+    elif update.effective_message.text is not None:
         symbols_number = len(update.effective_message.text.strip().split(' '))
         if symbols_number >= 10:
             database.add_points(update.effective_user.id, points_to_reward)
