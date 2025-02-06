@@ -247,13 +247,12 @@ application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS & f
 # application.add_handler(MessageHandler(filters.Chat(chat_id=cfg.TEST_FORUM_ID) & filters.User(user_id=cfg.TEST_STREAMER_USER_ID), forward_posts.forward_post))
 # application.add_handler(MessageHandler(filters.Chat(chat_id=cfg.FORUM_ID) & filters.User(user_id=[cfg.STREAMER_USER_ID, cfg.CHANNEL_ID]), forward_posts.forward_post))
 # application.add_handler(MessageHandler(filters.Chat(chat_id=cfg.TEST_FORUM_ID) & filters.User(user_id=cfg.STREAMER_USER_ID), forward_posts.forward_post))
-
+application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_TITLE,
+                                       chat_management_module.schedule_remove_rename_message))
 application.add_handler(MessageHandler(filters.Chat(chat_id=cfg.TEST_CHANNEL_ID), forward_posts.forward_post_from_channel))
 application.add_handler(MessageHandler(filters.Chat(chat_id=cfg.CHANNEL_ID), forward_posts.forward_post_from_channel))
 
 # application.add_handler(MessageHandler(filters.Chat(chat_id=cfg.TEST_CHANNEL_ID), forward_posts.forward_to_comments))
-application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_TITLE,
-                                       chat_management_module.schedule_remove_rename_message))
 application.add_handler(MessageHandler(filters.VIDEO & filters.ChatType.PRIVATE,
                                        tiktok_module.got_tiktok_file))
 application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS | filters.StatusUpdate.LEFT_CHAT_MEMBER,
